@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="NYC Bus Profiles">
+    <meta name="author" content="NYU CUSP">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+    <title>NYC Bus Profile Dashboard</title>
+    <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/busvis.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="http://www.nyu.edu" ><img id="projectBrand" class="navbar-brand" src="{{ url_for('static', filename='img/all-logo.png') }}" /></a>
+        </div>
+        <div class="nav navbar-nav navbar-right">
+          <span class="btn wrapper" data-toggle="tooltip" data-placement="bottom" title="About">
+            <label class="btn" data-toggle="modal" data-target="#aboutBoxModal"><h1 id="projectTitle">NYC <span class="BusViz">BUSVIZ</span></h1></label>
+          </span>
+        </div>
+        <ul class="nav navbar-nav">
+          <li>
+            <form class="navbar-form" role="search" id="searchForm">
+              <div class="form-group">
+                <input type="text" id="searchInput" class="form-control searchBusLine" placeholder="Enter a route name to search (hotkey '/')" data-provide="typeahead">
+              </div>
+              <button type="submit" class="btn btn-default">Search</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header busLine">
+        <h2 id="busLine">&nbsp;</h2>
+      </div>
+
+      <div class="row busHeader">
+        <div class="col-md-1">
+          <span class="btn btn-default busLogo" data-toggle="modal" data-target="#busSelectionModal"><h3 class="busRoute"></h3></span>
+        </div>
+
+        <div class="col-md-4">
+          <div class="list-group busDirection" data-key="direction" id="groupDirection">
+          </div>
+        </div>
+        
+        <div class="col-md-7">
+          <div class="btn-group headLine" data-toggle="buttons" data-key="shape" aria-label="groupShape" id="groupShape">
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="btn-group headLine" data-toggle="buttons" data-key="hourBin" aria-label="groupHourBin" id="groupHourBin">
+            <label class="btn btn-default hourBin active" data-value="0">
+              <input type="radio" value="0" checked="checked"/> 7am - 10am
+            </label> 
+            <label class="btn btn-default hourBin" data-value="1">
+              <input type="radio" value="1" /> 10am - 4pm
+            </label> 
+            <label class="btn btn-default hourBin" data-value="2">
+              <input type="radio" value="2" /> 4pm - 7pm
+            </label> 
+            <label class="btn btn-default hourBin" data-value="3">
+              <input type="radio" value="3" /> 7pm - 11pm
+            </label> 
+            <label class="btn btn-default hourBin" data-value="4">
+              <input type="radio" value="4" /> 11pm - 7am
+            </label>
+          </div>
+
+          <div class="btn-group headLine" data-key="speedType" data-toggle="buttons" aria-label="groupSpeedType" id="groupSpeedType">
+            <label class="btn btn-default speedType active" data-value="f" data-toggle="tooltip" data-placement="bottom"
+                   title="Showing the average speeds of the buses, including the time spent at stops">
+              <input type="radio" value="0" checked="checked"/> Bus
+            </label> 
+            <label class="btn btn-default speedType" data-value="r" data-toggle="tooltip" data-placement="bottom"
+                   title="Showing the average speeds of the roads, excluding the time spent at stops">
+              <input type="radio" value="1" /> Road
+            </label> 
+          </div>
+        </div>
+      </div> <!--/.row busHead-->
+
+      <div class="row"> 
+        <div class="col-md-3">
+          <div class="scalarBarDiv">
+            <p style="float:left;margin-bottom:0px;">Slowest (mph)</p>
+            <span style="margin-bottom:0px"><strong>Speed</strong></span>
+            <p style="float:right;margin-right:5px;margin-bottom:0px;">Fastest (mph)</p>
+            <div style="clear: both;"></div>
+            <div id="speedScalarBar"></div>
+          </div>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+          <div class="alert" role="alert" id="alertBox"></div>
+        </div>
+        <div class="col-md-3">
+          <div class="scalarBarDiv">
+            <p style="float:left;margin-bottom:0px;">Shortest (s)</p>
+            <span style="margin-bottom:0px"><strong>Stop Time</strong></span>
+            <p style="float:right;margin-right:5px;margin-bottom:0px;">Longest (s)</p>
+            <div style="clear: both;"></div>
+            <div id="timeScalarBar"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div id="map"></div>
+        </div>
+      </div>
+
+      <!-- Bus Selection -->
+      <div class="modal fade" id="busSelectionModal" tabindex="-1" role="dialog" aria-labelledby="busSelectionModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3 class="modal-title">Quick Bus Selection</h3>
+            </div>
+            <div class="modal-body">
+              <div class="container-fluid">
+                <h4>Tier 1</h4>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">01</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx19" style="background-color:#B933AD;">Bx19</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B46" style="background-color:#6CBE45;">B46</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx39" style="background-color:#FAA61A;">Bx39</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx3" style="background-color:#EE352E;">Bx3</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx21" style="background-color:#6CBE45;">Bx21</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">06</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q60" style="background-color:#EE352E;">Q60</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx31" style="background-color:#EE352E;">Bx31</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B68" style="background-color:#EE352E;">B68</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M3" style="background-color:#B933AD;">M3</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M11" style="background-color:#FAA61A;">M11</span></a></div>
+                </div>
+
+                <hr /><h4>Tier 2</h4>
+                
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">11</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M86" style="background-color:#FAA61A;">M86</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx15" style="background-color:#FAA61A;">Bx15</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B35" style="background-color:#EE352E;">B35</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx36" style="background-color:#B933AD;">Bx36</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M101" style="background-color:#FAA61A;">M101</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">16</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M96" style="background-color:#6CBE45;">M96</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M79" style="background-color:#EE352E;">M79</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx35" style="background-color:#00AEEF;">Bx35</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M42" style="background-color:#EE352E;">M42</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx9" style="background-color:#FAA61A;">Bx9</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">21</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M23" style="background-color:#6CBE45;">M23</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M66" style="background-color:#FAA61A;">M66</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx6" style="background-color:#EE352E;">Bx6</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B8" style="background-color:#FAA61A;">B8</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B38" style="background-color:#00AEEF;">B38</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">26</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M100" style="background-color:#00AEEF;">M100</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B41" style="background-color:#006CB7;">B41</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B12" style="background-color:#6CBE45;">B12</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx13" style="background-color:#006CB7;">Bx13</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx11" style="background-color:#FAA61A;">Bx11</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">31</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M4" style="background-color:#00AEEF;">M4</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B82" style="background-color:#6CBE45;">B82</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M7" style="background-color:#00AEEF;">M7</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q58" style="background-color:#6CBE45;">Q58</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx22" style="background-color:#EE352E;">Bx22</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">36</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M31" style="background-color:#B933AD;">M31</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M104" style="background-color:#B933AD;">M104</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B52" style="background-color:#EE352E;">B52</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B63" style="background-color:#006CB7;">B63</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B6" style="background-color:#EE352E;">B6</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">41</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B1" style="background-color:#00AEEF;">B1</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q32" style="background-color:#00AEEF;">Q32</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q88" style="background-color:#FAA61A;">Q88</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B54" style="background-color:#6CBE45;">B54</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B17" style="background-color:#B933AD;">B17</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">46</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M1" style="background-color:#EE352E;">M1</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B11" style="background-color:#006CB7;">B11</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q23" style="background-color:#FAA61A;">Q23</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B60" style="background-color:#B933AD;">B60</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx4" style="background-color:#FAA61A;">Bx4</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">51</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B47" style="background-color:#FAA61A;">B47</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q10" style="background-color:#FAA61A;">Q10</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx28" style="background-color:#00AEEF;">Bx28</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q64" style="background-color:#EE352E;">Q64</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx7" style="background-color:#EE352E;">Bx7</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">56</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B9" style="background-color:#EE352E;">B9</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B36" style="background-color:#FAA61A;">B36</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx17" style="background-color:#006CB7;">Bx17</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q25" style="background-color:#00AEEF;">Q25</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B26" style="background-color:#006CB7;">B26</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">61</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q8" style="background-color:#B933AD;">Q8</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B25" style="background-color:#6CBE45;">B25</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B49" style="background-color:#EE352E;">B49</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B62" style="background-color:#00AEEF;">B62</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B61" style="background-color:#6CBE45;">B61</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">66</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q6" style="background-color:#B933AD;">Q6</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q54" style="background-color:#B933AD;">Q54</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q12" style="background-color:#EE352E;">Q12</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="M5" style="background-color:#EE352E;">M5</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q43" style="background-color:#EE352E;">Q43</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">71</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B43" style="background-color:#EE352E;">B43</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B3" style="background-color:#EE352E;">B3</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx5" style="background-color:#EE352E;">Bx5</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q4" style="background-color:#EE352E;">Q4</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q28" style="background-color:#EE352E;">Q28</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">76</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q5" style="background-color:#EE352E;">Q5</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q17" style="background-color:#EE352E;">Q17</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Bx10" style="background-color:#006CB7;">Bx10</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q66" style="background-color:#EE352E;">Q66</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q113" style="background-color:#EE352E;">Q113</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">81</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q65" style="background-color:#00AEEF;">Q65</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q27" style="background-color:#EE352E;">Q27</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q111" style="background-color:#EE352E;">Q111</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="Q85" style="background-color:#EE352E;">Q85</span></a></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B103" style="background-color:#FAA61A;">B103</span></a></div>
+                </div>
+                <div class="row"><div class="col-md-1"><span class="badge busBadgeOrder">86</span></div>
+                  <div class="col-md-2"><a class="btn btn-default busBadgeButton" type="button" data-dismiss="modal"><span class="badge busBadge" data-route="B15" style="background-color:#B933AD;">B15</span></a></div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>    
+        </div>
+      </div>    
+      
+      <!-- About box -->
+      <div class="modal fade" id="aboutBoxModal" tabindex="-1" role="dialog" aria-labelledby="aboutBoxModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3 class="modal-title">About</h3>
+            </div>
+            <div class="modal-body">
+              <div class="jumbotron">
+                <h2 class="BusViz"><big><big><big>BUSVIZ</big></big></big></h2>
+                <p>© NYU CUSP BusVis Team 2015</p>
+                <p>Data were collected from the <a href="http://bustime.mta.info/">MTA BusTime API</a>.</p>
+                <p>Analysis were performed on the CUSP Data
+                  Facility. All questions should be directed to:</p>
+                <p>Huy T. Vo at <img id="contact" src="{{ url_for('static', filename='img/contact.png') }}"></img></p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>    
+    
+    </div> <!-- /container -->
+
+    <!-- ================================================== -->
+    <script src="{{ url_for('static', filename='js/libs/jquery-1.11.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/bootstrap3-typeahead.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/mousetrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/listgroup.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/d3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/libs/colorbrewer.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/busvis.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/spatialmap.js') }}"></script>
+
+    <script>
+    busvis.initialize("map", {
+        center: [40.7127, -74.0059],
+        zoom: 14,
+        maxZoom: 18,
+        bounds: L.latLngBounds(L.latLng(40.502860218134586,-73.7014082058679),
+                               L.latLng(40.91238545795432,-74.2523635421483)),
+    });
+    </script>
+  </body>
+</html>
+
