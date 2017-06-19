@@ -27,6 +27,7 @@
     - user: (your system username)
     - password: (no password)
     - connection URL: postgresql://localhost
+  -  at any point now, you can explore the data in the database via the Postico tool :)
 
 ### 5) install a json viewer plugin for Chrome:
   - https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh
