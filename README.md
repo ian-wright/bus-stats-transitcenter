@@ -7,9 +7,9 @@
   - create a new python virtual environment called 'venv': *virtualenv venv*
   - activate the virtualenv: *source ./venv/bin/activate*
   - double check that *which pip* directs you to your venv python, and not your system level python
-  - install project requiremeents: *pip install -r requirements.txt*
 
 2) clone this repo: *git clone https://github.com/ian-wright/tc-app.git*
+  - install project requiremeents: *pip install -r requirements.txt*
 
 3) install a nice shiny version of PostgreSQL: 
   - https://postgresapp.com/
