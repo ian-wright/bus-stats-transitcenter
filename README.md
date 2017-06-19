@@ -14,7 +14,7 @@
 ### 3) install a nice shiny version of PostgreSQL: 
   - https://postgresapp.com/
   - once downloaded:
-    - add it to your path: in your .bashrc, bash_profile, or .zshrc file, add: *export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"*
+    - in order to access this postgres db from the command line later, add it to your path: in your .bashrc, bash_profile, or .zshrc file, add: *export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"*
     - open the app initialize a new server
     - create a new database called (exactly): *transit*
 
