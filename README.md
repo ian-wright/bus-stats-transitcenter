@@ -25,7 +25,7 @@
     - database: (your system username)
     - user: (your system username)
     - password: (no password)
-  -  once connected, create a new database on your server called (exactly): *transit*
+  -  once connected, create a new database on your server (lower left corner button) called, exactly: *transit*
   -  at any point now, you can explore the data in the database via the Postico tool :)
 
 ### 5) install a json viewer plugin for Chrome:
