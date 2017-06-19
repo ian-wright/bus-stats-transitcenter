@@ -16,7 +16,6 @@
   - once downloaded:
     - in order to access this postgres db from the command line later, include a new line: in your .bashrc, bash_profile, or .zshrc file, add: *export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"*
     - open the app initialize a new server
-    - create a new database called (exactly): *transit*
 
 ### 4) install a postgres client for looking at tables:
   - https://eggerapps.at/postico/
@@ -27,6 +26,7 @@
     - user: (your system username)
     - password: (no password)
     - connection URL: postgresql://localhost
+  -  create a new database called (exactly): *transit*
   -  at any point now, you can explore the data in the database via the Postico tool :)
 
 ### 5) install a json viewer plugin for Chrome:
