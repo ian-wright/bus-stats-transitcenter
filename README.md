@@ -9,7 +9,7 @@
   - double check that *which pip* directs you to your venv python, and not your system level python
 
 ### 2) clone this repo: *git clone https://github.com/ian-wright/tc-app.git*
-  - install project requiremeents: *pip install -r tc-app/requirements.txt*
+  - install project requirements: *pip install -r tc-app/requirements.txt*
 
 ### 3) install a nice shiny version of PostgreSQL: 
   - https://postgresapp.com/
