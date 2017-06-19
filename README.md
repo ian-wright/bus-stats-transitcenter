@@ -8,10 +8,10 @@
   - activate the virtualenv: *source ./venv/bin/activate*
   - double check that *which pip* directs you to your venv python, and not your system level python
 
-### 2) clone this repo: *git clone https://github.com/ian-wright/tc-app.git*
+### 2) clone the app repo: *git clone https://github.com/ian-wright/tc-app.git*
   - install project requirements: *pip install -r tc-app/requirements.txt*
 
-### 3) install a nice shiny version of PostgreSQL: 
+### 3) start a PostgreSQL server: 
   - https://postgresapp.com/
   - once downloaded:
     - in order to access this postgres db from the command line later, include a new line: in your .bashrc, bash_profile, or .zshrc file, add: *export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"*
