@@ -16,7 +16,7 @@
   - once downloaded:
     - add it to your path, in your .bashrc or .zshrc file, add *export PATH="/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH"*
     - open the app initialize a new server
-    - create a new database called (exactly) 'transit'
+    - create a new database called (exactly): *transit*
 
 4) install a postgres client for looking at tables:
   - https://eggerapps.at/postico/
@@ -27,7 +27,15 @@
     - user: (your system username)
     - password: (no password)
     - connection URL: postgresql://localhost
+
+5) install a json viewer plugin for Chrome:
+  - https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh
+  - enable the plugin, and check the box "allow access to file URLs"
+  - in plugin options, change "maxJsonSize" to 1000
    
-5) run initialize db schema and load some fake data into it:
-  - double check that 
-  - run: p
+6) initialize db schema and load some fake data into it:
+  - run: *python db_load.py*
+
+7) use Flask's built in web server (for testing only):
+  - run: *python app.py*
+  - check it out on Google Chrome @ *http://127.0.0.1:5000/routes/Bx39* or *http://127.0.0.1:5000*
