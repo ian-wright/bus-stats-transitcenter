@@ -3,8 +3,8 @@
 # June 6, 2017
 # Ian Wright
 
-# remove all but the first geojson in each bus routes' busvis.org data directory
-# this is just to reduce the number of geodata that we carry throughout development
+# remove all but the first geojson in each bus routes' busvis.org data directory (data from Huy's busvis project)
+# this is just to reduce the amount of geodata that we carry through development
 # ultimately we'll need only two geojson files per route (one for each direction)
 
 for BUS in $HOME/school/capstone/tc_app/data/profiles/*; do
