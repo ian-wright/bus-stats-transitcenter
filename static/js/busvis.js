@@ -1,3 +1,5 @@
+// the only way to create new closure scope in JS is with a function
+// so we define an anonymous function and run it immediately
 !function() {
     var busvis = {
         version: "0.0.1",
@@ -15,7 +17,7 @@
                                        L.latLng(40.91238545795432,-74.2523635421483)),
             };
 
-            // jquery extends the options object to include the properties of the inOptions object
+            // jquery extends the options object to include the properties of the inOptions object, in this case they're the same (not overwritten)
             $.extend(options, inOptions);
             // calling the busvis method 'loadRoutes', with an argument string of '/data/profiles/routes.json'
             busvis.loadRoutes(busvis.dataPath + "routes.json");
@@ -25,6 +27,7 @@
             busvis.canvas = busvis.initSpatialMap(canvasId, options);
             busvis.createScalarBar();
 
+            // intitially, create a geojson layer on the map with NO DATA, but do set up the display options
             busvis.busLayer = L.geoJson(null, {
                 style: busvis.busVisStyle,
                 pointToLayer: busvis.createBusStop,
@@ -78,6 +81,7 @@
             }
         },
 
+        // get selected params from all the toggle elements
         updateSelection: function() {
             var busLine   = busvis.profile.route_short_name;
             var direction = $('#groupDirection').children(".active").data("value");
@@ -113,6 +117,7 @@
             }
         },
  
+        // requires that selection has already been updated, then actually retreives data and repaints viz
         update: function() {
             var dataUrl = (busvis.dataPath + busvis.selection.busLine + "/" + busvis.selection.direction + "_" +
                            busvis.selection.hourBin + "_" + busvis.selection.shape + ".geojson");
@@ -123,6 +128,7 @@
                 $.getJSON(dataUrl, function(data) {
                     busvis.clearBusFeatures();
                     $(data.features).each(function(key, feature) {
+                        // this is where the busfeatures are drawn on the leaflet map
                         busvis.busLayer.addData(feature);
                         if (feature.geometry.type=="LineString")
                             busvis.busLayer.setStyle(busvis.busLineStyle);
@@ -200,7 +206,6 @@
         },
 
         loadRoutes: function (url) {
-            // jquery gets 
             $.getJSON(url, function(json) {
                 d3.select(".searchBusLine")
                     .selectAll("option").data(json)
@@ -240,6 +245,7 @@
             busvis.loadProfile(route);
         },
 
+        // 
         updateProfile: function () {
             busvis.clearSignals();
 
@@ -338,6 +344,8 @@
         needZoom: true,
     };
 
+    // refer to the busvis object, setting its datapath value
     busvis.dataPath = window.location.pathname.replace(/profiles\/.*/i, "data/profiles/");
+    // 'this' in fact refers to the global window object, effectively adding the whole busvis object to global scope!
     this.busvis = busvis;
 }();
