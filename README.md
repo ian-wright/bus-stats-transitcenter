@@ -19,14 +19,13 @@
 
 ### 4) install a postgres client for looking at tables:
   - https://eggerapps.at/postico/
-  - connect to your postgres DB:
+  - connect to your postgres server:
     - host: localhost
     - port: 5432
     - database: (your system username)
     - user: (your system username)
     - password: (no password)
-    - connection URL: postgresql://localhost
-  -  create a new database called (exactly): *transit*
+  -  once connected, create a new database on your server called (exactly): *transit*
   -  at any point now, you can explore the data in the database via the Postico tool :)
 
 ### 5) install a json viewer plugin for Chrome:
