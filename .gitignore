@@ -1,5 +1,12 @@
+# last edit: June 19, 2017
+
+# exclude python virtualenv resources
 venv
+
+# exclude data directory, with exception of json profiles
+#data
+#!data/profiles/*
+
 *.pyc
 .DS_Store
-data
 .ipynb_checkpoints/

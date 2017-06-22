@@ -1,6 +1,18 @@
 <!DOCTYPE html>
-	<html lang="en">
-		<body>
-			<div>{{data}}</div>
-		</body>
-	</html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<div>Le bus.</div>
+		<div id="datatest"></div>
+		<script src="{{ url_for('static', filename='js/libs/jquery-1.11.3.min.js') }}"></script>
+		<script>
+		var route = '{{ route }}'
+		var dataUrl = `http://127.0.0.1:5000/routes/${route}/data`;
+	    $.getJSON(dataUrl, function(data) {
+                    $("#datatest").text(data["long_name"]);
+                    });
+	    </script>
+	</body>
+</html>

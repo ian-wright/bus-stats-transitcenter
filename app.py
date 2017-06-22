@@ -194,13 +194,12 @@ def build_response(profile, ewt_df, ejt_df):
     return response
 
 
-#def get_bunching(route):
+#def get_speed(route):
 
 
-@app.route('/routes/<string:route>')
+@app.route('/routes/<string:route>/data')
 def get_route(route):
     print 'getting data for route: {}'.format(route)
-
     window_start = str(get_last_update() + datetime.timedelta(days=-(DAYSBACK)))
     print 'window_start:', window_start
 
@@ -208,14 +207,12 @@ def get_route(route):
                               get_ewt_df(route, window_start),
                               get_ejt_df(route, window_start))
 
-    #return render_template('route.html', data=jsonify(response))
-    #return render_template('route.html', data=response)
-    #return render_template('route.html', data='banana')
     return jsonify(response)
 
-    
 
-    
+@app.route('/routes/<string:route>')
+def dashboard(route):
+    return render_template('route.html', route=route)
 
 
 @app.route('/')
