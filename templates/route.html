@@ -11,8 +11,9 @@
 		var route = '{{ route }}'
 		var dataUrl = `http://127.0.0.1:5000/routes/${route}/data`;
 	    $.getJSON(dataUrl, function(data) {
-                    $("#datatest").text(data["long_name"]);
-                    });
+	    	// here is where JS gets acccess to all route data, so we can call functions from other JS files here.
+            $("#datatest").text(data["long_name"]);
+        });
 	    </script>
 	</body>
 </html>
