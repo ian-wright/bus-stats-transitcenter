@@ -160,11 +160,11 @@ def build_data_series(df, direc, dbin, hbin):
                       & (df['direction'] == direc), 
                       ['date', 'stop', 'metric']]
 
-    def tuple_data(date):
+    def tuple_data(day):
         one_day = filtered.loc[filtered.date == day, :]
         return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
 
-    return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
+    return {str(day): tuple_data(day) for day in filtered.date.unique()}
 
 
 
