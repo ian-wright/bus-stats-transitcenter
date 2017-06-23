@@ -9,6 +9,7 @@ import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
 db = SQLAlchemy(app)
 
 
