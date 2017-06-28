@@ -8,7 +8,7 @@ import datetime
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
 db = SQLAlchemy(app)
 
@@ -110,8 +110,8 @@ def get_profile(route):
 
     with open('./data/profiles/{}/{}.geojson'.format(route, route)) as profile_geojson:
         geo = geojson.load(profile_geojson)
-    
-    # TODO  - right now, this is just the same geo for both directions... 
+
+    # TODO  - right now, this is just the same geo for both directions...
     # after we create proper route profile json files, update this section
     profile['directions']['0']['geo'] = geo
     profile['directions']['1']['geo'] = geo
@@ -123,29 +123,29 @@ def get_profile(route):
 def get_ewt_df(route, window_start):
     print 'querying EWT for route: {}'.format(route)
 
-    ewt_df = pd.read_sql(db.session.query(EWT) 
+    ewt_df = pd.read_sql(db.session.query(EWT)
                .filter(EWT.rds_index.startswith(route + '_'))
                .filter(EWT.date >= window_start).statement,
                db.session.bind)
 
     ewt_df['direction'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'direc'), axis=1)
     ewt_df['stop'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'stop'), axis=1)
-    
+
     print 'EWT:\n', ewt_df.head()
     return ewt_df
 
 
-def get_ejt_df(route, window_start): 
+def get_ejt_df(route, window_start):
     print 'querying EJT for route: {}'.format(route)
-    
-    ejt_df = pd.read_sql(db.session.query(EJT) 
+
+    ejt_df = pd.read_sql(db.session.query(EJT)
                .filter(EJT.rds_index.startswith(route + '_'))
                .filter(EJT.date >= window_start).statement,
                db.session.bind)
 
     ejt_df['direction'] = ejt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'direc'), axis=1)
     ejt_df['stop'] = ejt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'stop'), axis=1)
-    
+
     print 'EJT:\n', ejt_df.head()
     return ejt_df
 
@@ -157,14 +157,14 @@ def build_data_series(df, direc, dbin, hbin):
 
     filtered = df.loc[(df['daybin'] == dbin) \
                       & (df['hourbin'] == hbin) \
-                      & (df['direction'] == direc), 
+                      & (df['direction'] == direc),
                       ['date', 'stop', 'metric']]
 
-    def tuple_data(day):
+    def tuple_data(date):
         one_day = filtered.loc[filtered.date == day, :]
         return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
 
-    return {str(day): tuple_data(day) for day in filtered.date.unique()}
+    return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
 
 
 
@@ -215,13 +215,15 @@ def get_route(route):
 def dashboard(route):
     return render_template('route.html', route=route)
 
-
 @app.route('/')
 def index():
     return render_template('dashboard.html')
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 
 if __name__ == '__main__':
     app.debug = True
     app.run()
-

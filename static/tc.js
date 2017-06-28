@@ -4,19 +4,15 @@
 
 		selection: {
             route: null,
-             stop: null,
+            // stop: null,
             direction: null,
             dayBin: null,
             hourBin: null,
             date: null
         },
 
-        data: null,
-
 		initialize: function(data) {
-			this.data = data;
 
-			// print header
 			$("#bus_id").text(data["route_id"] + ": " + data["long_name"]);
 
 			// set direction headsign selection options
@@ -25,51 +21,34 @@
 
 			// dynamically insert date select options
 			var counter = 0;
-			Object.keys(data["directions"]["0"]["daybins"]["0"]["hourbins"]["0"]).reverse().forEach(function(day){
+			data["directions"]["0"]["daybins"]["0"]["hourbins"]["0"].reverse().forEach(function(day){
+				var date = day[0];
 				if (counter == 0) {
-					var option_elem = `<option name="date" value="${day}" selected="selected">${day}</option>`
+					var option_elem = `<option name="date" value="${date}" selected="selected">${date}</option>`
 				} else {
-					var option_elem = `<option name="date" value="${day}">${day}</option>`
+					var option_elem = `<option name="date" value="${date}">${date}</option>`
 				};
 				$("#dateSelect").append(option_elem);
 				counter++;
 			});
 
+			this.selection.route = data["route_id"];
 			this.updateSelection();
-			this.registerHandlers();
 		},
 
-		updateSelection: function() {	
-			console.log("updating selection...");
-			tc.selection.route = tc.data["route_id"];
-			tc.selection.dayBin = $("input[name=daybin]:checked", "#daySelect").val();
-			tc.selection.hourBin = $("input[name=hourbin]:checked", "#hourSelect").val();
-			tc.selection.direction = $("option[name=direction]:selected", "#dirSelect").val();
-			tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
-			tc.refreshTable();
-		},
+		updateSelection: function() {
 
-		refreshTable: function() {
-			console.log("refreshing table...");
-			// clear existing table
-			$("#dataTable").empty();
-			// write a header row
-			$("#dataTable").append(`<tr><th>Stop</th><th>EWT</th></tr>`);
-			// write data rows
-			tc.data["directions"][tc.selection.direction]
-					 ["daybins"][tc.selection.dayBin]
-					 ["hourbins"][tc.selection.hourBin]
-					 [tc.selection.date]
-					 .forEach(function(stop){
-					 	$("#dataTable").append(`<tr><td>${stop[0]}</td><td>${stop[1]}</td></tr>`);
-					 });
-		},
+			this.selection.dayBin = $("input[name=daybin]:checked", "#daySelect").val();
+			this.selection.hourBin = $("input[name=hourbin]:checked", "#hourSelect").val();
+			this.selection.direction = $("option[name=direction]:selected", "#dirSelect").val();
+			this.selection.date = $("option[name=date]:selected", "#dateSelect").val();
 
-		registerHandlers: function() {
-			$("#daySelect, #hourSelect, #dirSelect, #dateSelect").on("change", this.updateSelection);
+			//this.refreshData();
 		}
 
+		//refreshData: function() {
+
+		//}
 	};
-	// add our tc object to global window scope
-	this.tc = tc;
+	this.tc = tc
 })();

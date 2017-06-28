@@ -12,7 +12,7 @@ from app import db
 db.drop_all()
 db.create_all()
 # ESTABLISH SQLALCHEMY CONNECTION
-engine = create_engine('postgresql://localhost/transit')
+engine = create_engine('postgresql://root:root@localhost:5432/transit')
 
 
 # FAKE DATA RANGES

@@ -37,7 +37,7 @@
     			<div class="sidebar">
     				<ul class="nav navbar-nav sidebar-nav">
     					<li>
-    						<div ng-class="{active: $state.includes('detail') || $state.includes('home') }">
+    						<div class="underline active" ng-class="{active: $state.includes('detail') || $state.includes('home') }">
     							<a ui-sref="home" href="{{ url_for('home') }}">
     								Dashboard
     							</a>
@@ -63,8 +63,8 @@
 
     					</li>
               <li>
-    						<div class="underline active" ui-sref-active="active">
-    							<a href="/routes/BX39">
+    						<div class="underline" ui-sref-active="active">
+    							<a href="/routes/Bx39">
     								Route Level Metrics
     							</a>
     						</div>
@@ -102,63 +102,83 @@
 
     <div id='contentWrapper'>
       <div id="container">
-        <h2>Route Level Performance</h2>
-				<div class="row mleft0">
-					<h1 id="bus_id">le bus...</h1>
-				</div>
+        <h1>Summary</h1>
+        <div class="row mleft0">
+          <div class="col-sm-4">
+            <div class="rowbox">
+              <p class="span-date">1 January 2017 - 31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>On-Time Performance</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo">71%</h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Excess Wait Time</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo">3.5m</h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Reliability Buffer Time</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo">4.6m</h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+        </div>
+        <div class="row mleft0">
+          <h1>Speed Map</h1>
+          <div class="row mleft0">
+            <div class="col-sm-11">
+              <div class="row mleft0">
+                <div class="col-sm-11">
+                  <img src="{{ url_for('static', filename='img/traffic.JPG') }}" alt="traffic map" height="725px">
+                </div>
+              </div>
+            </div>
+          </div>
 
-
-				<p>Select time filters:</p>
-				<form id="daySelect">
-					<input type="radio" name="daybin" value="0"> Weekday
-					<input type="radio" name="daybin" value="1"> Weekend
-					<input type="radio" name="daybin" value="2" checked> All
-				</form>
-				<form id="hourSelect">
-					<input type="radio" name="hourbin" value="0"> Peak
-					<input type="radio" name="hourbin" value="1"> Off-Peak
-					<input type="radio" name="hourbin" value="2" checked> All
-				</form>
-
-				<p>Select the direction:</p>
-				<select id="dirSelect" size="2">
-					<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
-					<option name= "direction" id="dir1" value="1">Dir1</option>
-				</select>
-
-				<p>Finally, select a date:</p>
-				<select id="dateSelect" size="1">
-					<!--dynamically add dates to a drop down here-->
-				</select>
-
-				<p>Here's some data:</p>
-			</div>
-		</div>
+        </div>
+      </div>
+    </div>
 
     <div id="footer">
       <div id="footerInner">
 
         <div id="rightFooter">
-          <a href="" target="_blank">
+          <a href="http://www.massdot.state.ma.us/" target="_blank">
             <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
           </a>
-          <a href="" target="_blank">
+          <a href="http://www.mbta.com/" target="_blank">
             <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
           </a>
         </div>
       </div>
     </div> <!-- End Footer -->
-
-		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-		<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-		<script>
-			var route = '{{ route }}'
-			var dataURL = `/routes/${route}/data`;
-		    $.getJSON(dataURL, function(data) {
-		    	// here is where JS gets acccess to all route data, so we can call functions from other JS files here.
-	            tc.initialize(data);
-	        });
-	    </script>
 
   </body>
   </html>

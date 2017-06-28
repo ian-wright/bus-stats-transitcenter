@@ -1,0 +1,818 @@
+<html lang="en-US" class="gr__mbtabackontrack_com"><head><style type="text/css">[uib-typeahead-popup].dropdown-menu{display:block;}</style><style type="text/css">.uib-time input{width:50px;}</style><style type="text/css">.uib-datepicker .uib-title{width:100%;}.uib-day button,.uib-month button,.uib-year button{min-width:100%;}.uib-datepicker-popup.dropdown-menu{display:block;}.uib-button-bar{padding:10px 9px 2px;}</style><style type="text/css">.ng-animate.item:not(.left):not(.right){-webkit-transition:0s ease-in-out left;transition:0s ease-in-out left}</style><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+		<meta charset="utf-8">
+		<title>MBTA Performance Dashboard</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700" rel="stylesheet" type="text/css">
+		<link href="https://fonts.googleapis.com/css?family=Roboto:100,200,400,500" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" type="text/css" href="../thirdparty/bootstrap-3.3.5/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="../thirdparty/bootstrap.inline-responsive.css"> <!-- visible-inline-* classes -->
+		<link rel="stylesheet" type="text/css" href="../thirdparty/font-awesome-4.4.0/css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="css/performance.css">
+
+		<script async="" src="//www.google-analytics.com/analytics.js"></script><script type="text/javascript" src="../thirdparty/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/bootstrap-3.3.5/bootstrap.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/highcharts-4.1.8/highcharts-4.1.8.js" charset="utf-8"></script> <!-- Highcharts license 100038594-1nk69u -->
+		<script type="text/javascript" src="../thirdparty/highcharts-4.1.8-modules/export-csv.js" charset="utf-8"></script> <!-- Needed for ARIA table insertion -->
+		<script type="text/javascript" src="../thirdparty/highcharts-4.1.8/highcharts-more.js" charset="utf-8"></script> <!-- Highcharts More needed for Area Range -->
+		<script type="text/javascript" src="../thirdparty/highcharts-4.1.8/plugins/pattern-fill.js" charset="utf-8"></script> <!-- Highcharts Pattern Fill Plugin Needed for Striped Area Range -->
+		<script type="text/javascript" src="../shared/js/functions.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/angular.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/plugins/angular-ui-router.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/plugins/angular-sanitize.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/plugins/ui-bootstrap.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/plugins/highcharts-ng.min.js"></script>
+		<script type="text/javascript" src="../thirdparty/angular-1.4.8/plugins/quick-ng-repeat.js"></script>
+		<script src="js/perfApp.js?version=2.0"></script> <!-- Change version # here -->
+
+		<link rel="icon" type="image/png" href="../favicon.ico">
+
+	</head>
+
+	<body ng-app="perfApp" data-gr-c-s-loaded="true" class="ng-scope">
+
+		<div id="mainWrapper" ng-controller="wrapperCtrl" class="ng-scope" style="margin-top: 78px;">
+
+			<navig><!-- Top Nav Bar -->
+<nav class="navbar navbar-default" id="navBars">
+  <div id="navbarContainer">
+	  <div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div id="#navbarHeader" class="navbar-header">
+		  <button type="button" id="menuCollapseButton" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false" style="padding-top: 21px;">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a id="mainLogo" class="navbar-brand" href="#" style="padding-top: 20.5px;">
+			<img src="images/MBTAlogo.png" width="37" height="37" alt="T" style="display:inline-block;vertical-align:middle;position:relative;top:-20%">
+			<span class="text">Dashboard</span>
+		  </a>
+		</div>
+
+		<div id="sidebar" class="navbar-collapse collapse collapsed" aria-expanded="false" style="height: 0px;">
+			<div class="sidebar">
+				<ul class="nav navbar-nav sidebar-nav">
+					<li>
+						<div class="underline active" ng-class="{active: $state.includes('detail') || $state.includes('home') }">
+							<a ui-sref="home" href="#/home">
+								Dashboard
+							</a>
+						</div>
+
+						<ul class="sidebarSubLinks">
+							<!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+									Reliability
+								</a>
+							</li><!-- end ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/ridership///">
+									Ridership
+								</a>
+							</li><!-- end ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/financials///">
+									Financials
+								</a>
+							</li><!-- end ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/customersatisfaction///">
+									Customer Satisfaction
+								</a>
+							</li><!-- end ngRepeat: mc in metricCategories -->
+						</ul>
+
+					</li>
+
+					<li>
+						<div class="underline" ui-sref-active="active">
+							<a href="/blog">
+								Data Blog
+							</a>
+						</div>
+					</li>
+
+					<li>
+						<div class="underline" ui-sref-active="active">
+							<a ui-sref="engagement" href="#/engagement">
+								Surveys
+							</a>
+						</div>
+					</li>
+
+					<li>
+						<div class="underline">
+							<a ui-sref="download" ui-sref-active="active" href="#/download">
+								More Data
+							</a>
+						</div>
+					</li>
+
+				</ul>
+			</div> <!-- Side bar end -->
+		</div> <!-- Side bar collapse end -->
+
+		<div id="topbarCollapse" class="navbar-collapse collapse" aria-expanded="false" style="height: 0px;">
+		  <ul id="topbar" class="nav navbar-nav navbar-right collapsed">
+			<li>
+				<a ui-sref="about" ui-sref-active="active" href="#/about">About</a>
+			</li>
+			<li>
+				<a ui-sref="contact" ui-sref-active="active" href="#/contact">Contact</a>
+			</li>
+			<li>
+				<a ui-sref="explanations" ui-sref-active="active" href="#/explanations">FAQs</a>
+			</li>
+		  </ul>
+		</div> <!-- Navbar collapse end -->
+
+	  </div><!-- /.container-fluid -->
+  </div>
+</nav>
+<!-- Nav Bar --></navig>
+
+			<div id="contentWrapper">
+
+				<!-- Error Status -->
+				<!-- ngIf: statusObj && statusObj.type != '' -->
+
+				<!-- uiView:  --><div ui-view="" class="viewport ng-scope" autoscroll="true"><!-- ngIf: performanceData --><div id="metrics" ng-if="performanceData" class="ng-scope">
+
+	<div class="metricFrequency row" equalize-height="">
+		<!-- ngRepeat: mc in performanceData.dashboard.metricCategories --><div ng-repeat="mc in performanceData.dashboard.metricCategories" ng-init="tableOrChart = 'chart'" class="overviewcolumn column col-sm-12 col-md-6 ng-scope" equalize-height-add="">
+				<div class="metricContainer">
+
+					<div class="metricHeaderOverview">
+
+						<div class="metricHeaderText">
+							<!-- Date -->
+							<!-- ngIf: mc.dateDescription --><div ng-if="mc.dateDescription" class="metricDate ng-binding ng-scope">
+								June 21, 2017
+							</div><!-- end ngIf: mc.dateDescription -->
+						</div>
+
+						<div class="topbarIconBar">
+
+							<!-- Table, Chart -->
+							<!-- ngIf: mc.showChartToggle --><span ng-if="mc.showChartToggle" class="ng-scope">
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'chart'}" ng-click="$parent.tableOrChart = 'chart'" class="topBarLink topBarActive" title="Show chart">Chart</a>
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'table'}" ng-click="$parent.tableOrChart = 'table'" class="topBarLink" title="Show table">Data</a>
+							</span><!-- end ngIf: mc.showChartToggle -->
+
+							<!-- More Info Tooltip -->
+							<!-- ngIf: mc.tooltip --><mtooltip ng-if="mc.tooltip" class="mtooltip topbarIcon ng-scope" data-content="mc.tooltip"><a data-html="true" title="The reliability measures vary by mode, but overall they all describe how well the MBTA adheres to our published schedules and service frequencies so that our customers can rely on consistent travel times." data-toggle="tooltip" data-placement="auto right" data-container="body" tooltip="" ng-init="img = 'images/tooltip.png'" ng-mouseover="img = 'images/tooltip_hover.png'" ng-mouseleave="img = 'images/tooltip.png'">
+	<img ng-src="images/tooltip.png" width="28" height="28" alt="?" src="images/tooltip.png">
+</a></mtooltip><!-- end ngIf: mc.tooltip -->
+
+						</div>
+
+					</div>
+
+					<div class="metricBody metricBodyOverview">
+
+						<h3 class="metricHeadline">
+							<a ui-sref="detail({ metricCategory:mc.slug })" class="titlelink ng-binding" href="#/detail/reliability///">
+								Reliability
+							</a>
+
+							<!-- Mobile link -->
+							<div class="detailLink visible-inline-xs">
+								<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Reliability" href="#/detail/reliability///">
+									<img ng-src="images/mobile_arrow.png" width="18" height="35" alt=">" src="images/mobile_arrow.png">
+								</a>
+							</div>
+
+						</h3>
+						<div style="clear:both;"></div>
+
+						<!-- Description -->
+						<a ui-sref="detail({ metricCategory:mc.slug })" href="#/detail/reliability///">
+							<!-- ngIf: mc.description --><div ng-if="mc.description" class="description ng-binding ng-scope">
+								How dependable is our service?
+							</div><!-- end ngIf: mc.description -->
+						</a>
+
+						<!-- Error Messages -->
+						<!-- ngRepeat: err in mc.errorMessages -->
+
+						<!-- Per metric chart or table -->
+						<!-- ngRepeat: metric in mc.overviewMetrics.all --><div class="metricWrapper ng-scope" ng-repeat="metric in mc.overviewMetrics.all">
+
+							<onechart metric="metric"><!-- Number; same in chart or table view -->
+<!-- ngIf: metric.chartType == 'number' -->
+
+<!-- Calculation; same in chart of table view -->
+<!-- ngIf: metric.chartType == 'calculation' -->
+
+<!-- Star Rating; becomes Number in table view -->
+<!-- ngIf: metric.chartType == 'star' -->
+<!-- ngIf: metric.chartType == 'star' -->
+
+<!-- Highcharts Chart -->
+<!-- ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' --><div ng-show="tableOrChart == 'chart'" ng-if="metric.chartConfig &amp;&amp; metric.chartType != 'star' &amp;&amp; metric.chartType != 'number' &amp;&amp; metric.chartType != 'calculation'" id="chartContainer_reliability_overview" class="chartContainer ng-scope">
+	<div resize="" id="chart_reliability_overview" config="metric.chartConfig" class="ng-isolate-scope" data-highcharts-chart="0" aria-label="A chart. null. "><div class="highcharts-container ng-scope" id="highcharts-0" style="position: relative; overflow: hidden; width: 459px; height: 160px; text-align: left; line-height: normal; z-index: 0; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);" aria-hidden="true"><svg version="1.1" style="font-family:&quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif;font-size:12px;" xmlns="http://www.w3.org/2000/svg" width="459" height="160"><desc>Created with Highcharts 4.1.8</desc><defs><pattern id="highcharts-default-pattern-0" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11" stroke="#7cb5ec" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-1" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 10 L 10 0 M -1 1 L 1 -1 M 9 11 L 11 9" stroke="#434348" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-2" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 3 0 L 3 10 M 8 0 L 8 10" stroke="#90ed7d" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-3" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 3 L 10 3 M 0 8 L 10 8" stroke="#f7a35c" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-4" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 3 L 5 3 L 5 0 M 5 10 L 5 7 L 10 7" stroke="#8085e9" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-5" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 3 3 L 8 3 L 8 8 L 3 8 Z" stroke="#f15c80" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-6" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 5 5 m -4 0 a 4 4 0 1 1 8 0 a 4 4 0 1 1 -8 0" stroke="#e4d354" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-7" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 10 3 L 5 3 L 5 0 M 5 10 L 5 7 L 0 7" stroke="#2b908f" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-8" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 2 5 L 5 2 L 8 5 L 5 8 Z" stroke="#f45b5b" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-9" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 0 L 5 10 L 10 0" stroke="#91e8e1" stroke-width="2"></path></pattern><clipPath id="highcharts-1"><rect x="0" y="0" width="135" height="449"></rect></clipPath></defs><rect x="0" y="0" width="459" height="160" strokeWidth="0" fill="transparent" class=" highcharts-background"></rect><g class="highcharts-grid" zIndex="1"></g><g class="highcharts-grid" zIndex="1"></g><g class="highcharts-data-labels highcharts-tracker" visibility="visible" zIndex="1" transform="translate(0,10) scale(1 1)" opacity="1" style=""><g zIndex="1" style="z-index:1;padding-top:1em;" transform="translate(-1,26)"></g><g zIndex="1" style="z-index:1;padding-top:1em;" transform="translate(-1,71)"></g><g zIndex="1" style="z-index:1;padding-top:1em;" transform="translate(-1,116)"></g></g><g class="highcharts-axis" zIndex="2"><text x="-10" zIndex="7" text-anchor="middle" transform="translate(0,0) rotate(270 -10 77.5)" class=" highcharts-xaxis-title" style="color:#1D4E5F;fill:#1D4E5F;" visibility="visible" y="77.5">Mode</text></g><g class="highcharts-axis" zIndex="2"></g><g class="highcharts-series-group" zIndex="3"><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" width="449" height="135" clip-path="url(#highcharts-1)"><rect x="108" y="0" width="10" height="450" fill="#dee2e3" rx="0" ry="0"></rect><rect x="63" y="0" width="10" height="450" fill="#dee2e3" rx="0" ry="0"></rect><rect x="18" y="0" width="10" height="450" fill="#dee2e3" rx="0" ry="0"></rect></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" width="449" height="135" clip-path="none"></g><g class="highcharts-series highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" style="" width="449" height="135" clip-path="url(#highcharts-1)"><rect x="108" y="157" width="10" height="293" fill="#a2bf05" rx="0" ry="0"></rect><rect x="63" y="62" width="10" height="388" fill="#a2bf05" rx="0" ry="0"></rect><rect x="18" y="44" width="10" height="406" fill="#a2bf05" rx="0" ry="0"></rect></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" width="449" height="135" clip-path="none"></g><g class="highcharts-series highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-1)" style="" width="449" height="135"></g><g class="highcharts-markers highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(449,145) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-2)" style="" width="449" height="135"><path fill="#7cb5ec" d="M 17 44.89999999999998 L 27 44.89999999999998" stroke="#1c4f60" stroke-width="2"></path><path fill="#7cb5ec" d="M 62 44.89999999999998 L 72 44.89999999999998" stroke="#1c4f60" stroke-width="2"></path><path fill="#7cb5ec" d="M 107 112.25 L 117 112.25" stroke="#1c4f60" stroke-width="2"></path></g></g><g class="highcharts-axis-labels highcharts-xaxis-labels" zIndex="7"></g><g class="highcharts-axis-labels highcharts-yaxis-labels" zIndex="7"></g><g class="highcharts-tooltip" zIndex="8" style="cursor:default;padding:0;white-space:nowrap;" transform="translate(399,-9999)" opacity="0" visibility="visible"><path fill="none" d="M 3.5 0.5 L 38.5 0.5 C 41.5 0.5 41.5 0.5 41.5 3.5 L 41.5 47.5 C 41.5 50.5 41.5 50.5 38.5 50.5 L 3.5 50.5 C 0.5 50.5 0.5 50.5 0.5 47.5 L 0.5 31 -5.5 25 0.5 19 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.049999999999999996" stroke-width="5" transform="translate(1, 1)" width="41" height="50"></path><path fill="none" d="M 3.5 0.5 L 38.5 0.5 C 41.5 0.5 41.5 0.5 41.5 3.5 L 41.5 47.5 C 41.5 50.5 41.5 50.5 38.5 50.5 L 3.5 50.5 C 0.5 50.5 0.5 50.5 0.5 47.5 L 0.5 31 -5.5 25 0.5 19 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.09999999999999999" stroke-width="3" transform="translate(1, 1)" width="41" height="50"></path><path fill="none" d="M 3.5 0.5 L 38.5 0.5 C 41.5 0.5 41.5 0.5 41.5 3.5 L 41.5 47.5 C 41.5 50.5 41.5 50.5 38.5 50.5 L 3.5 50.5 C 0.5 50.5 0.5 50.5 0.5 47.5 L 0.5 31 -5.5 25 0.5 19 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.15" stroke-width="1" transform="translate(1, 1)" width="41" height="50"></path><path fill="rgba(249, 249, 249, .85)" d="M 3.5 0.5 L 38.5 0.5 C 41.5 0.5 41.5 0.5 41.5 3.5 L 41.5 47.5 C 41.5 50.5 41.5 50.5 38.5 50.5 L 3.5 50.5 C 0.5 50.5 0.5 50.5 0.5 47.5 L 0.5 31 -5.5 25 0.5 19 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" stroke="#a2bf05" stroke-width="1"></path><text x="8" zIndex="1" style="font-size:12px;color:#333333;fill:#333333;" y="20"><tspan>Bus</tspan><tspan style="font-weight:bold" x="8" dy="15">65%</tspan></text></g><text x="449" text-anchor="end" zIndex="8" style="cursor:pointer;color:#909090;font-size:9px;fill:#909090;" y="155" visibility="hidden">Highcharts.com</text></svg><div class="highcharts-data-labels" style="position: absolute; left: 0px; top: 10px; visibility: visible;"><div style="position: absolute; left: -1px; top: 26px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 0.9em; white-space: nowrap; font-weight: normal; color: teal; margin-left: 0px; margin-top: 0px; left: 0px; top: 3px;" zindex="1">Bus | <b>65%</b><a class="viewDetailLink" ui-sref="detail({&quot;metricCategory&quot;:&quot;reliability&quot;,&quot;mode&quot;:&quot;bus&quot;})">View Trends</a></span></div><div style="position: absolute; left: -1px; top: 71px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 0.9em; white-space: nowrap; font-weight: normal; color: teal; margin-left: 0px; margin-top: 0px; left: 0px; top: 3px;" zindex="1">Commuter Rail | <b>86%</b><a class="viewDetailLink" ui-sref="detail({&quot;metricCategory&quot;:&quot;reliability&quot;,&quot;mode&quot;:&quot;commuter_rail&quot;})">View Trends</a></span></div><div style="position: absolute; left: -1px; top: 116px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 0.9em; white-space: nowrap; font-weight: normal; color: teal; margin-left: 0px; margin-top: 0px; left: 0px; top: 3px;" zindex="1">Subway | <b>90%</b><a class="viewDetailLink" ui-sref="detail({&quot;metricCategory&quot;:&quot;reliability&quot;,&quot;mode&quot;:&quot;subway&quot;})">View Trends</a></span></div></div></div><div aria-label="A tabular view of the data in the chart." style="position: absolute; left: -9999em; width: 1px; height: 1px; overflow: hidden;"><table><tbody><tr><th>Mode</th></tr></tbody></table></div></div>
+</div><!-- end ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Table -->
+<!-- ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' --><datatable ng-show="tableOrChart == 'table'" ng-if="metric.chartType != 'star' &amp;&amp; metric.chartType != 'number' &amp;&amp; metric.chartType != 'calculation'" class="ng-scope ng-hide"><table class="dataTable table" width="100%">
+	<thead>
+		<!-- ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) --><tr ng-if="metric.categories &amp;&amp; (metric.categories.length > 0 &amp;&amp; !metric.dataTableFlip)" class="ng-scope">
+			<th class="categoryTh ng-binding">
+				Mode
+			</th>
+			<!-- ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><th ng-if="series.showInTable" ng-repeat="series in metric.series" class="categoryTh ng-binding ng-scope">
+				Actual
+			</th><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><th ng-if="series.showInTable" ng-repeat="series in metric.series" class="categoryTh ng-binding ng-scope">
+				Target
+			</th><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series -->
+
+			<!-- ngIf: metric.plotLines && metric.plotLines[0] -->
+
+			<!-- ngIf: metric.allowDrilldownOn --><th ng-if="metric.allowDrilldownOn" class="ng-scope">
+				<!-- View Details -->
+			</th><!-- end ngIf: metric.allowDrilldownOn -->
+		</tr><!-- end ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) -->
+	</thead>
+
+	<!-- ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) --><tbody ng-if="metric.categories &amp;&amp; (metric.categories.length > 0 &amp;&amp; !metric.dataTableFlip)" class="ng-scope">
+		<!-- ngRepeat: (cidx, category) in metric.categories --><!-- ngIf: metric.chartType != 'pie' --><tr ng-repeat="(cidx, category) in metric.categories" ng-if="metric.chartType != 'pie'" class="ng-scope">
+			<!-- ngIf: category.name --><td ng-if="category.name" class="categoryTd ng-binding ng-scope">
+				Bus
+			</td><!-- end ngIf: category.name -->
+
+			<!-- ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				65%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				75%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series -->
+
+			<!-- ngIf: metric.plotLines && metric.plotLines[cidx] -->
+
+			<!-- ngIf: metric.allowDrilldownOn --><td ng-if="metric.allowDrilldownOn" class="ng-scope">
+				<viewdetaillink><a class="viewDetailLink" ui-sref="detail({ &quot;metricCategory&quot;: &quot;reliability&quot;, &quot;mode&quot;: &quot;bus&quot;, &quot;routeType&quot;: &quot;&quot;, &quot;route&quot;: &quot;&quot; })" href="#/detail/reliability/bus//">
+	View Trends
+</a></viewdetaillink>
+			</td><!-- end ngIf: metric.allowDrilldownOn -->
+		</tr><!-- end ngIf: metric.chartType != 'pie' --><!-- end ngRepeat: (cidx, category) in metric.categories --><!-- ngIf: metric.chartType != 'pie' --><tr ng-repeat="(cidx, category) in metric.categories" ng-if="metric.chartType != 'pie'" class="ng-scope">
+			<!-- ngIf: category.name --><td ng-if="category.name" class="categoryTd ng-binding ng-scope">
+				Commuter Rail
+			</td><!-- end ngIf: category.name -->
+
+			<!-- ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				86%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				90%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series -->
+
+			<!-- ngIf: metric.plotLines && metric.plotLines[cidx] -->
+
+			<!-- ngIf: metric.allowDrilldownOn --><td ng-if="metric.allowDrilldownOn" class="ng-scope">
+				<viewdetaillink><a class="viewDetailLink" ui-sref="detail({ &quot;metricCategory&quot;: &quot;reliability&quot;, &quot;mode&quot;: &quot;commuter_rail&quot;, &quot;routeType&quot;: &quot;&quot;, &quot;route&quot;: &quot;&quot; })" href="#/detail/reliability/commuter_rail//">
+	View Trends
+</a></viewdetaillink>
+			</td><!-- end ngIf: metric.allowDrilldownOn -->
+		</tr><!-- end ngIf: metric.chartType != 'pie' --><!-- end ngRepeat: (cidx, category) in metric.categories --><!-- ngIf: metric.chartType != 'pie' --><tr ng-repeat="(cidx, category) in metric.categories" ng-if="metric.chartType != 'pie'" class="ng-scope">
+			<!-- ngIf: category.name --><td ng-if="category.name" class="categoryTd ng-binding ng-scope">
+				Subway
+			</td><!-- end ngIf: category.name -->
+
+			<!-- ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				90%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><td ng-repeat="series in metric.series" ng-if="series.showInTable" class="ng-binding ng-scope"> <!-- Point is a single value -->
+				90%
+			</td><!-- end ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series --><!-- ngIf: series.showInTable --><!-- end ngRepeat: series in metric.series -->
+
+			<!-- ngIf: metric.plotLines && metric.plotLines[cidx] -->
+
+			<!-- ngIf: metric.allowDrilldownOn --><td ng-if="metric.allowDrilldownOn" class="ng-scope">
+				<viewdetaillink><a class="viewDetailLink" ui-sref="detail({ &quot;metricCategory&quot;: &quot;reliability&quot;, &quot;mode&quot;: &quot;subway&quot;, &quot;routeType&quot;: &quot;&quot;, &quot;route&quot;: &quot;&quot; })" href="#/detail/reliability/subway//">
+	View Trends
+</a></viewdetaillink>
+			</td><!-- end ngIf: metric.allowDrilldownOn -->
+		</tr><!-- end ngIf: metric.chartType != 'pie' --><!-- end ngRepeat: (cidx, category) in metric.categories -->
+    </tbody><!-- end ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) -->
+
+    <!-- ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series -->
+
+</table></datatable><!-- end ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Explanation -->
+<!-- ngIf: metric.explanation --></onechart>
+
+						</div><!-- end ngRepeat: metric in mc.overviewMetrics.all -->
+
+					</div>
+
+				</div>
+
+				<!-- Single Metric Category Page link -->
+				<div class="bottomRightLinkSpacer hidden-xs"></div>
+				<div class="detailLink bottomRightLink hidden-xs">
+					<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Reliability" ng-init="img = 'images/arrow.png'" ng-mouseover="img = 'images/arrow_hover.png'" ng-mouseleave="img = 'images/arrow.png'" href="#/detail/reliability///">
+						Details
+						<img ng-src="images/arrow.png" width="23" height="48" alt=">" src="images/arrow.png">
+					</a>
+				</div>
+
+			</div><!-- end ngRepeat: mc in performanceData.dashboard.metricCategories --><div ng-repeat="mc in performanceData.dashboard.metricCategories" ng-init="tableOrChart = 'chart'" class="overviewcolumn column col-sm-12 col-md-6 ng-scope" equalize-height-add="">
+				<div class="metricContainer">
+
+					<div class="metricHeaderOverview">
+
+						<div class="metricHeaderText">
+							<!-- Date -->
+							<!-- ngIf: mc.dateDescription --><div ng-if="mc.dateDescription" class="metricDate ng-binding ng-scope">
+								April 2017
+							</div><!-- end ngIf: mc.dateDescription -->
+						</div>
+
+						<div class="topbarIconBar">
+
+							<!-- Table, Chart -->
+							<!-- ngIf: mc.showChartToggle -->
+
+							<!-- More Info Tooltip -->
+							<!-- ngIf: mc.tooltip --><mtooltip ng-if="mc.tooltip" class="mtooltip topbarIcon ng-scope" data-content="mc.tooltip"><a data-html="true" title="Average weekday ridership is the total number of boardings on MBTA services on an average weekday in the month." data-toggle="tooltip" data-placement="auto right" data-container="body" tooltip="" ng-init="img = 'images/tooltip.png'" ng-mouseover="img = 'images/tooltip_hover.png'" ng-mouseleave="img = 'images/tooltip.png'">
+	<img ng-src="images/tooltip.png" width="28" height="28" alt="?" src="images/tooltip.png">
+</a></mtooltip><!-- end ngIf: mc.tooltip -->
+
+						</div>
+
+					</div>
+
+					<div class="metricBody metricBodyOverview">
+
+						<h3 class="metricHeadline">
+							<a ui-sref="detail({ metricCategory:mc.slug })" class="titlelink ng-binding" href="#/detail/ridership///">
+								Ridership
+							</a>
+
+							<!-- Mobile link -->
+							<div class="detailLink visible-inline-xs">
+								<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Ridership" href="#/detail/ridership///">
+									<img ng-src="images/mobile_arrow.png" width="18" height="35" alt=">" src="images/mobile_arrow.png">
+								</a>
+							</div>
+
+						</h3>
+						<div style="clear:both;"></div>
+
+						<!-- Description -->
+						<a ui-sref="detail({ metricCategory:mc.slug })" href="#/detail/ridership///">
+							<!-- ngIf: mc.description --><div ng-if="mc.description" class="description ng-binding ng-scope">
+								How many trips are taken on MBTA services on an average weekday?
+							</div><!-- end ngIf: mc.description -->
+						</a>
+
+						<!-- Error Messages -->
+						<!-- ngRepeat: err in mc.errorMessages -->
+
+						<!-- Per metric chart or table -->
+						<!-- ngRepeat: metric in mc.overviewMetrics.all --><div class="metricWrapper ng-scope" ng-repeat="metric in mc.overviewMetrics.all">
+
+							<onechart metric="metric"><!-- Number; same in chart or table view -->
+<!-- ngIf: metric.chartType == 'number' --><numberchart ng-if="metric.chartType == 'number'" class="ng-scope"><!-- Number (displays the same whether in chart view or table view) -->
+<!-- quickNgRepeat: series in metric.series track by $index --><div quick-ng-repeat="series in metric.series track by $index" class="row numberChart ng-scope" ng-class="{'vertical_separated':!$last,'sidebysidenum':metric.series.length>1}">
+
+	<!-- quickNgRepeat: (idx, value) in series.data --><div quick-ng-repeat="(idx, value) in series.data" class="metricNumberTile ng-scope" ng-class="{'col-md-6':series.data.length==2, 'col-md-4':series.data.length==3, 'col-md-3':series.data.length==4, 'col-md-5ths':series.data.length>4, 'fixedHeight':series.data.length>1}">
+
+		<div class="metricValue" ng-style="{ color: metric.categories[idx].color || series.color || metric.color }" ng-class="{'metricValues': series.data.length>1, 'metricValuesCount2':series.data.length==2, 'metricValuesCount3':series.data.length==3, 'metricValuesCount4':series.data.length==4, 'metricValuesCountMany':series.data.length>4}" style="color: rgb(34, 168, 153);">
+			<!-- ngIf: !series.percents --><span ng-if="!series.percents" class="ng-binding ng-scope">1.31M</span><!-- end ngIf: !series.percents --><!-- ngIf: series.percents --><!-- ngIf: metric.maxValue -->
+		</div>
+
+		<!-- ngIf: metric.categories[idx] -->
+
+		<!-- ngIf: metric.allowDrilldownOn -->
+
+
+	</div>
+
+	<!-- ngIf: series.name -->
+</div></numberchart><!-- end ngIf: metric.chartType == 'number' -->
+
+<!-- Calculation; same in chart of table view -->
+<!-- ngIf: metric.chartType == 'calculation' -->
+
+<!-- Star Rating; becomes Number in table view -->
+<!-- ngIf: metric.chartType == 'star' -->
+<!-- ngIf: metric.chartType == 'star' -->
+
+<!-- Highcharts Chart -->
+<!-- ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Table -->
+<!-- ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Explanation -->
+<!-- ngIf: metric.explanation --></onechart>
+
+						</div><!-- end ngRepeat: metric in mc.overviewMetrics.all -->
+
+					</div>
+
+				</div>
+
+				<!-- Single Metric Category Page link -->
+				<div class="bottomRightLinkSpacer hidden-xs"></div>
+				<div class="detailLink bottomRightLink hidden-xs">
+					<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Ridership" ng-init="img = 'images/arrow.png'" ng-mouseover="img = 'images/arrow_hover.png'" ng-mouseleave="img = 'images/arrow.png'" href="#/detail/ridership///">
+						Details
+						<img ng-src="images/arrow.png" width="23" height="48" alt=">" src="images/arrow.png">
+					</a>
+				</div>
+
+			</div><!-- end ngRepeat: mc in performanceData.dashboard.metricCategories --><div ng-repeat="mc in performanceData.dashboard.metricCategories" ng-init="tableOrChart = 'chart'" class="overviewcolumn column col-sm-12 col-md-6 ng-scope" equalize-height-add="">
+				<div class="metricContainer">
+
+					<div class="metricHeaderOverview">
+
+						<div class="metricHeaderText">
+							<!-- Date -->
+							<!-- ngIf: mc.dateDescription --><div ng-if="mc.dateDescription" class="metricDate ng-binding ng-scope">
+								April 2017
+							</div><!-- end ngIf: mc.dateDescription -->
+						</div>
+
+						<div class="topbarIconBar">
+
+							<!-- Table, Chart -->
+							<!-- ngIf: mc.showChartToggle --><span ng-if="mc.showChartToggle" class="ng-scope">
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'chart'}" ng-click="$parent.tableOrChart = 'chart'" class="topBarLink topBarActive" title="Show chart">Chart</a>
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'table'}" ng-click="$parent.tableOrChart = 'table'" class="topBarLink" title="Show table">Data</a>
+							</span><!-- end ngIf: mc.showChartToggle -->
+
+							<!-- More Info Tooltip -->
+							<!-- ngIf: mc.tooltip --><mtooltip ng-if="mc.tooltip" class="mtooltip topbarIcon ng-scope" data-content="mc.tooltip"><a data-html="true" title="This measures how the MBTA is tracking against its operating budget for the fiscal year, which runs from July 1st-June 30th. It does not include any capital expenditures." data-toggle="tooltip" data-placement="auto right" data-container="body" tooltip="" ng-init="img = 'images/tooltip.png'" ng-mouseover="img = 'images/tooltip_hover.png'" ng-mouseleave="img = 'images/tooltip.png'">
+	<img ng-src="images/tooltip.png" width="28" height="28" alt="?" src="images/tooltip.png">
+</a></mtooltip><!-- end ngIf: mc.tooltip -->
+
+						</div>
+
+					</div>
+
+					<div class="metricBody metricBodyOverview">
+
+						<h3 class="metricHeadline">
+							<a ui-sref="detail({ metricCategory:mc.slug })" class="titlelink ng-binding" href="#/detail/financials///">
+								Financials
+							</a>
+
+							<!-- Mobile link -->
+							<div class="detailLink visible-inline-xs">
+								<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Financials" href="#/detail/financials///">
+									<img ng-src="images/mobile_arrow.png" width="18" height="35" alt=">" src="images/mobile_arrow.png">
+								</a>
+							</div>
+
+						</h3>
+						<div style="clear:both;"></div>
+
+						<!-- Description -->
+						<a ui-sref="detail({ metricCategory:mc.slug })" href="#/detail/financials///">
+							<!-- ngIf: mc.description --><div ng-if="mc.description" class="description ng-binding ng-scope">
+								How are we tracking against our operating budget?
+							</div><!-- end ngIf: mc.description -->
+						</a>
+
+						<!-- Error Messages -->
+						<!-- ngRepeat: err in mc.errorMessages -->
+
+						<!-- Per metric chart or table -->
+						<!-- ngRepeat: metric in mc.overviewMetrics.all --><div class="metricWrapper ng-scope" ng-repeat="metric in mc.overviewMetrics.all">
+
+							<onechart metric="metric"><!-- Number; same in chart or table view -->
+<!-- ngIf: metric.chartType == 'number' -->
+
+<!-- Calculation; same in chart of table view -->
+<!-- ngIf: metric.chartType == 'calculation' -->
+
+<!-- Star Rating; becomes Number in table view -->
+<!-- ngIf: metric.chartType == 'star' -->
+<!-- ngIf: metric.chartType == 'star' -->
+
+<!-- Highcharts Chart -->
+<!-- ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' --><div ng-show="tableOrChart == 'chart'" ng-if="metric.chartConfig &amp;&amp; metric.chartType != 'star' &amp;&amp; metric.chartType != 'number' &amp;&amp; metric.chartType != 'calculation'" id="chartContainer_financials_overview" class="chartContainer ng-scope">
+	<div resize="" id="chart_financials_overview" config="metric.chartConfig" class="ng-isolate-scope" data-highcharts-chart="1" aria-label="A chart. null. "><div class="highcharts-container ng-scope" id="highcharts-4" style="position: relative; overflow: hidden; width: 459px; height: 200px; text-align: left; line-height: normal; z-index: 0; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);" aria-hidden="true"><svg version="1.1" style="font-family:&quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif;font-size:12px;" xmlns="http://www.w3.org/2000/svg" width="459" height="200"><desc>Created with Highcharts 4.1.8</desc><defs><pattern id="highcharts-default-pattern-0" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 0 L 10 10 M 9 -1 L 11 1 M -1 9 L 1 11" stroke="#7cb5ec" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-1" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 10 L 10 0 M -1 1 L 1 -1 M 9 11 L 11 9" stroke="#434348" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-2" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 3 0 L 3 10 M 8 0 L 8 10" stroke="#90ed7d" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-3" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 3 L 10 3 M 0 8 L 10 8" stroke="#f7a35c" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-4" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 3 L 5 3 L 5 0 M 5 10 L 5 7 L 10 7" stroke="#8085e9" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-5" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 3 3 L 8 3 L 8 8 L 3 8 Z" stroke="#f15c80" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-6" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 5 5 m -4 0 a 4 4 0 1 1 8 0 a 4 4 0 1 1 -8 0" stroke="#e4d354" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-7" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 10 3 L 5 3 L 5 0 M 5 10 L 5 7 L 0 7" stroke="#2b908f" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-8" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 2 5 L 5 2 L 8 5 L 5 8 Z" stroke="#f45b5b" stroke-width="2"></path></pattern><pattern id="highcharts-default-pattern-9" patternUnits="userSpaceOnUse" width="10" height="10"><path d="M 0 0 L 5 10 L 10 0" stroke="#91e8e1" stroke-width="2"></path></pattern><clipPath id="highcharts-5"><rect x="0" y="0" width="128" height="409"></rect></clipPath></defs><rect x="0" y="0" width="459" height="200" strokeWidth="0" fill="transparent" class=" highcharts-background"></rect><g class="highcharts-grid" zIndex="1"></g><g class="highcharts-grid" zIndex="1"></g><g class="highcharts-data-labels" visibility="visible" zIndex="1" transform="translate(0,10) scale(1 1)" opacity="1"><g zIndex="1" style="z-index:1;padding-top:1em;" transform="translate(389,53)"></g></g><g class="highcharts-data-labels highcharts-tracker" visibility="visible" zIndex="1" transform="translate(0,10) scale(1 1)" opacity="1" style=""><g zIndex="1" style="z-index:1;padding-top:1em;" transform="translate(286,83)"></g></g><g class="highcharts-axis" zIndex="2"></g><g class="highcharts-axis" zIndex="2"></g><g class="highcharts-series-group" zIndex="3"><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" width="409" height="128" clip-path="url(#highcharts-5)"><rect x="49" y="20" width="30" height="390" fill="#c8cccb" rx="0" ry="0"></rect></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" width="409" height="128" clip-path="none"></g><g class="highcharts-series highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" style="" width="409" height="128" clip-path="url(#highcharts-5)"><rect x="49" y="98" width="30" height="312" fill="#22A899" rx="0" ry="0"></rect></g><g class="highcharts-markers" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" width="409" height="128" clip-path="none"></g><g class="highcharts-series highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-5)" style="" width="409" height="128"></g><g class="highcharts-markers highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(409,138) rotate(90) scale(-1,1) scale(1 1)" clip-path="url(#highcharts-6)" style="" width="409" height="128"><path fill="#7cb5ec" d="M 49 85.4003639747583 L 79 85.4003639747583" stroke="#1c4f60" stroke-width="3"></path></g></g><g class="highcharts-data-labels highcharts-tracker" visibility="visible" zIndex="6" transform="translate(0,10) scale(1 1)" opacity="1" style=""><g zIndex="1" style="" transform="translate(294,21)"><text x="5" zIndex="1" style="font-size: 1em; font-weight: normal; color: rgb(28, 79, 96); fill: rgb(28, 79, 96); text-shadow: rgb(255, 255, 255) 0px 0px 6px, rgb(255, 255, 255) 0px 0px 3px; text-rendering: geometricPrecision;" y="17"><tspan style="font-weight:bold">$1.68B</tspan></text></g></g><g class="highcharts-legend" zIndex="7" transform="translate(0,158)"><g zIndex="1"><g><g class="highcharts-legend-item" zIndex="1" transform="translate(8,3)"><text x="24" style="color:#154E61;font-size:12px;font-weight:500;cursor:default;font-family:'Open Sans', sans-serif;padding:0.4em;fill:#154E61;" text-anchor="start" zIndex="2" y="15"><tspan>Spending Year to Date </tspan></text><rect x="0" y="4" width="12" height="12" rx="6" ry="6" zIndex="3" fill="#22A899"></rect></g><g class="highcharts-legend-item" zIndex="1" transform="translate(176.609375,3)"><path fill="#7cb5ec" d="M -9 11 L 21 11" stroke="#1c4f60" stroke-width="3"></path><text x="24" y="15" style="color:#154E61;font-size:12px;font-weight:500;cursor:default;font-family:'Open Sans', sans-serif;padding:0.4em;fill:#154E61;" text-anchor="start" zIndex="2"><tspan>Budgeted Year to Date </tspan></text></g></g></g></g><g class="highcharts-axis-labels highcharts-xaxis-labels" zIndex="7"></g><g class="highcharts-axis-labels highcharts-yaxis-labels" zIndex="7"></g><g class="highcharts-tooltip" zIndex="8" style="cursor:default;padding:0;white-space:nowrap;" transform="translate(0,-9999)"><path fill="none" d="M 3.5 0.5 L 13.5 0.5 C 16.5 0.5 16.5 0.5 16.5 3.5 L 16.5 13.5 C 16.5 16.5 16.5 16.5 13.5 16.5 L 3.5 16.5 C 0.5 16.5 0.5 16.5 0.5 13.5 L 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.049999999999999996" stroke-width="5" transform="translate(1, 1)"></path><path fill="none" d="M 3.5 0.5 L 13.5 0.5 C 16.5 0.5 16.5 0.5 16.5 3.5 L 16.5 13.5 C 16.5 16.5 16.5 16.5 13.5 16.5 L 3.5 16.5 C 0.5 16.5 0.5 16.5 0.5 13.5 L 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.09999999999999999" stroke-width="3" transform="translate(1, 1)"></path><path fill="none" d="M 3.5 0.5 L 13.5 0.5 C 16.5 0.5 16.5 0.5 16.5 3.5 L 16.5 13.5 C 16.5 16.5 16.5 16.5 13.5 16.5 L 3.5 16.5 C 0.5 16.5 0.5 16.5 0.5 13.5 L 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5" isShadow="true" stroke="black" stroke-opacity="0.15" stroke-width="1" transform="translate(1, 1)"></path><path fill="rgba(249, 249, 249, .85)" d="M 3.5 0.5 L 13.5 0.5 C 16.5 0.5 16.5 0.5 16.5 3.5 L 16.5 13.5 C 16.5 16.5 16.5 16.5 13.5 16.5 L 3.5 16.5 C 0.5 16.5 0.5 16.5 0.5 13.5 L 0.5 3.5 C 0.5 0.5 0.5 0.5 3.5 0.5"></path></g><text x="449" text-anchor="end" zIndex="8" style="cursor:pointer;color:#909090;font-size:9px;fill:#909090;" y="195" visibility="hidden">Highcharts.com</text></svg><div class="highcharts-tooltip" style="position: absolute; left: 0px; top: -9999px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 12px; white-space: nowrap; color: rgb(51, 51, 51); margin-left: 0px; margin-top: 0px; left: 8px; top: 8px;" zindex="1"></span></div><div class="highcharts-data-labels" style="position: absolute; left: 0px; top: 10px; visibility: visible;"><div style="position: absolute; left: 389px; top: 53px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 0.9em; white-space: nowrap; font-weight: normal; color: rgb(113, 159, 174); margin-left: 0px; margin-top: 0px; left: 0px; top: 3px;" zindex="1"><b>$2.02B</b></span></div></div><div class="highcharts-data-labels" style="position: absolute; left: 0px; top: 10px; visibility: visible;"><div style="position: absolute; left: 286px; top: 83px;"><span style="position: absolute; font-family: &quot;Lucida Grande&quot;, &quot;Lucida Sans Unicode&quot;, Arial, Helvetica, sans-serif; font-size: 0.9em; white-space: nowrap; font-weight: normal; color: rgb(34, 168, 153); margin-left: 0px; margin-top: 0px; left: 0px; top: 3px;" zindex="1"><b>$1.62B</b></span></div></div></div><div aria-label="A tabular view of the data in the chart." style="position: absolute; left: -9999em; width: 1px; height: 1px; overflow: hidden;"><table><tbody><tr><th>Category</th></tr></tbody></table></div></div>
+</div><!-- end ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Table -->
+<!-- ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' --><datatable ng-show="tableOrChart == 'table'" ng-if="metric.chartType != 'star' &amp;&amp; metric.chartType != 'number' &amp;&amp; metric.chartType != 'calculation'" class="ng-scope ng-hide"><table class="dataTable table" width="100%">
+	<thead>
+		<!-- ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) -->
+	</thead>
+
+	<!-- ngIf: metric.categories && (metric.categories.length > 0 && !metric.dataTableFlip) -->
+
+    <!-- ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><tbody ng-if="!metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 &amp;&amp; metric.dataTableFlip)" ng-repeat="series in metric.series" class="ng-scope">
+
+		<!-- Not Pie -->
+		<!-- ngRepeat: datapoint in series.data --><!-- ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><tr ng-if="metric.chartType != 'pie' &amp;&amp; series.showInTable &amp;&amp; datapoint != undefined &amp;&amp; datapoint.y != 0" ng-repeat="datapoint in series.data" class="ng-scope">
+
+            <!-- Name Column -->
+            <!-- ngIf: !datapoint.name && !series.name -->
+            <!-- ngIf: !datapoint.name && series.name --><td ng-if="!datapoint.name &amp;&amp; series.name" class="categoryTd ng-binding ng-scope">
+                Budgeted Year to Date
+            </td><!-- end ngIf: !datapoint.name && series.name -->
+            <!-- ngIf: datapoint.name -->
+
+            <!-- Value Column(s) -->
+			<!-- ngIf: !datapoint.y --><td ng-if="!datapoint.y" class="ng-binding ng-scope">
+				$1.68B
+            </td><!-- end ngIf: !datapoint.y -->
+            <!-- ngIf: datapoint.y -->
+			<!-- ngIf: metric.plotLines && metric.plotLines.showInTable == true -->
+
+		</tr><!-- end ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><!-- end ngRepeat: datapoint in series.data -->
+
+		<!-- Pie -->
+		<!-- ngRepeat: subseries in series.data --><!-- ngIf: metric.chartType == 'pie' --><!-- end ngRepeat: subseries in series.data -->
+
+	</tbody><!-- end ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><tbody ng-if="!metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 &amp;&amp; metric.dataTableFlip)" ng-repeat="series in metric.series" class="ng-scope">
+
+		<!-- Not Pie -->
+		<!-- ngRepeat: datapoint in series.data --><!-- ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><tr ng-if="metric.chartType != 'pie' &amp;&amp; series.showInTable &amp;&amp; datapoint != undefined &amp;&amp; datapoint.y != 0" ng-repeat="datapoint in series.data" class="ng-scope">
+
+            <!-- Name Column -->
+            <!-- ngIf: !datapoint.name && !series.name -->
+            <!-- ngIf: !datapoint.name && series.name --><td ng-if="!datapoint.name &amp;&amp; series.name" class="categoryTd ng-binding ng-scope">
+                Spending Year to Date
+            </td><!-- end ngIf: !datapoint.name && series.name -->
+            <!-- ngIf: datapoint.name -->
+
+            <!-- Value Column(s) -->
+			<!-- ngIf: !datapoint.y --><td ng-if="!datapoint.y" class="ng-binding ng-scope">
+				$1.62B
+            </td><!-- end ngIf: !datapoint.y -->
+            <!-- ngIf: datapoint.y -->
+			<!-- ngIf: metric.plotLines && metric.plotLines.showInTable == true -->
+
+		</tr><!-- end ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><!-- end ngRepeat: datapoint in series.data -->
+
+		<!-- Pie -->
+		<!-- ngRepeat: subseries in series.data --><!-- ngIf: metric.chartType == 'pie' --><!-- end ngRepeat: subseries in series.data -->
+
+	</tbody><!-- end ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series --><!-- ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><tbody ng-if="!metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 &amp;&amp; metric.dataTableFlip)" ng-repeat="series in metric.series" class="ng-scope">
+
+		<!-- Not Pie -->
+		<!-- ngRepeat: datapoint in series.data --><!-- ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><tr ng-if="metric.chartType != 'pie' &amp;&amp; series.showInTable &amp;&amp; datapoint != undefined &amp;&amp; datapoint.y != 0" ng-repeat="datapoint in series.data" class="ng-scope">
+
+            <!-- Name Column -->
+            <!-- ngIf: !datapoint.name && !series.name -->
+            <!-- ngIf: !datapoint.name && series.name --><td ng-if="!datapoint.name &amp;&amp; series.name" class="categoryTd ng-binding ng-scope">
+                Annual Budget
+            </td><!-- end ngIf: !datapoint.name && series.name -->
+            <!-- ngIf: datapoint.name -->
+
+            <!-- Value Column(s) -->
+			<!-- ngIf: !datapoint.y --><td ng-if="!datapoint.y" class="ng-binding ng-scope">
+				$2.02B
+            </td><!-- end ngIf: !datapoint.y -->
+            <!-- ngIf: datapoint.y -->
+			<!-- ngIf: metric.plotLines && metric.plotLines.showInTable == true -->
+
+		</tr><!-- end ngIf: metric.chartType != 'pie' && series.showInTable && datapoint != undefined && datapoint.y != 0 --><!-- end ngRepeat: datapoint in series.data -->
+
+		<!-- Pie -->
+		<!-- ngRepeat: subseries in series.data --><!-- ngIf: metric.chartType == 'pie' --><!-- end ngRepeat: subseries in series.data -->
+
+	</tbody><!-- end ngIf: !metric.categories || metric.categories.length == 0 || (metric.categories.length > 0 && metric.dataTableFlip) --><!-- end ngRepeat: series in metric.series -->
+
+</table></datatable><!-- end ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Explanation -->
+<!-- ngIf: metric.explanation --></onechart>
+
+						</div><!-- end ngRepeat: metric in mc.overviewMetrics.all -->
+
+					</div>
+
+				</div>
+
+				<!-- Single Metric Category Page link -->
+				<div class="bottomRightLinkSpacer hidden-xs"></div>
+				<div class="detailLink bottomRightLink hidden-xs">
+					<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Financials" ng-init="img = 'images/arrow.png'" ng-mouseover="img = 'images/arrow_hover.png'" ng-mouseleave="img = 'images/arrow.png'" href="#/detail/financials///">
+						Details
+						<img ng-src="images/arrow.png" width="23" height="48" alt=">" src="images/arrow.png">
+					</a>
+				</div>
+
+			</div><!-- end ngRepeat: mc in performanceData.dashboard.metricCategories --><div ng-repeat="mc in performanceData.dashboard.metricCategories" ng-init="tableOrChart = 'chart'" class="overviewcolumn column col-sm-12 col-md-6 ng-scope" equalize-height-add="">
+				<div class="metricContainer">
+
+					<div class="metricHeaderOverview">
+
+						<div class="metricHeaderText">
+							<!-- Date -->
+							<!-- ngIf: mc.dateDescription --><div ng-if="mc.dateDescription" class="metricDate ng-binding ng-scope">
+								May 2017
+							</div><!-- end ngIf: mc.dateDescription -->
+						</div>
+
+						<div class="topbarIconBar">
+
+							<!-- Table, Chart -->
+							<!-- ngIf: mc.showChartToggle --><span ng-if="mc.showChartToggle" class="ng-scope">
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'chart'}" ng-click="$parent.tableOrChart = 'chart'" class="topBarLink topBarActive" title="Show chart">Chart</a>
+								<a ng-class="{'topBarActive':$parent.tableOrChart == 'table'}" ng-click="$parent.tableOrChart = 'table'" class="topBarLink" title="Show table">Data</a>
+							</span><!-- end ngIf: mc.showChartToggle -->
+
+							<!-- More Info Tooltip -->
+							<!-- ngIf: mc.tooltip --><mtooltip ng-if="mc.tooltip" class="mtooltip topbarIcon ng-scope" data-content="mc.tooltip"><a data-html="true" title="Each month the MBTA surveys a subset of its customers about their experience on the MBTA. This is the average of last month’s responses to the question that asks customers to rate the MBTA overall." data-toggle="tooltip" data-placement="auto right" data-container="body" tooltip="" ng-init="img = 'images/tooltip.png'" ng-mouseover="img = 'images/tooltip_hover.png'" ng-mouseleave="img = 'images/tooltip.png'">
+	<img ng-src="images/tooltip.png" width="28" height="28" alt="?" src="images/tooltip.png">
+</a></mtooltip><!-- end ngIf: mc.tooltip -->
+
+						</div>
+
+					</div>
+
+					<div class="metricBody metricBodyOverview">
+
+						<h3 class="metricHeadline">
+							<a ui-sref="detail({ metricCategory:mc.slug })" class="titlelink ng-binding" href="#/detail/customersatisfaction///">
+								Customer Satisfaction
+							</a>
+
+							<!-- Mobile link -->
+							<div class="detailLink visible-inline-xs">
+								<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Customer Satisfaction" href="#/detail/customersatisfaction///">
+									<img ng-src="images/mobile_arrow.png" width="18" height="35" alt=">" src="images/mobile_arrow.png">
+								</a>
+							</div>
+
+						</h3>
+						<div style="clear:both;"></div>
+
+						<!-- Description -->
+						<a ui-sref="detail({ metricCategory:mc.slug })" href="#/detail/customersatisfaction///">
+							<!-- ngIf: mc.description --><div ng-if="mc.description" class="description ng-binding ng-scope">
+								How do riders rate the MBTA?
+							</div><!-- end ngIf: mc.description -->
+						</a>
+
+						<!-- Error Messages -->
+						<!-- ngRepeat: err in mc.errorMessages -->
+
+						<!-- Per metric chart or table -->
+						<!-- ngRepeat: metric in mc.overviewMetrics.all --><div class="metricWrapper ng-scope" ng-repeat="metric in mc.overviewMetrics.all">
+
+							<onechart metric="metric"><!-- Number; same in chart or table view -->
+<!-- ngIf: metric.chartType == 'number' -->
+
+<!-- Calculation; same in chart of table view -->
+<!-- ngIf: metric.chartType == 'calculation' -->
+
+<!-- Star Rating; becomes Number in table view -->
+<!-- ngIf: metric.chartType == 'star' --><starrating ng-if="metric.chartType == 'star'" ng-show="tableOrChart == 'chart'" class="ng-scope"><!-- Star rating -->
+<!-- ngRepeat: series in metric.series --><div ng-repeat="series in metric.series" class="ng-scope">
+	<!-- ngRepeat: value in series.data --><div class="metricStars ng-scope" ng-repeat="value in series.data" style="color:#E5AB3F">
+		<span class="sr-only ng-binding">
+			3.35/5
+		</span>
+		<!-- ngRepeat: n in range(metric.maxValue) track by $index --><span ng-repeat="n in range(metric.maxValue) track by $index" class="ng-scope">
+			<!-- ngIf: (value - $index) > 1 --><img ng-if="(value - $index) > 1" src="images/star-01.png" class="metricStar ng-scope" alt="*"><!-- end ngIf: (value - $index) > 1 -->
+			<!-- ngIf: (value - $index) < 1 && (value - $index) >= 0.6 -->
+			<!-- ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 -->
+			<!-- ngIf: (value - $index) < 0.3 && (value - $index) > 0 -->
+			<!-- ngIf: (value - $index) < 0 -->
+		</span><!-- end ngRepeat: n in range(metric.maxValue) track by $index --><span ng-repeat="n in range(metric.maxValue) track by $index" class="ng-scope">
+			<!-- ngIf: (value - $index) > 1 --><img ng-if="(value - $index) > 1" src="images/star-01.png" class="metricStar ng-scope" alt="*"><!-- end ngIf: (value - $index) > 1 -->
+			<!-- ngIf: (value - $index) < 1 && (value - $index) >= 0.6 -->
+			<!-- ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 -->
+			<!-- ngIf: (value - $index) < 0.3 && (value - $index) > 0 -->
+			<!-- ngIf: (value - $index) < 0 -->
+		</span><!-- end ngRepeat: n in range(metric.maxValue) track by $index --><span ng-repeat="n in range(metric.maxValue) track by $index" class="ng-scope">
+			<!-- ngIf: (value - $index) > 1 --><img ng-if="(value - $index) > 1" src="images/star-01.png" class="metricStar ng-scope" alt="*"><!-- end ngIf: (value - $index) > 1 -->
+			<!-- ngIf: (value - $index) < 1 && (value - $index) >= 0.6 -->
+			<!-- ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 -->
+			<!-- ngIf: (value - $index) < 0.3 && (value - $index) > 0 -->
+			<!-- ngIf: (value - $index) < 0 -->
+		</span><!-- end ngRepeat: n in range(metric.maxValue) track by $index --><span ng-repeat="n in range(metric.maxValue) track by $index" class="ng-scope">
+			<!-- ngIf: (value - $index) > 1 -->
+			<!-- ngIf: (value - $index) < 1 && (value - $index) >= 0.6 -->
+			<!-- ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 --><img ng-if="(value - $index) < 0.6 &amp;&amp; (value - $index) >= 0.3" src="images/star-03.png" class="metricStar ng-scope" alt="1/2"><!-- end ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 -->
+			<!-- ngIf: (value - $index) < 0.3 && (value - $index) > 0 -->
+			<!-- ngIf: (value - $index) < 0 -->
+		</span><!-- end ngRepeat: n in range(metric.maxValue) track by $index --><span ng-repeat="n in range(metric.maxValue) track by $index" class="ng-scope">
+			<!-- ngIf: (value - $index) > 1 -->
+			<!-- ngIf: (value - $index) < 1 && (value - $index) >= 0.6 -->
+			<!-- ngIf: (value - $index) < 0.6 && (value - $index) >= 0.3 -->
+			<!-- ngIf: (value - $index) < 0.3 && (value - $index) > 0 -->
+			<!-- ngIf: (value - $index) < 0 --><img ng-if="(value - $index) < 0 " src="images/star-05.png" class="metricStar ng-scope" alt=""><!-- end ngIf: (value - $index) < 0 -->
+		</span><!-- end ngRepeat: n in range(metric.maxValue) track by $index -->
+	</div><!-- end ngRepeat: value in series.data -->
+</div><!-- end ngRepeat: series in metric.series -->
+</starrating><!-- end ngIf: metric.chartType == 'star' -->
+<!-- ngIf: metric.chartType == 'star' --><numberchart ng-if="metric.chartType == 'star'" ng-show="tableOrChart == 'table'" class="ng-scope ng-hide"><!-- Number (displays the same whether in chart view or table view) -->
+<!-- quickNgRepeat: series in metric.series track by $index --><div quick-ng-repeat="series in metric.series track by $index" class="row numberChart ng-scope" ng-class="{'vertical_separated':!$last,'sidebysidenum':metric.series.length>1}">
+
+	<!-- quickNgRepeat: (idx, value) in series.data --><div quick-ng-repeat="(idx, value) in series.data" class="metricNumberTile ng-scope" ng-class="{'col-md-6':series.data.length==2, 'col-md-4':series.data.length==3, 'col-md-3':series.data.length==4, 'col-md-5ths':series.data.length>4, 'fixedHeight':series.data.length>1}">
+
+		<div class="metricValue" ng-style="{ color: metric.categories[idx].color || series.color || metric.color }" ng-class="{'metricValues': series.data.length>1, 'metricValuesCount2':series.data.length==2, 'metricValuesCount3':series.data.length==3, 'metricValuesCount4':series.data.length==4, 'metricValuesCountMany':series.data.length>4}" style="color: rgb(229, 171, 63);">
+			<!-- ngIf: !series.percents --><span ng-if="!series.percents" class="ng-binding ng-scope">3.35</span><!-- end ngIf: !series.percents --><!-- ngIf: series.percents --><!-- ngIf: metric.maxValue --><span ng-if="metric.maxValue" class="ng-binding ng-scope">/5</span><!-- end ngIf: metric.maxValue -->
+		</div>
+
+		<!-- ngIf: metric.categories[idx] -->
+
+		<!-- ngIf: metric.allowDrilldownOn -->
+
+
+	</div>
+
+	<!-- ngIf: series.name -->
+</div></numberchart><!-- end ngIf: metric.chartType == 'star' -->
+
+<!-- Highcharts Chart -->
+<!-- ngIf: metric.chartConfig && metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Table -->
+<!-- ngIf: metric.chartType != 'star' && metric.chartType != 'number' && metric.chartType != 'calculation' -->
+
+<!-- Explanation -->
+<!-- ngIf: metric.explanation --></onechart>
+
+						</div><!-- end ngRepeat: metric in mc.overviewMetrics.all -->
+
+					</div>
+
+				</div>
+
+				<!-- Single Metric Category Page link -->
+				<div class="bottomRightLinkSpacer hidden-xs"></div>
+				<div class="detailLink bottomRightLink hidden-xs">
+					<a ui-sref="detail({ metricCategory:mc.slug })" title="More About Customer Satisfaction" ng-init="img = 'images/arrow.png'" ng-mouseover="img = 'images/arrow_hover.png'" ng-mouseleave="img = 'images/arrow.png'" href="#/detail/customersatisfaction///">
+						Details
+						<img ng-src="images/arrow.png" width="23" height="48" alt=">" src="images/arrow.png">
+					</a>
+				</div>
+
+			</div><!-- end ngRepeat: mc in performanceData.dashboard.metricCategories -->
+
+	</div>
+
+</div><!-- end ngIf: performanceData --></div>
+
+			</div>
+
+			<thefooter><div id="footer">
+	<div id="footerInner">
+		<div id="leftFooter">
+			<a href="http://www.facebook.com/massdotinfo" target="_blank">
+			  <img src="images/facebook.png" alt="Facebook" width="21" height="20" class="footerSocialMediaLogo">
+			</a>
+			<a href="http://www.twitter.com/MBTA" target="_blank">
+				<img src="images/twitter.png" alt="Twitter" width="21" height="17" class="footerSocialMediaLogo">
+			</a>
+			<a href="http://www.instagram.com/mbtapics" target="_blank">
+			  <img src="images/instagram.png" alt="Instagram" width="21" height="20" class="footerSocialMediaLogo">
+			</a>
+		</div>
+
+		<div id="rightFooter">
+			<a href="http://www.massdot.state.ma.us/" target="_blank">
+			  <img src="images/MassdotLogo.png" alt="MassDOT Logo" width="105" height="21" class="footerLogo">
+			</a>
+			<a href="http://www.mbta.com/" target="_blank">
+				<img src="images/MBTAlogo_footer.png" alt="MBTA Logo" width="31" height="31" class="footerLogo">
+			</a>
+		</div>
+	</div>
+
+</div> <!-- End Footer -->    </thefooter>
+
+		</div><!-- end mainWrapper-->
+
+		<!-- Loading modal -->
+		<loading><div id="loadingModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-body">
+
+        <img src="images/loading.gif" width="79" height="79">
+
+        <div id="loadingText">Loading</div>
+
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal --></loading>
+
+		<!--Google analytics-->
+		<script>
+		  var uaid = 'UA-25827878-7';
+		  if(window.location.hostname=='ruggles.mbta.com') uaid = 'UA-9856433-4';
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', uaid, 'auto');
+		  ga('send', 'pageview', location.pathname + location.hash);
+
+		</script>
+		<!--End Google analytics-->
+
+
+
+</body></html>

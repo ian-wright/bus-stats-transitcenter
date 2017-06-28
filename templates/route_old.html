@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<h2 id="bus_id">le bus...</h1>
+
+		<p>Select time filters:</p>
+		<form id="daySelect">
+			<input type="radio" name="daybin" value="0"> Weekday
+			<input type="radio" name="daybin" value="1"> Weekend
+			<input type="radio" name="daybin" value="2" checked> All
+		</form>
+		<form id="hourSelect">
+			<input type="radio" name="hourbin" value="0"> Peak
+			<input type="radio" name="hourbin" value="1"> Off-Peak
+			<input type="radio" name="hourbin" value="2" checked> All
+		</form>
+
+		<p>Select the direction:</p>
+		<select id="dirSelect" size="2"> 
+			<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
+			<option name= "direction" id="dir1" value="1">Dir1</option>
+		</select>
+
+		<p>Finally, select a date:</p>
+		<select id="dateSelect" size="1"> 
+			<!--dynamically add dates to a drop down here-->
+		</select>
+
+		<p>Here's some data:</p>
+		<table id="dataTable">
+			<!--dynamically add data here-->
+		</table>
+
+
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+		<script>
+			var route = '{{ route }}'
+			var dataURL = `/routes/${route}/data`;
+		    $.getJSON(dataURL, function(data) {
+		    	// here is where JS gets acccess to all route data, so we can call functions from other JS files here.
+	            tc.initialize(data);
+	        });
+	    </script>
+	</body>
+</html>
