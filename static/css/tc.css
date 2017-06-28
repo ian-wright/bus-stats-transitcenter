@@ -1,0 +1,183 @@
+#map {
+    width: 60%;
+    height: 400px;
+}
+
+#projectBrand {
+    padding-top: 0px;
+    padding-bottom: 5px;
+    margin-top:-10px;
+    height: 45px;
+}
+
+#contact {
+    content:url(images/contact.png);
+}
+
+#searchInput {
+    width: 400px;
+}
+
+#projectTitle {
+    margin-top: -3px;
+    margin-bottom: -10px;
+    margin-right: 20px;
+    color: #57068c;
+}
+
+#busLine {
+    margin-top: -10px;
+    margin-bottom: -10px;
+}
+
+#alertBox {
+    text-align:center;
+    height: 48px;
+    margin-top: -15px;
+    margin-bottom: 5px;
+}
+
+.wrapper {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.busBadgeOrder {
+    margin-top:9px;
+    background-color: #ccc;
+}
+
+.busBadgeButton {
+    border:0px solid transparent;
+    margin-left:0px;
+    margin-right:0px;
+}
+
+.busBadge {
+    font-size: 18px;
+}
+
+.scalarBarDiv {
+    text-align:center;
+    margin-top: -10px;
+}
+
+li.scalarBarBox {
+    text-align : right;
+	width      : 53px;
+    height     : 8px;
+    line-height: 35px;
+    /* font-weight: bold; */
+     margin-bottom: 10px;
+}
+
+.btn.busLogo {
+    display: table-cell;
+    width:85px;
+    color:#fff;
+    height: 80px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.busRoute {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    /* font-weight: bold; */
+}
+
+.BusViz {
+	font-weight: 300;
+    font-style: italic;
+	color : #2360a5;
+}
+
+.badge.scalarBarBox {
+    background-color: #df8a13;
+}
+
+.bus.stop {
+    stroke: none;
+    fill: steelblue;
+}
+
+.bus.selected.stop {
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.tile {
+    position: absolute;
+    width: 256px;
+    height: 256px;
+}
+
+.tile path {
+    fill: none;
+    stroke: #000;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.tile .speed { stroke: #f39; stroke-width: 2px}
+
+.info {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+body {
+    padding-top: 70px;
+}
+
+.btn.active.hourBin  {
+    background-color: #5cb85c;
+}
+
+.btn.active.busShape  {
+    background-color: #f0ad4e;
+}
+
+.btn-group.hourBin,
+.btn-group.busShape {
+    padding-top: 3px;
+    height: 41px;
+    padding-bottom: 6px;
+}
+
+.btn-group.headLine {
+    padding-top: 3px;
+    height: 41px;
+    padding-bottom: 6px;
+}
+
+.list-group-item.active.busDirection  {
+    background-color: #5bc0de;
+    color: #000;
+}
+
+.list-group-item.busDirection  {
+    color: #aaa;
+    height: 41px;
+}
+
+.page-header.busLine {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.row.busHeader {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.row.busHeader [class*='col-']:not(:first-child),
+.row.busHeader [class*='col-']:not(:last-child) {
+    padding-right: 0px;
+    padding-left: 5px;
+}
+
+.badge.busShape {
+    background-color: #df8a13;
+}

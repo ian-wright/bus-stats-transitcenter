@@ -9,12 +9,19 @@ a, a:visited, a:hover, a:active {
 	padding-left: 0;
 }
 
-.col-sm-3, .col-sm-4{
+.col-sm-3, .col-sm-5{
   background-color: #eee;
   margin: 20px;
   margin-left: 0;
-  width: 40vh;
   padding-bottom:10px;
+}
+
+.col-sm-5 {
+  width: 55vh;
+}
+
+.col-sm-4 {
+  background-color: white;
 }
 
 /* New bootstrap for 5 columns */
@@ -163,6 +170,15 @@ a:hover {
 
 .mwidth100 {
   min-width: 90vh;
+}
+
+.sbs {
+  float: left;
+}
+
+.bot {
+  position: relative;
+  padding-top: 20px;
 }
 
 /* Data Tables */
@@ -1421,6 +1437,15 @@ div.underline{
     color: #57068c !important;
 	text-transform: uppercase;
 	font-family: 'Roboto', sans-serif;
+}
+
+#map {
+    width: 86%;
+    height: 400px;
+}
+
+.font20 {
+  font-size: 70px;
 }
 
 /* center modal */

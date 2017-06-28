@@ -2,6 +2,14 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+    	<meta name="description" content="NYC Bus Profiles">
+    	<meta name="author" content="NYU CUSP">
+    	<title>TC <> CUSP</title>
+    	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
+		<!-- <link href="{{ url_for('static', filename='leaflet/leaflet.css') }}" rel="stylesheet"> -->
+		<link href="{{ url_for('static', filename='css/tc.css') }}" rel="stylesheet">
+
 	</head>
 	<body>
 		<h2 id="bus_id">le bus...</h1>
@@ -19,13 +27,13 @@
 		</form>
 
 		<p>Select the direction:</p>
-		<select id="dirSelect" size="2"> 
+		<select id="dirSelect" size="2">
 			<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
 			<option name= "direction" id="dir1" value="1">Dir1</option>
 		</select>
 
 		<p>Finally, select a date:</p>
-		<select id="dateSelect" size="1"> 
+		<select id="dateSelect" size="1">
 			<!--dynamically add dates to a drop down here-->
 		</select>
 
@@ -34,9 +42,16 @@
 			<!--dynamically add data here-->
 		</table>
 
+		<div id="map"><!--map goes here!--></div>
+
 
 		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+  				integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+  				crossorigin=""></script>
 		<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+
+
 		<script>
 			var route = '{{ route }}'
 			var dataURL = `/routes/${route}/data`;

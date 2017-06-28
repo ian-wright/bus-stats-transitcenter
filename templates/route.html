@@ -12,6 +12,7 @@
     <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
     <script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
   </head>
 
@@ -107,31 +108,75 @@
 					<h1 id="bus_id">le bus...</h1>
 				</div>
 
+        <div class="row mleft0">
+          <div class="col-sm-4">
+    				<h2>Time Filters</h2>
+    				<form id="daySelect">
+    					<input type="radio" name="daybin" value="0"> Weekday
+    					<input type="radio" name="daybin" value="1"> Weekend
+    					<input type="radio" name="daybin" value="2" checked> All
+    				</form>
+    				<form id="hourSelect">
+    					<input type="radio" name="hourbin" value="0"> Peak
+    					<input type="radio" name="hourbin" value="1"> Off-Peak
+    					<input type="radio" name="hourbin" value="2" checked> All
+    				</form>
+          </div>
 
-				<p>Select time filters:</p>
-				<form id="daySelect">
-					<input type="radio" name="daybin" value="0"> Weekday
-					<input type="radio" name="daybin" value="1"> Weekend
-					<input type="radio" name="daybin" value="2" checked> All
-				</form>
-				<form id="hourSelect">
-					<input type="radio" name="hourbin" value="0"> Peak
-					<input type="radio" name="hourbin" value="1"> Off-Peak
-					<input type="radio" name="hourbin" value="2" checked> All
-				</form>
+          <div class="col-sm-4">
+    				<h2>Direction</h2>
+    				<select id="dirSelect" size="2">
+    					<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
+    					<option name= "direction" id="dir1" value="1">Dir1</option>
+    				</select>
+          </div>
 
-				<p>Select the direction:</p>
-				<select id="dirSelect" size="2">
-					<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
-					<option name= "direction" id="dir1" value="1">Dir1</option>
-				</select>
+          <div class="col-sm-4">
+  				<p>Finally, select a date:</p>
+  				<select id="dateSelect" size="1">
+  					<!--dynamically add dates to a drop down here-->
+  				</select>
+          <!--
+          <p>Here's some data:</p>
+      		<table id="dataTable">
+      		</table> -->
+        </div>
+        </div>
 
-				<p>Finally, select a date:</p>
-				<select id="dateSelect" size="1">
-					<!--dynamically add dates to a drop down here-->
-				</select>
+        <div class="row mleft0">
+          <div class="col-sm-5">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Excess Wait Time</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo font20" id="dataTable1"></h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+          <div class="col-sm-5">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Average Speed</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo font20" id="dataTable2"></h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+        </div>
 
-				<p>Here's some data:</p>
+				<div id="map"><!--map goes here!--></div>
 			</div>
 		</div>
 
@@ -150,6 +195,9 @@
     </div> <!-- End Footer -->
 
 		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+  				integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+  				crossorigin=""></script>
 		<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
 		<script>
 			var route = '{{ route }}'
