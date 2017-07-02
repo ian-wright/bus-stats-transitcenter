@@ -83,11 +83,11 @@
 
 			function buildPopup(feature, layer) {
 			    // does this feature have a property named popupContent?
-			    if (feature.properties && feature.properties.popupContent) {
-			        layer.bindPopup(feature.properties.popupContent);
-			    }
-			    if (feature.properties && feature.properties.popupContent) {
-			        layer.bindPopup(feature.properties.popupContent);
+			    // if (feature.properties && feature.properties.popupContent) {
+			    //     layer.bindPopup(feature.properties.popupContent);
+			    // }
+			    if (feature.geometry.type == 'Point') {
+			        layer.bindPopup(feature.properties.n);
 			    }
 			}
 
