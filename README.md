@@ -25,7 +25,7 @@
   - connect to your postgres server:
     - host: localhost
     - port: 5432
-    - database: (your system username)
+    - database: (leave blank)
     - user: (your system username)
     - password: (no password)
   -  once connected, create a new database on your server (lower left corner button) named, exactly: *transit*
