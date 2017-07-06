@@ -41,4 +41,4 @@
 
 ### 7) use Flask's built in web server (for testing only):
   - within venv, run: *python app.py*
-  - test out a JSON route endpoint on Google Chrome @ *http://127.0.0.1:5000/routes/Bx39*
+  - test out a JSON route endpoint on Google Chrome @ *http://127.0.0.1:5000/routes/Bx39/data*
