@@ -2,8 +2,11 @@
 
 ## Instructions to get it up and runnning:
 
-### 1) install python's virtual environment package: *pip install virtualenv*
-  - navigate to the directory where you want the project
+### 1) setup a virtual environment
+  - install python's virtual environment package: 
+    - for a regular python/pip instance: *pip install virtualenv*
+    - for an anaconda instance: *conda install virtualenv*
+  - navigate to the directory where you want the project to live
   - create a new python virtual environment called 'venv': *virtualenv venv*
   - activate the virtualenv: *source ./venv/bin/activate*
   - double check that *which pip* directs you to your venv python, and not your system level python
