@@ -1,11 +1,11 @@
-# last edit: June 19, 2017
+# last edit: July 9, 2017
 
 # exclude python virtualenv resources
 venv
 
-# exclude data directory, with exception of json profiles
-#data
-#!data/profiles/*
+# exclude data directory
+data/*
+
 
 *.pyc
 .DS_Store
