@@ -175,7 +175,7 @@ if __name__ == "__main__":
     flush_old_files()
     data = load_data()
 
-    # new profiles to generate : unique routes x 2 directions
+    # number of new profiles to generate: unique routes x 2 directions
     all_files = len(data['trips']['route_id'].unique()) * 2
     i = 1
     for route_id in data['trips']['route_id'].unique():
