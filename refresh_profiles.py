@@ -1,4 +1,6 @@
-# DESCRIPTION: 
+# DESCRIPTION: generates a new set of {route_id}_{direction}.geojson files for every route/direction
+#              combination on MTA's most recent schedule. The LineString and Point features all have
+#              metadata that provide bus stop stop_id and a stop sequence integer.
 # AUTHOR: Ian Wright
 # ORIGINAL DATE: July 9, 2017
 # LAST EDITED: July 9, 2017
