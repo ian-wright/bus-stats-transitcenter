@@ -8,8 +8,8 @@ import datetime
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
 db = SQLAlchemy(app)
 
@@ -96,13 +96,13 @@ def get_last_update():
     return EWT.query.order_by(EWT.date.desc()).first().date
 
 
-# TODO - write the script that generates clean route profile json files (to be hosted in static dir)
+# TODO - write the script that generates clean route profile json files (to be hosted in static dir) - DONE
 
 def get_profile(route):
     profile = InterDict()
 
-    with open('./data/profiles/{}/profile.json'.format(route)) as profile_json:
-         prof = json.load(profile_json)
+    with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
+         prof = json.load(infile)
 
     profile['route_id'] = route
     profile['long_name'] = prof['route_long_name']
