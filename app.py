@@ -163,22 +163,20 @@ def build_data_series(df, direc, dbin, hbin):
     dbin = int(dbin)
     hbin = int(hbin)
 
-    try:
-        filtered = df.loc[(df['daybin'] == dbin) \
-                          & (df['hourbin'] == hbin) \
-                          & (df['direction'] == direc),
-                          ['date', 'stop', 'metric']]
+    filtered = df.loc[(df['daybin'] == dbin) \
+                      & (df['hourbin'] == hbin) \
+                      & (df['direction'] == direc),
+                      ['date', 'stop', 'metric']]
 
-        def tuple_data(date):
-            """
-            generates a list of stop-level data tuples corresponding to a single calendar day
-            """
-            one_day = filtered.loc[filtered.date == day, :]
-            return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
+    def tuple_data(date):
+        """
+        generates a list of stop-level data tuples corresponding to a single calendar day
+        """
+        one_day = filtered.loc[filtered.date == day, :]
+        return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
 
-        return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
-    except:
-        return None
+    return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
+
 
 
 def build_response(profile, ewt_df):
@@ -189,7 +187,9 @@ def build_response(profile, ewt_df):
     daybins = ['0', '1', '2']
     hourbins = ['0', '1', '2']
 
-    try:    
+    if (profile is None) or (ewt_df is None):
+        return {'status': 'error'}
+    else:
         response['status'] = 'ok'
         response['route_id'] = profile['route_id']
         response['long_name'] = profile['long_name']
@@ -208,8 +208,7 @@ def build_response(profile, ewt_df):
                                                                                                              dbin,
                                                                                                              hbin)
         return response
-    except:
-        return {'status': 'error'}
+        
 
 
 @app.route('/routes/<string:route>/data')
