@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="NYC Bus Profiles">
+    <meta name="author" content="NYU CUSP">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+    <title>NYC Bus Profile Dashboard</title>
+    <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default" id="navBars">
+      <div id="navbarContainer">
+    	  <div class="container-fluid">
+    		<!-- Brand and toggle get grouped for better mobile display -->
+    		<div id="#navbarHeader" class="navbar-header">
+    		  <button type="button" id="menuCollapseButton" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false" style="padding-top: 21px;">
+    			<span class="sr-only">Toggle navigation</span>
+    			<span class="icon-bar"></span>
+    			<span class="icon-bar"></span>
+    			<span class="icon-bar"></span>
+    		  </button>
+    		  <a id="mainLogo" class="navbar-brand" href="#" style="padding-top: 23px;">
+
+    			<span class="text">NYC Bus Profile</span>
+    		  </a>
+    		</div>
+
+    		<div id="sidebar" class="navbar-collapse collapse collapsed" aria-expanded="false" style="height: 0px;">
+    			<div class="sidebar">
+    				<ul class="nav navbar-nav sidebar-nav">
+    					<li>
+    						<div ng-class="{active: $state.includes('detail') || $state.includes('home') }">
+    							<a ui-sref="home" href="{{ url_for('home') }}">
+    								Dashboard
+    							</a>
+    						</div>
+
+    						<ul class="sidebarSubLinks">
+    							<!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									On-Time Performance
+    								</a>
+    							</li><!-- end ngRepeat: mc in metricCategories -->
+                  <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									Excess Wait Time
+    								</a>
+    							</li>
+                  <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									Reliability Buffer Time
+    								</a>
+    							</li>
+    						</ul>
+
+    					</li>
+              <li>
+    						<div class="underline active" ui-sref-active="active">
+    							<a href="/routes/BX39">
+    								Route Level Metrics
+    							</a>
+    						</div>
+    					</li>
+
+    					<li>
+    						<div class="underline" ui-sref-active="active">
+    							<a href="/glossary">
+    								Glossary
+    							</a>
+    						</div>
+    					</li>
+
+    				</ul>
+    			</div> <!-- Side bar end -->
+    		</div> <!-- Side bar collapse end -->
+
+    		<div id="topbarCollapse" class="navbar-collapse collapse" aria-expanded="false" style="height: 0px;">
+    		  <ul id="topbar" class="nav navbar-nav navbar-right collapsed">
+    			<li class="mtop10">
+    				<a ui-sref="about" ui-sref-active="active" href="#/about">About</a>
+    			</li>
+    			<li class="mtop10">
+    				<a ui-sref="contact" ui-sref-active="active" href="#/contact">Contact</a>
+    			</li>
+          <li>
+            <img src="{{ url_for('static', filename='img/CentralAdmin_Logoart/nyu_stacked_white.png') }}" width="27" height="37" alt="T" style="display:inline-block;vertical-align:middle">
+          </li>
+    		  </ul>
+    		</div> <!-- Navbar collapse end -->
+
+    	  </div><!-- /.container-fluid -->
+      </div>
+    </nav>
+
+    <div id='contentWrapper'>
+      <div id="container">
+        <h3>Ooooooops. That's a 404.</h3>
+        <img src="{{ url_for('static', filename='img/no-service.png') }}" height="300">
+        <a href="/home"> (take me back) </a>
+			</div>
+		</div>
+
+    <div id="footer">
+      <div id="footerInner">
+
+        <div id="rightFooter">
+          <a href="" target="_blank">
+            <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+          </a>
+          <a href="" target="_blank">
+            <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+          </a>
+        </div>
+      </div>
+    </div> <!-- End Footer -->
+
+
+
+  </body>
+  </html>

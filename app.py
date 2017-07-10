@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, url_for, abort
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
@@ -96,29 +96,43 @@ def get_last_update():
     return EWT.query.order_by(EWT.date.desc()).first().date
 
 
-# TODO - write the script that generates clean route profile json files (to be hosted in static dir) - DONE
-
 def get_profile(route):
     profile = InterDict()
 
-    with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
-         prof = json.load(infile)
+    # attempt to load both directions' geometry
+    geo = {}
+    for direction in ['0','1']:
+        try:
+            with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
+                geo[direction] = geojson.load(infile)
+        except IOError:
+            # geometry doesn't exist
+            print "couldn't find geometry profile for route {}, direction {}".format(route, direction)
+            pass
 
-    profile['route_id'] = route
-    profile['long_name'] = prof['route_long_name']
-    profile['directions']['0']['headsign'] = prof['directions']['0']['headsign']
-    profile['directions']['1']['headsign'] = prof['directions']['1']['headsign']
+    # allow server to continue even if there are no geometry profiles available
+    if '0' in geo:
+        profile['route_id'] = geo['0']['properties']['route_id']
+        profile['short_name'] = geo['0']['properties']['short_name']
+        profile['long_name'] = geo['0']['properties']['long_name']
+        profile['route_color'] = geo['0']['properties']['route_color']
+        profile['directions']['0']['headsign'] = geo['0']['properties']['headsign']
+        profile['directions']['0']['geo'] = {k: geo['0'][k] for k in ('type', 'features')}
 
-    with open('./data/profiles/{}/{}.geojson'.format(route, route)) as profile_geojson:
-        geo = geojson.load(profile_geojson)
-
-    # TODO  - right now, this is just the same geo for both directions...
-    # after we create proper route profile json files, update this section
-    profile['directions']['0']['geo'] = geo
-    profile['directions']['1']['geo'] = geo
+    if '1' in geo:
+        profile['route_id'] = geo['1']['properties']['route_id']
+        profile['short_name'] = geo['1']['properties']['short_name']
+        profile['long_name'] = geo['1']['properties']['long_name']
+        profile['route_color'] = geo['1']['properties']['route_color']
+        profile['directions']['1']['headsign'] = geo['1']['properties']['headsign']
+        profile['directions']['1']['geo'] = {k: geo['1'][k] for k in ('type', 'features')}
 
     print 'long_name:', profile['long_name']
-    return profile
+
+    if geo:
+        return profile
+    else:
+        return None
 
 
 def get_ewt_df(route, window_start):
@@ -129,74 +143,73 @@ def get_ewt_df(route, window_start):
                .filter(EWT.date >= window_start).statement,
                db.session.bind)
 
-    ewt_df['direction'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'direc'), axis=1)
-    ewt_df['stop'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'stop'), axis=1)
-
-    print 'EWT:\n', ewt_df.head()
-    return ewt_df
-
-
-def get_ejt_df(route, window_start):
-    print 'querying EJT for route: {}'.format(route)
-
-    ejt_df = pd.read_sql(db.session.query(EJT)
-               .filter(EJT.rds_index.startswith(route + '_'))
-               .filter(EJT.date >= window_start).statement,
-               db.session.bind)
-
-    ejt_df['direction'] = ejt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'direc'), axis=1)
-    ejt_df['stop'] = ejt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'stop'), axis=1)
-
-    print 'EJT:\n', ejt_df.head()
-    return ejt_df
+    # allow server to continue even if there is no data available
+    if len(ewt_df) != 0:
+        ewt_df['direction'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'direc'), axis=1)
+        ewt_df['stop'] = ewt_df.apply(lambda row: split_direc_stop(row['rds_index'], 'stop'), axis=1)
+        print 'EWT:\n', ewt_df.head()
+        return ewt_df
+    else:
+        return None
 
 
 def build_data_series(df, direc, dbin, hbin):
+    """
+    given a direction, daybin, and hourbin, this function produces a listof tuples representing 
+    stop-level metric data.
+    FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value)]
+    """
     direc = int(direc)
     dbin = int(dbin)
     hbin = int(hbin)
 
-    filtered = df.loc[(df['daybin'] == dbin) \
-                      & (df['hourbin'] == hbin) \
-                      & (df['direction'] == direc),
-                      ['date', 'stop', 'metric']]
+    try:
+        filtered = df.loc[(df['daybin'] == dbin) \
+                          & (df['hourbin'] == hbin) \
+                          & (df['direction'] == direc),
+                          ['date', 'stop', 'metric']]
 
-    def tuple_data(date):
-        one_day = filtered.loc[filtered.date == day, :]
-        return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
+        def tuple_data(date):
+            """
+            generates a list of stop-level data tuples corresponding to a single calendar day
+            """
+            one_day = filtered.loc[filtered.date == day, :]
+            return one_day.apply(lambda row: (row['stop'], row['metric']), axis=1).tolist()
 
-    return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
+        return [(str(day), tuple_data(day)) for day in filtered.date.unique()]
+    except:
+        return None
 
 
-
-def build_response(profile, ewt_df, ejt_df):
+def build_response(profile, ewt_df):
+    
     response = InterDict()
 
     directions = ['0', '1']
     daybins = ['0', '1', '2']
     hourbins = ['0', '1', '2']
 
-    response['route_id'] = profile['route_id']
-    response['long_name'] = profile['long_name']
+    try:    
+        response['status'] = 'ok'
+        response['route_id'] = profile['route_id']
+        response['long_name'] = profile['long_name']
+        response['short_name'] = profile['short_name']
+        response['route_color'] = profile['route_color']
 
-    # TODO - right now, the reponse object only has EWT...
-    # if all stop level metrics are written to the same postgres table, it'll be easy to include all metrics
+        # TODO - maybe surface route level metrics (encoded as stop_id=0) for easier access, or do it on client side?
 
-    # TODO - maybe surface route level metrics (encoded as stop_id=0) for easier access, or do it on client side?
-
-    for direction in directions:
-        response['directions'][direction]['headsign'] = profile['directions'][direction]['headsign']
-        response['directions'][direction]['geo'] = profile['directions'][direction]['geo']
-        for dbin in daybins:
-            for hbin in hourbins:
-                response['directions'][direction]['daybins'][dbin]['hourbins'][hbin] = build_data_series(ewt_df,
-                                                                                                         direction,
-                                                                                                         dbin,
-                                                                                                         hbin)
-    return response
-
-
-#def get_speed(route):
+        for direction in directions:
+            response['directions'][direction]['headsign'] = profile['directions'][direction]['headsign']
+            response['directions'][direction]['geo'] = profile['directions'][direction]['geo']
+            for dbin in daybins:
+                for hbin in hourbins:
+                    response['directions'][direction]['daybins'][dbin]['hourbins'][hbin] = build_data_series(ewt_df,
+                                                                                                             direction,
+                                                                                                             dbin,
+                                                                                                             hbin)
+        return response
+    except:
+        return {'status': 'error'}
 
 
 @app.route('/routes/<string:route>/data')
@@ -204,10 +217,9 @@ def get_route(route):
     print 'getting data for route: {}'.format(route)
     window_start = str(get_last_update() + datetime.timedelta(days=-(DAYSBACK)))
     print 'window_start:', window_start
-
+    
     response = build_response(get_profile(route),
-                              get_ewt_df(route, window_start),
-                              get_ejt_df(route, window_start))
+                              get_ewt_df(route, window_start))
 
     return jsonify(response)
 
@@ -216,13 +228,23 @@ def get_route(route):
 def dashboard(route):
     return render_template('route.html', route=route)
 
-@app.route('/')
-def index():
-    return render_template('dashboard.html')
 
+@app.route('/')
 @app.route('/home')
 def home():
     return render_template('home.html')
+
+
+@app.errorhandler(404)
+def not_found(error):
+    print 'rendering a 404'
+    return render_template('404.html'), 404
+
+
+@app.route('/routes/<string:route>/404')
+def not_found(route):
+    print 'rendering a 404'
+    return render_template('404.html'), 404
 
 
 if __name__ == '__main__':

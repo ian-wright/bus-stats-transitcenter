@@ -19,6 +19,13 @@
 		initialize: function(data) {
 			console.log("initializing...");
 			this.data = data;
+			console.log(data);
+
+			// handle bad data error
+			var current = $(location).attr('href');
+			if (data["status"]=="error") {
+				window.location.replace(current + "/404");
+			}
 
 			// print header
 			$("#bus_id").text(data["route_id"] + ": " + data["long_name"]);
