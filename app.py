@@ -229,6 +229,7 @@ def get_route(route):
     return jsonify(response)
 
 
+# this is the default route to use as a starting point, but this endpoint isn't called every time a route select changes
 @app.route('/routes/<string:route>')
 def dashboard(route):
     print 'routing a route!'
