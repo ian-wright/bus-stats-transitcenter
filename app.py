@@ -9,10 +9,14 @@ import os
 
 
 app = Flask(__name__)
-# use this config for windows setup
+
+# WINDOWS setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
-# use this config for mac setup
+# MAC setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+# COMPUTE setup
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
 db = SQLAlchemy(app)

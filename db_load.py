@@ -11,11 +11,14 @@ from app import db
 # CLEAR EXISTING TABLES AND REBUILD SCHEMA
 db.drop_all()
 db.create_all()
+
 # ESTABLISH SQLALCHEMY CONNECTION
-# use this config for windows setup
+# WINDOWS setup
 #engine = create_engine('postgresql://root:root@localhost:5432/transit')
-# use this config for mac setup
+# MAC setup
 engine = create_engine('postgresql://localhost/transit')
+# COMPUTE setup
+#engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
 
 
 # FAKE DATA RANGES
