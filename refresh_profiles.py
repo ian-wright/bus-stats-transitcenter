@@ -1,6 +1,7 @@
 # DESCRIPTION: generates a new set of {route_id}_{direction}.geojson files for every route/direction
-#              combination on MTA's most recent schedule. The LineString and Point features all have
-#              metadata that provide bus stop stop_id and a stop sequence integer.
+# combination on MTA's most recent schedule. The LineString and Point features all have metadata that 
+# provide bus stop stop_id and a stop sequence integer.
+
 # AUTHOR: Ian Wright
 # ORIGINAL DATE: July 9, 2017
 # LAST EDITED: July 9, 2017
@@ -80,9 +81,9 @@ def get_line_sets(shape_id):
 
     master = []
     for segment_sequence, segment_points in grouped:
-        segment_lines = list(segment_points.apply(
+        inter_stop_segment = list(segment_points.apply(
             lambda point: [point.shape_pt_lon, point.shape_pt_lat], axis=1))
-        master.append(segment_lines)
+        master.append(inter_stop_segment)
     return master
 
 
@@ -100,11 +101,11 @@ def get_stops(shape_id):
     filtered = data['stop_times'].loc[data['stop_times']['trip_id']==trip_id]
     merged = filtered.merge(data['stops'], how='inner')
     
-    stop_list = list(merged.apply(lambda stop: ([stop.stop_lon, stop.stop_lat], stop.stop_id), axis=1))
+    stop_list = list(merged.apply(lambda stop: (stop.stop_id, stop.stop_name, [stop.stop_lon, stop.stop_lat]), axis=1))
     return stop_list, headsign
 
 
-def build_feature(feature_type, coordinates, stop_id, stop_sequence):
+def build_feature(feature_type, coordinates, stop_id, stop_name, stop_sequence):
     """
     builds a geojson-style feature (Point or LineString), with coordinates
         and metadata (stop_id, and stop_sequence integer)
@@ -118,6 +119,7 @@ def build_feature(feature_type, coordinates, stop_id, stop_sequence):
             },
             "properties": {
                 "stop_id": stop_id,
+                "stop_name": stop_name,
                 "stop_sequence": stop_sequence
             }
         }
@@ -131,7 +133,7 @@ def write_geojson(route_id, direction, headsign, stop_list, line_list):
             headsign (string), stop_list (list), line_list (list)
     returns: none
     """
-    info_tuple = get_route_info(route_id)
+    meta_data = get_route_info(route_id)
     
     geo_dict = {"type": "FeatureCollection", "features": [], "properties": {}}
     
@@ -139,20 +141,20 @@ def write_geojson(route_id, direction, headsign, stop_list, line_list):
     pairs = zip(stop_list, line_list)
 
     for sequence, pair in enumerate(pairs):
-        stop_dict = build_feature("Point", pair[0][0], pair[0][1], sequence)
+        stop_dict = build_feature("Point", pair[0][2], pair[0][0], pair[0][1], sequence)
         geo_dict["features"].append(stop_dict)
-        line_dict = build_feature("LineString", pair[1], pair[0][1], sequence)
+        line_dict = build_feature("LineString", pair[1], pair[0][0], pair[0][1], sequence)
         geo_dict["features"].append(line_dict)
     
     # finish by building a Point feature for the "last stop"
-    last_stop = build_feature("Point", stop_list[-1][0], stop_list[-1][1], sequence + 1)
-    geo_dict["features"].append(stop_dict)
+    last_stop = build_feature("Point", stop_list[-1][2], stop_list[-1][0], stop_list[-1][1], sequence + 1)
+    geo_dict["features"].append(last_stop)
     
     # write metadata to FeatureCollection
     geo_dict["properties"]["route_id"] = route_id
-    geo_dict["properties"]["short_name"] = info_tuple[0]
-    geo_dict["properties"]["long_name"] = info_tuple[1]
-    geo_dict["properties"]["route_color"] = info_tuple[2]
+    geo_dict["properties"]["short_name"] = meta_data[0]
+    geo_dict["properties"]["long_name"] = meta_data[1]
+    geo_dict["properties"]["route_color"] = meta_data[2]
     geo_dict["properties"]["headsign"] = headsign
     geo_dict["properties"]["direction"] = direction
     

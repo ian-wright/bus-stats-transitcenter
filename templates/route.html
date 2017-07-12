@@ -69,6 +69,14 @@
     								Route Level Metrics
     							</a>
     						</div>
+    						<div>
+    							Select a Route!
+    							<select id="routeSelect" size="1">
+    								{% for route in avail %}
+									    <option name="route" value="{{ route }}">{{ route }}</option>
+									{% endfor %}
+    							</select>
+    						</div>
     					</li>
 
     					<li>
@@ -112,22 +120,25 @@
           <div class="col-sm-4">
     				<h2>Time Filters</h2>
     				<form id="daySelect">
-    					<input type="radio" name="daybin" value="0"> Weekday
-    					<input type="radio" name="daybin" value="1"> Weekend
-    					<input type="radio" name="daybin" value="2" checked> All
+    					<input type="radio" name="daybin" value="0" checked> All
+    					<input type="radio" name="daybin" value="1"> Weekday
+    					<input type="radio" name="daybin" value="2" > Weekend
     				</form>
     				<form id="hourSelect">
-    					<input type="radio" name="hourbin" value="0"> Peak
-    					<input type="radio" name="hourbin" value="1"> Off-Peak
-    					<input type="radio" name="hourbin" value="2" checked> All
+    					<input type="radio" name="hourbin" value="0" checked> All
+    					<input type="radio" name="hourbin" value="1"> 7am-10am
+    					<input type="radio" name="hourbin" value="2"> 10am-4pm
+    					<input type="radio" name="hourbin" value="3">4pm-7pm
+    					<input type="radio" name="hourbin" value="4">7pm-10pm
     				</form>
           </div>
 
           <div class="col-sm-4">
     				<h2>Direction</h2>
-    				<select id="dirSelect" size="2">
-    					<option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
+    				<select id="dirSelect" size="3">
+    					<option name= "direction" id="dir0" value="0">Dir0</option>
     					<option name= "direction" id="dir1" value="1">Dir1</option>
+    					<option name= "direction" id="dir2" value="2" selected="selected">All</option>
     				</select>
           </div>
 
@@ -136,12 +147,17 @@
   				<select id="dateSelect" size="1">
   					<!--dynamically add dates to a drop down here-->
   				</select>
-          <!--
-          <p>Here's some data:</p>
-      		<table id="dataTable">
-      		</table> -->
+          
+          
         </div>
         </div>
+
+        <!-- START: JUST FOR TESTING -->
+        <p>Here's some data:</p>
+      	  <table id="dataTable"></table> 
+      	<!-- END: JUST FOR TESTING -->
+
+
 
         <div class="row mleft0">
           <div class="col-sm-5">
@@ -204,8 +220,7 @@
 		console.log(route);
 		var dataURL = `/routes/${route}/data`;
 	    $.getJSON(dataURL, function(data) {
-	    	// here is where JS gets acccess to all route data, so we can call functions from other JS files here.
-            tc.initialize(data);
+            tc.initialize(data, first=true);
         });
     </script>
 

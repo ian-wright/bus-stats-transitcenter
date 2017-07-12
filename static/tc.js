@@ -3,12 +3,13 @@
 	var tc = {
 
 		selection: {
+			metric: null,
             route: null,
-            stop: null,
             direction: null,
             dayBin: null,
             hourBin: null,
-            date: null
+            date: null,
+            stop: null
         },
 
         mapObject: null,
@@ -18,9 +19,9 @@
 
         data: null,
 
-		initialize: function(data) {
+		initialize: function(data, first) {
 			console.log("initializing...");
-			this.data = data;
+			tc.data = data;
 
 			// handle bad data error
 			if (data["status"]=="error") {
@@ -47,25 +48,30 @@
 				counter++;
 			});
 
-			// update user selection, refresh data, build map
-			this.buildMap();
-			this.updateSelection();
-			this.registerHandlers();
+			// only need to initialize map environmment once
+			if (first==true) {
+				tc.initializeMap();
+				tc.registerSelectionHandlers();
+				tc.registerRouteChangeHandler();
+			};
+
+			tc.updateSelection();
+			
 		},
 
-		buildMap: function() {
-			console.log("building map...");
+		resetDashboard:function(route) {
+			//get new data
+			var dataURL = `/routes/${route}/data`;
+	    	$.getJSON(dataURL, function(data) {
+           		tc.initialize(data, first=false);
+        	});
+        	// TODO - clean the URL and append the new route to the URL
+		},
 
-			// get approximate center point of route, to center map view on
-			var stops = tc.data["directions"]["0"]["geo"]["features"].filter(function(feat) {
-							return feat["geometry"]["type"] == "Point";
-						});
-			// TODO - why is latlng reversed in current geojson format?
-			var mapCenterArray = stops[Math.round(stops.length / 2)]["geometry"]["coordinates"].reverse();
-			var mapCenter = L.latLng(mapCenterArray);
-			console.log("mapCenter:", mapCenter);
-			// setView with coordinates and zoom level
-			tc.mapObject = L.map('map').setView(mapCenter, 13);
+		initializeMap: function() {
+			console.log("initializing map...");
+
+			tc.mapObject = L.map('map');
 			tc.mapObject.on({click: resetMapStyle});
 
 			// this is a basic "light" style raster map layer from mapbox
@@ -130,6 +136,7 @@
 				    justClicked.setStyle(startMarkerStyle);
 				// if this is the endpoint of a journey selection
 				} else if (tc.selection.stop.length == 1){
+					// check that journey is going in the right direction
 					if (justClicked.feature.properties.stop_sequence > tc.selection.stop[0].feature.properties.stop_sequence) {
 						console.log('2nd stop selection:', justClicked.feature.properties.stop_id);
 						tc.selection.stop.push(justClicked);
@@ -163,13 +170,15 @@
 				console.log(startSeq, endSeq);
 				// change marker style for journey markers
 				tc.markerLayer.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence > startSeq) && (layer.feature.properties.stop_sequence < endSeq)) {
+					if ((layer.feature.properties.stop_sequence > startSeq) && 
+						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyMarkerStyle);
 					};
 				});
 				// change line style for journey linestrings
 				tc.lineLayer.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence >= startSeq) && (layer.feature.properties.stop_sequence < endSeq)) {
+					if ((layer.feature.properties.stop_sequence >= startSeq) && 
+						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyLineStyle);
 					};
 				});
@@ -180,7 +189,9 @@
 			function onEachFeature(feature, layer) {
 			    if (feature.geometry.type == 'Point') {
 			    	// bind a popup to markers
-			        layer.bindPopup("<dl><dt>stop_id</dt>"
+			        layer.bindPopup("<dl><dt>stop_name</dt>"
+						           + "<dd>" + feature.properties.stop_name + "</dd>"
+			        			   + "<dl><dt>stop_id</dt>"
 						           + "<dd>" + feature.properties.stop_id + "</dd>"
 						           + "<dt>stop_seq</dt>"
 						           + "<dd>" + feature.properties.stop_sequence + "</dd>");
@@ -202,7 +213,6 @@
 			    };
 			};
 
-
 			// create a geojson map layer, passing a function to generate custom markers from geo points
 			// don't add any geo data to the layer at this stage (data added in refresh function)
 			tc.mapLayer = L.geoJSON(false, {
@@ -214,53 +224,78 @@
     		}).addTo(tc.mapObject);
 		},
 
-		refreshMap: function() {
-			console.log("refreshing map...");
+
+		redrawMap: function() {
+			console.log("redrawing map...");
 			tc.mapLayer.clearLayers();
-			tc.mapLayer.addData(tc.data["directions"][tc.selection.direction]["geo"]);
+
+			// get approximate center point of route, to center map view on
+			var stops = tc.data["directions"]["0"]["geo"]["features"].filter(function(feat) {
+							return feat["geometry"]["type"] == "Point";
+						});
+			// TODO - why is latlng reversed in current geojson format?
+			var mapCenterArray = stops[Math.round(stops.length / 2)]["geometry"]["coordinates"].reverse();
+			var mapCenter = L.latLng(mapCenterArray);
+			console.log("mapCenter:", mapCenter);
+			// setView with coordinates and zoom level
+			tc.mapObject.setView(mapCenter, 13);
+
+
+			tc.mapLayer.addData(tc.data["directions"]["0"]["geo"]);
 		},
 
+
 		updateSelection: function() {
+			// scans all user toggles to update current selection
 			console.log("updating selection...");
-			tc.selection.route = tc.data["route_id"];
 			tc.selection.dayBin = $("input[name=daybin]:checked", "#daySelect").val();
 			tc.selection.hourBin = $("input[name=hourbin]:checked", "#hourSelect").val();
 			tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
-			// only refresh map if the direction selection changes
+			// only refresh the map if either the direction or route selections have changed
+			var newRoute = tc.data["route_id"];
 			var newDirection = $("option[name=direction]:selected", "#dirSelect").val();
-			if (newDirection != tc.selection.direction) {
+			if ((newDirection != tc.selection.direction) || (newRoute != tc.selection.route)) {
 				tc.selection.direction = newDirection;
-				tc.refreshMap();
-			}
+				tc.selection.route = tc.data["route_id"];
+				tc.redrawMap();
+			};
 			// refresh data table for all selection changes
 			tc.refreshTable();
-
+			// PLACEHOLDER - this is where I'd trigger the update of shown metrics
 		},
+
 
 		refreshTable: function() {
 			console.log("refreshing table...");
 			// clear existing table
-			$("#dataTable1").empty();
-			$("#dataTable2").empty();
+			$("#dataTable").empty();
 			// write a header row
-			// $("#dataTable").append(`<tr><th>Stop</th><th>EWT</th></tr>`);
+			$("#dataTable").append(`<tr><th>Stop</th><th>EWT</th><th>RBT</th><th>Speed</th></tr>`);
 			// write data rows
 			tc.data["directions"][tc.selection.direction]
 					 ["daybins"][tc.selection.dayBin]
 					 ["hourbins"][tc.selection.hourBin]
 					 [tc.selection.date]
 					 .forEach(function(stop){
-					 	$("#dataTable1").append(`${stop[0]}`);
-						$("#dataTable2").append(`${stop[1]}`);
+					 	$("#dataTable").append(`<tr><td>${stop[0]}</td><td>${stop[1]}</td><td>${stop[2]}</td><td>${stop[3]}</td></tr>`);
 					 });
 		},
 
-		registerHandlers: function() {
-			console.log("registering handlers...");
-			$("#daySelect, #hourSelect, #dirSelect, #dateSelect").on("change", this.updateSelection);
-		}
 
+		registerSelectionHandlers: function() {
+			console.log("registering selection handlers...");
+			$("#daySelect, #hourSelect, #dirSelect, #dateSelect").on("change", tc.updateSelection);
+		},
+
+
+		registerRouteChangeHandler: function() {
+			console.log("registering route change handler...");
+			$("#routeSelect").change(function() {
+				tc.resetDashboard($(this).val())
+			});
+		}
 	};
+
 	// add our tc object to global window scope
 	this.tc = tc;
 	console.log('running tc.js');
