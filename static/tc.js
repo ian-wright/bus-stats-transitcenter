@@ -17,7 +17,7 @@
         markerGroup: L.layerGroup(),
         lineGroup: L.layerGroup(),
 
-        data: null,
+        // data: null,
 
 		initialize: function(data, first) {
 			console.log("initializing dashboard...");
@@ -36,7 +36,7 @@
 			$("#dir0").text(data["directions"]["0"]["headsign"]);
 			$("#dir1").text(data["directions"]["1"]["headsign"]);
 
-			// dynamically insert date select options - KILL THIS AFTER LINECHART IS IN
+			// dynamically insert date select options - KILL THIS AFTER LINECHART/DATEPICKER IS IN
 			Object.keys(data["directions"]["0"]["daybins"]["0"]["hourbins"]["0"]).reverse().forEach(function(day){
 				var option_elem = `<option name="date" value="${day}">${day}</option>`
 				$("#dateSelect").append(option_elem);
@@ -50,19 +50,43 @@
 				tc.registerRouteChangeHandler();
 			};
 
+			tc.selection.stop = '0';
+
+			gr.initialize();
 			tc.updateSelection();
 		},
 
 		updateMetricDisplay: function() {
+			console.log("updating metric display...");
+			
+			var allDates = tc.data["directions"][tc.selection.direction]
+				   				  ["daybins"][tc.selection.dayBin]
+				   				  ["hourbins"][tc.selection.hourBin];
+
+			var parsed = allDates[tc.selection.date].map(function(stop) {
+				return [stop[0], {'ewt': stop[1],
+						   'rbt': stop[2],
+						   'speed': stop[3]}]
+			});
+
+			// draw D3 charts
+			gr.updateCharts(allDates,
+							tc.selection.metric,
+							tc.selection.stop,
+							tc.selection.date);
+
+			// TODO - code to populate metric blocks according to selection here
+			console.log('parsed data:', parsed);
 			
 		},
 
 		resetDashboard:function(route) {
-			console.log("resetting dashboard...");
+			console.log(`resetting dashboard for ${route}...`);
 
 			// revert to default selections on new route (day=0, hour=0, dir=2)
 			$("input[value=0]", "#hourSelect").prop('checked', true);
 			$("input[value=0]", "#daySelect").prop('checked', true);
+			$("input[value=ewt]", "#metricSelect").prop('checked', true);
 			$("option[value=2]", "#dirSelect").prop('selected', true);
 
 			//get new data
@@ -130,7 +154,7 @@
 
 			function clickFeature(e) {
 			    var justClicked = e.target;
-			    console.log(justClicked);
+			    console.log("original selection:", tc.selection);
 
 			    // if this is the first stop selection
 			    if (!tc.selection.stop) {
@@ -151,9 +175,10 @@
 				// have already selected a journey, so reset the map selection
 				} else {
 					resetMapStyle();
-					tc.selection.stop = [justClicked];
+					tc.selection.stop = ['justClicked'];
 					justClicked.setStyle(startMarkerStyle);
 				};
+				console.log("new selection:", tc.selection);
 			};
 
 			function resetMapStyle() {
@@ -161,8 +186,8 @@
 				// revert marker and line styles to default values
 				tc.markerGroup.eachLayer(function(layer){layer.setStyle(defaultMarkerStyle)});
 				tc.lineGroup.eachLayer(function(layer){layer.setStyle(defaultLineStyle)});
-				// reset stop selection
-				tc.selection.stop = null;
+				// reset stop selection to ALL (0)
+				tc.selection.stop = '0';
 
 			};
 
@@ -253,7 +278,7 @@
 			tc.lineGroup.eachLayer(function(layer){tc.mapObject.removeLayer(layer)});
 			tc.lineGroup = L.layerGroup(),
 
-			//tc.mapObject.removeLayer(tc.maplayer);
+			console.log("adding data to map:", tc.data["directions"][dir]["geo"]);
 			tc.mapLayer.addData(tc.data["directions"][dir]["geo"]);
 		},
 
@@ -265,19 +290,24 @@
 			tc.selection.dayBin = $("input[name=daybin]:checked", "#daySelect").val();
 			tc.selection.hourBin = $("input[name=hourbin]:checked", "#hourSelect").val();
 			tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+			tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 			// only refresh the map if either the direction or route selections have changed
 			var newRoute = tc.data["route_id"];
 			var newDirection = $("option[name=direction]:selected", "#dirSelect").val();
 			if ((newDirection != tc.selection.direction) || (newRoute != tc.selection.route)) {
+				console.log("direction or route selection has changed!");
 				tc.selection.direction = newDirection;
 				tc.selection.route = tc.data["route_id"];
 				console.log("new selection:", tc.selection)
 				tc.redrawMap();
 			};
 			console.log("new selection:", tc.selection)
+
+			// TODO - put code here to update the view block that echos the current selection
+
 			// refresh data table for all selection changes
 			tc.refreshTable();
-			// PLACEHOLDER - this is where I'd trigger the update of shown metrics
+			tc.updateMetricDisplay();
 		},
 
 
@@ -300,7 +330,7 @@
 
 		registerSelectionHandlers: function() {
 			console.log("registering selection handlers...");
-			$("#daySelect, #hourSelect, #dirSelect, #dateSelect").on("change", tc.updateSelection);
+			$("#daySelect, #hourSelect, #dirSelect, #dateSelect, #metricSelect").on("change", tc.updateSelection);
 		},
 
 

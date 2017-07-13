@@ -143,6 +143,15 @@
           </div>
 
           <div class="col-sm-4">
+            <h2>Metric</h2>
+            <form id="metricSelect">
+              <input type="radio" name="metric" value="ewt" checked> EWT
+              <input type="radio" name="metric" value="rbt"> RBT
+              <input type="radio" name="metric" value="speed" > speed
+            </form>
+          </div>
+
+          <div class="col-sm-4">
   				<p>Finally, select a date:</p>
   				<select id="dateSelect" size="1">
   					<!--dynamically add dates to a drop down here-->
@@ -193,6 +202,24 @@
         </div>
 
 				<div id="map"><!--map goes here!--></div>
+
+        <div class = "blocks">
+            <div class = 'charts-section metricWrapperDetail'>
+            <div class = "metricBody">
+            <h4>All dates</h4>
+            <div id ="month-chart"></div>
+            </div>
+
+            <div>
+            <h4>Past 7 Days</h4>
+            <div id ="week-chart"></div>
+            </div>
+
+            <h4>Metric by Stop</h4>
+            <div id ="stop-chart"></div>
+            </div>
+          </div><!--charts-section!-->
+
 			</div>
 		</div>
 
@@ -211,10 +238,13 @@
     </div> <!-- End Footer -->
 
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
-  			integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
-  			crossorigin=""></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+  <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+          integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+          crossorigin=""></script>
+
+  <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
 	<script>
 		var route = '{{ route }}';
 		console.log(route);
