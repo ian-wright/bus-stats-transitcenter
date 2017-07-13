@@ -6,14 +6,17 @@
       console.log("initializing charts...");
 
       gr.chart1 = d3.select("#month-chart").append("svg")
+                    .attr("class", "graph")
                     .attr("width","720")
                     .attr("height","240");
 
       gr.chart2 = d3.select("#week-chart").append("svg")
+                      .attr("class", "graph")
                       .attr("width","720")
                       .attr("height","240");
 
       gr.chart3 = d3.select("#stop-chart").append("svg")
+                      .attr("class", "graph")
                       .attr("width","720")
                       .attr("height","240");
 
@@ -47,69 +50,58 @@
                 .curve(d3.curveLinear)
                 .x(function(d){ return gr.x3(d.stop);})
                 .y(function(d){ return gr.y3(d.metric);});
-    },
 
-
-    updateCharts: function(data, metric, stop, date) {
-      console.log("updating charts...");
-      
-      var metricMap = {
+      gr.metricMap = {
         'stop': 0,
         'ewt': 1,
         'rbt': 2,
         'speed': 3
       };
 
-      // clear stuff
-      d3.selectAll("g").remove();
+      gr.NameMap = {
+        'ewt': 'Estimated Wait Time (min)',
+        'rbt': 'Reliability Buffer Time (min)',
+        'speed': 'Speed (mph)'
+      };
+    },
 
-      // refactor to integrate *******
+    updateCharts: function(data, metric, stop, date) {
+      console.log(`updating charts: metric: ${metric}, stop: ${stop}, date: ${date}:`, data);
 
-      // var day_ind  = d3.select('input[name=daybin]:checked').attr('value');
-      // var hour_ind = d3.select('input[name=hourbin]:checked').attr('value');
-      // var dir_ind = d3.select('input[name=direction]:checked').attr('value');
-
-      // var ooo = data.directions[dir_ind].daybins[day_ind].hourbins[hour_ind];
-      //var ooo = data;
-
-      console.log(`data for charts: metric: ${metric}, stop: ${stop}, date: ${date}:`, data);
-
+      // clear existing data from charts
+      d3.selectAll(".graph > *").remove();
+  
       //-------------------ALL DATES----------------------------------------------------------------------------  
       console.log("drawing all dates chart...");
 
-      var g1 = gr.chart1.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
+      var g1 = gr.chart1.append("g")
+                        .attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
+
       var dateArray1 = [];
       var metricArray1 = [];
 
+      console.log('stop:', stop);
+      console.log('metric:', metric);
+
+      // TODO - handle the JOURNEY case
+
       Object.keys(data).forEach(function(date) {
-        // TODO - make sure none of the keys are from prototype
-
-          dateArray1.push(data);
-
           // find the selected stop and extract datapoint
           var selectedStop = data[date].filter(function(stopData) {
-            stopData[metricMap['stop']] == stop;
+            return stopData[gr.metricMap['stop']] == stop;
           });
-          metricArray1.push(selectedStop[metricMap[metric]]);
+          // build data and metric arrays incrementally (for matching stops)
+          if (selectedStop.length == 1) {
+            dateArray1.push(date);
+            metricArray1.push(selectedStop[0][gr.metricMap[metric]]);
+          };
       });
-
-      
-      // for(var i = 0; i < ooo.length; i++){
-      //   var dates = ooo[i];
-      //   dateArray.push(dates[0]);
-      //   var stoplength = dates[1].length;
-      //   metricArray.push(dates[1][stoplength-1][1]);
-      // }
-
-      // ****************************
-
       
       var chartcontent1 = [];
       for (var i = 0; i < dateArray1.length; i++) {
-        chartcontent1.push({date:gr.parseTime(dateArray1[i]),metric:metricArray1[i]});
+        chartcontent1.push({'date':gr.parseTime(dateArray1[i]), 'metric':metricArray1[i]});
       }
 
-      
       gr.x1.domain(d3.extent(chartcontent1, function(d,i) { return d.date; }));
       gr.y1.domain([0,d3.max(metricArray1)]);
 
@@ -123,8 +115,6 @@
           return d3.axisLeft(y)
               .ticks(5)
       }
-
-    
       
       // add the X gridlines
       g1.append("g")     
@@ -159,13 +149,9 @@
           .attr("dy", "0.71em");
 
       g1.append("text")
-                .attr("text-anchor", "middle")  
+                .attr("text-anchor", "middle") 
                 .attr("transform", "translate(" +(-20) +","+(gr.height1/2)+")rotate(-90)")  
-                .text("Eccess Wait Time(min)");
-      
-      // g1.append("path")
-      //     .attr("class", "line")
-      //     .attr("d", gr.line1(chartcontent1));
+                .text(gr.NameMap[metric]);
 
       g1.append("path")
           .datum(chartcontent1)
@@ -225,14 +211,14 @@
       g2.append("text")
                 .attr("text-anchor", "middle")  
                 .attr("transform", "translate(" +(-20) +","+(gr.height2/2)+")rotate(-90)")  
-                .text("Eccess Wait Time(min)");
+                .text(gr.NameMap[metric]);
       
       g2.append("path")
           .datum(chartcontent2)
           .attr("class", "line")
           .attr("d", gr.line2);
 
-    //-------------------chart3----------------------------------------------------------------------------
+    //---------------STOP-BY-STOP--------------------------------------------------------------------------
       console.log("drawing stop chart...");
 
       var g3 = gr.chart3.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
@@ -240,9 +226,11 @@
       var metricArray3 = [];
 
       data[date].forEach(function(stopData) {
-        stopArray3.push(stopData[metricMap['stop']]);
-        metricArray3.push(stopData[metricMap[metric]]);
+        stopArray3.push(stopData[gr.metricMap['stop']]);
+        metricArray3.push(stopData[gr.metricMap[metric]]);
       });
+
+      //TODO - show stopname instead of stop_id
 
       var chartcontent3 = [];
       for (var i = 0; i < stopArray3.length; i++) {
@@ -286,7 +274,7 @@
       g3.append("text")
                 .attr("text-anchor", "middle")  
                 .attr("transform", "translate(" +(-20) +","+(gr.height3/2)+")rotate(-90)")  
-                .text("Eccess Wait Time(min)");
+                .text(gr.NameMap[metric]);
       
       g3.append("path")
           .datum(chartcontent3)
@@ -294,12 +282,6 @@
           .attr("d", gr.line3);
 
     },
-
-    // updateData: function() {
-    //   d3.selectAll("g").remove();
-    //   updateChart();
-    // } 
-
   };
 
   // add our tc object to global window scope

@@ -50,7 +50,7 @@
 				tc.registerRouteChangeHandler();
 			};
 
-			tc.selection.stop = '0';
+			tc.selection.stop = 0;
 
 			gr.initialize();
 			tc.updateSelection();
@@ -69,10 +69,25 @@
 						   'speed': stop[3]}]
 			});
 
+			//TODO - code to handle displaying route vs stop vs journey
+
+			// TODO - draw journey-level graphs
+			var selectedStop;
+			if  (tc.selection.stop == 0) {
+				// route-level case
+				selectedStop = 0;
+			} else {
+				// stop-level case
+				selectedStop = tc.selection.stop[0].feature.properties.stop_id;
+			}
+
+			//update table
+			tc.refreshTable();
+
 			// draw D3 charts
 			gr.updateCharts(allDates,
 							tc.selection.metric,
-							tc.selection.stop,
+							selectedStop,
 							tc.selection.date);
 
 			// TODO - code to populate metric blocks according to selection here
@@ -157,7 +172,7 @@
 			    console.log("original selection:", tc.selection);
 
 			    // if this is the first stop selection
-			    if (!tc.selection.stop) {
+			    if (tc.selection.stop == 0) {
 			    	console.log('1st stop selection:', justClicked.feature.properties.stop_id);
 				    tc.selection.stop = [justClicked];
 				    justClicked.setStyle(startMarkerStyle);
@@ -179,6 +194,7 @@
 					justClicked.setStyle(startMarkerStyle);
 				};
 				console.log("new selection:", tc.selection);
+				tc.updateMetricDisplay();
 			};
 
 			function resetMapStyle() {
@@ -187,7 +203,7 @@
 				tc.markerGroup.eachLayer(function(layer){layer.setStyle(defaultMarkerStyle)});
 				tc.lineGroup.eachLayer(function(layer){layer.setStyle(defaultLineStyle)});
 				// reset stop selection to ALL (0)
-				tc.selection.stop = '0';
+				tc.selection.stop = 0;
 
 			};
 
