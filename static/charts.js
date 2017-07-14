@@ -70,9 +70,9 @@
 
       // clear existing data from charts
       d3.selectAll(".graph > *").remove();
-  
 
-      //-------------------ALL DATES----------------------------------------------------------------------------  
+
+      //-------------------ALL DATES----------------------------------------------------------------------------
       console.log("drawing all dates chart...");
 
       var g1 = gr.chart1.append("g")
@@ -97,7 +97,7 @@
             metricArray1.push(selectedStop[0][gr.metricMap[metric]]);
           };
       });
-      
+
       var chartcontent1 = [];
       for (var i = 0; i < dateArray1.length; i++) {
         chartcontent1.push({'date':gr.parseTime(dateArray1[i]), 'metric':metricArray1[i]});
@@ -106,19 +106,19 @@
       gr.x1.domain(d3.extent(chartcontent1, function(d,i) { return d.date; }));
       gr.y1.domain([0,d3.max(metricArray1)]);
 
-      function make_x_gridlines(x) {   
+      function make_x_gridlines(x) {
           return d3.axisBottom(x)
               .ticks(7)
       }
 
       // gridlines in y axis function
-      function make_y_gridlines(y) {   
+      function make_y_gridlines(y) {
           return d3.axisLeft(y)
               .ticks(5)
       }
-      
+
       // add the X gridlines
-      g1.append("g")     
+      g1.append("g")
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height1 + ")")
           .attr("stroke-width", "2")
@@ -128,7 +128,7 @@
           )
 
       // add the Y gridlines
-      g1.append("g")     
+      g1.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
           .call(make_y_gridlines(gr.y1)
@@ -150,8 +150,8 @@
           .attr("dy", "0.71em");
 
       g1.append("text")
-                .attr("text-anchor", "middle") 
-                .attr("transform", "translate(" +(-20) +","+(gr.height1/2)+")rotate(-90)")  
+                .attr("text-anchor", "middle")
+                .attr("transform", "translate(" +(-20) +","+(gr.height1/2)+")rotate(-90)")
                 .text(gr.NameMap[metric]);
 
       g1.append("path")
@@ -178,7 +178,7 @@
       gr.y2.domain([0,d3.max(metricArray2)]);
 
       // add the X gridlines
-      g2.append("g")     
+      g2.append("g")
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height2 + ")")
           .attr("stroke-width", "2")
@@ -188,7 +188,7 @@
           )
 
       // add the Y gridlines
-      g2.append("g")     
+      g2.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
           .call(make_y_gridlines(gr.y2)
@@ -210,10 +210,10 @@
           .attr("dy", "0.71em");
 
       g2.append("text")
-                .attr("text-anchor", "middle")  
-                .attr("transform", "translate(" +(-20) +","+(gr.height2/2)+")rotate(-90)")  
+                .attr("text-anchor", "middle")
+                .attr("transform", "translate(" +(-20) +","+(gr.height2/2)+")rotate(-90)")
                 .text(gr.NameMap[metric]);
-      
+
       g2.append("path")
           .datum(chartcontent2)
           .attr("class", "line")
@@ -244,7 +244,7 @@
       gr.x3.domain([d3.min(stopArray3),d3.max(stopArray3)]);
       gr.y3.domain([0,d3.max(metricArray3)]);
       // add the X gridlines
-      g3.append("g")     
+      g3.append("g")
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height3 + ")")
           .attr("stroke-width", "2")
@@ -276,10 +276,10 @@
           .attr("dy", "0.71em");
 
       g3.append("text")
-                .attr("text-anchor", "middle")  
-                .attr("transform", "translate(" +(-20) +","+(gr.height3/2)+")rotate(-90)")  
+                .attr("text-anchor", "middle")
+                .attr("transform", "translate(" +(-20) +","+(gr.height3/2)+")rotate(-90)")
                 .text(gr.NameMap[metric]);
-      
+
       g3.append("path")
           .datum(chartcontent3)
           .attr("class", "line")

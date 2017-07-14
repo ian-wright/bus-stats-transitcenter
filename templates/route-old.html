@@ -26,7 +26,6 @@
   </head>
 
   <body>
-    <!-- navbar-->
     <nav class="navbar navbar-default" id="navBars">
       <div id="navbarContainer">
     	  <div class="container-fluid">
@@ -79,7 +78,7 @@
     								Route Level Metrics
     							</a>
     						</div>
-                <div class="row mleft0">
+                <div class="row">
       						<div class="styled-select purple rounded">
       							Select a Route!
       							<select id="routeSelect" size="1">
@@ -119,132 +118,152 @@
 
     	  </div><!-- /.container-fluid -->
       </div>
-    </nav><!-- navbar ends -->
+    </nav>
 
-    <div id="contentWrapper">
-
+    <div id='contentWrapper'>
       <div id="container">
-        <!-- title -->
         <h2>Route Level Performance</h2>
-        <div class="row mleft0">
+				<div class="row mleft0">
 					<h1 id="bus_id">le bus...</h1>
 				</div>
 
-        <div class="row mleft0"> <!-- row container -->
-
-          <div class="col-sm-9">
-            <div class="row mleft0"> <!-- row metrics -->
-
-              <div class="col-sm-4">
-                <div class="rowbox">
-                  <p class="span-date">31 May 2017</p>
-                </div>
-                <div class="rowbox">
-                  <h2>Excess Wait Time</h2>
-                  <p>Short Explanation<p>
-                </div>
-                <div class="row">
-                  <h1 class="jumbo">3.5 min</h1>
-                </div>
-                <div class="row">
-                  <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-                </div>
-              </div><!-- end of ewt box-->
-
-              <div class="col-sm-4">
-                <div class="rowbox">
-                  <p class="span-date">31 May 2017</p>
-                </div>
-                <div class="rowbox">
-                  <h2>Speed</h2>
-                  <p>Short Explanation<p>
-                </div>
-                <div class="row">
-                  <h1 class="jumbo">5 mph</h1>
-                </div>
-                <div class="row">
-                  <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-                </div>
-              </div><!-- end of speed box-->
-              <div class="col-sm-4">
-                <div class="rowbox">
-                  <p class="span-date">31 May 2017</p>
-                </div>
-                <div class="rowbox">
-                  <h2>RBT</h2>
-                  <p>Short Explanation<p>
-                </div>
-                <div class="row">
-                  <h1 class="jumbo">19.7 %</h1>
-                </div>
-                <div class="row">
-                  <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-                </div>
-              </div><!-- end of rbt box-->
-            </div><!-- end of row metrics -->
-
-            <div class="row mleft0"> <!--map -->
-              <div id="map"><!--map goes here!--></div>
-            </div> <!-- map -->
-
-            <div class="row mleft0 mtop40">
-              <h1>Trends</h1><!-- chart -->
-              <div class = 'charts-section metricWrapperDetail'>
-              <div class = "metricBody">
-              <h4>Past Month</h4>
-              <div id ="month-chart"></div>
+        <div class="col-sm-9">
+          <div class="row">
+            <!--ewt box-->
+            <div class="col-sm-3">
+              <div class="rowbox">
+                <p class="span-date">31 May 2017</p>
               </div>
-
-              <div>
-              <h4>Past 7 Days</h4>
-              <div id ="week-chart"></div>
+              <div class="rowbox">
+                <h2>Excess Wait Time</h2>
+                <p>Short Explanation<p>
               </div>
-
-              <h4>EWT by Stop</h4>
-              <div id ="stop-chart"></div>
+              <div class="row">
+                <h1 class="jumbo font20" id="dataTable1"></h1>
               </div>
-            </div><!-- chart -->
+              <div class="row">
+                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+              </div>
+            </div>
+            <!-- rbt box -->
+            <div class="col-sm-3">
+              <div class="rowbox">
+                <p class="span-date">31 May 2017</p>
+              </div>
+              <div class="rowbox">
+                <h2>Excess Wait Time</h2>
+                <p>Short Explanation<p>
+              </div>
+              <div class="row">
+                <h1 class="jumbo font20" id="dataTable1"></h1>
+              </div>
+              <div class="row">
+                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+              </div>
+            </div>
+            <!-- speed box -->
+            <div class = "col-sm-3">
+              <div class="rowbox">
+                <p class="span-date">31 May 2017</p>
+              </div>
+              <div class="rowbox">
+                <h2>Excess Wait Time</h2>
+                <p>Short Explanation<p>
+              </div>
+              <div class="row">
+                <h1 class="jumbo font20" id="dataTable1"></h1>
+              </div>
+              <div class="row">
+                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+              </div>
+            </div>
+          <div class="row">
+          <!-- end of boxes -->
 
+
+          <div class="row">
+            <div id="map"><!--map goes here!--></div>
           </div>
 
-          <div class="col-sm-3 mtop0">
-            <div class="row">
-              <h4>TIME FILTERS</h4>
-              <form id="daySelect">
-                <input type="radio" name="daybin" value="0"> Weekday
-                <input type="radio" name="daybin" value="1"> Weekend
-                <input type="radio" name="daybin" value="2" checked> All
-              </form>
-              <form id="hourSelect">
-                <input type="radio" name="hourbin" value="0"> Peak
-                <input type="radio" name="hourbin" value="1"> Off-Peak
-                <input type="radio" name="hourbin" value="2" checked> All
-              </form>
-              <h4>DIRECTIONS</h4>
-              <select id="dirSelect" size="3">
-                <option name= "direction" id="dir0" value="0">Dir0</option>
-                <option name= "direction" id="dir1" value="1">Dir1</option>
-                <option name= "direction" id="dir2" value="2" selected="selected">All</option>
-              </select>
-              <h4>METRIC</h4>
-              <form id="metricSelect">
-                <input type="radio" name="metric" value="ewt" checked> EWT
-                <input type="radio" name="metric" value="rbt"> RBT
-                <input type="radio" name="metric" value="speed" > speed
-              </form>
-              <h4>DATE</h4>
-              <p>Finally, select a date:</p>
-      				<select id="dateSelect" size="1">
-      					<!--dynamically add dates to a drop down here-->
-      				</select>
-            </div> <!-- blocks -->
+          <div class = "row">
+            <div class = 'charts-section metricWrapperDetail'>
+            <div class = "metricBody">
+            <h4>Past Month</h4>
+            <div id ="month-chart"></div>
+            </div>
+
+            <div>
+            <h4>Past 7 Days</h4>
+            <div id ="week-chart"></div>
+            </div>
+
+            <h4>EWT by Stop</h4>
+            <div id ="stop-chart"></div>
+            </div>
+          </div><!--charts-section!-->
+
+        </div>
+
+        <div class="col-sm-3">
+          <div class = "blocks">
+            <h4>TIME FILTERS</h4>
+            <form id="daySelect">
+              <input type="radio" name="daybin" value="0"> Weekday
+              <input type="radio" name="daybin" value="1"> Weekend
+              <input type="radio" name="daybin" value="2" checked> All
+            </form>
+            <form id="hourSelect">
+              <input type="radio" name="hourbin" value="0"> Peak
+              <input type="radio" name="hourbin" value="1"> Off-Peak
+              <input type="radio" name="hourbin" value="2" checked> All
+            </form>
+            <h4>DIRECTIONS</h4>
+            <select id="dirSelect" size="3">
+              <option name= "direction" id="dir0" value="0">Dir0</option>
+              <option name= "direction" id="dir1" value="1">Dir1</option>
+              <option name= "direction" id="dir2" value="2" selected="selected">All</option>
+            </select>
+            <h4>METRIC</h4>
+            <form id="metricSelect">
+              <input type="radio" name="metric" value="ewt" checked> EWT
+              <input type="radio" name="metric" value="rbt"> RBT
+              <input type="radio" name="metric" value="speed" > speed
+            </form>
+            <h4>DATE</h4>
+            <p>Finally, select a date:</p>
+    				<select id="dateSelect" size="1">
+    					<!--dynamically add dates to a drop down here-->
+    				</select>
+            <div class = "datepicker uib-datepicker" ng-controller="DatepickerDemoCtrl">
+              <div style="display:inline-block; min-height:290px;">
+                <div uib-datepicker ng-model="dt" class="well well-sm" datepicker-options="options"></div>
+                <h4>DATA DISPLAYED FOR: </h4>
+                <em></em>
+                <em id = "selected_date" style="display: none"></em>
+
+              </div>
+            </div>
+            <div>
+              <input name = "updateButton"
+              type = "button"
+              value= "update"
+              class = "btn btn-default"
+              onclick = "updateData()"/>
+            </div>
+
           </div>
-        </div><!-- row content -->
+        </div>
+        </div>
 
-      </div><!-- container -->
-    </div><!-- contentWrapper-->
+        <!-- START: JUST FOR TESTING -->
+        <p>Here's some data:</p>
+      	  <table id="dataTable"></table>
+      	<!-- END: JUST FOR TESTING -->
 
-    <div id="footer"><!-- footer -->
+			</div>
+		</div>
+
+    <div id="footer">
       <div id="footerInner">
 
         <div id="rightFooter">
@@ -258,22 +277,22 @@
       </div>
     </div> <!-- End Footer -->
 
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
-    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
-            integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
-            crossorigin=""></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+  <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+          integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+          crossorigin=""></script>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-  	<script>
-  		var route = '{{ route }}';
-  		console.log(route);
-  		var dataURL = `/routes/${route}/data`;
-  	    $.getJSON(dataURL, function(data) {
-              tc.initialize(data, first=true);
-          });
-      </script>
+  <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+	<script>
+		var route = '{{ route }}';
+		console.log(route);
+		var dataURL = `/routes/${route}/data`;
+	    $.getJSON(dataURL, function(data) {
+            tc.initialize(data, first=true);
+        });
+    </script>
 
   </body>
-</html>
+  </html>

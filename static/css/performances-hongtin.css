@@ -9,28 +9,28 @@ a, a:visited, a:hover, a:active {
 	padding-left: 0;
 }
 
-.col-sm-3, .col-sm-5{
-  background: rgba(250, 250, 250, .8);
-  margin: 20px;
+.blocks{
+  background-color: #eee;
   margin-left: 0;
   padding-bottom:10px;
 }
 
-.col-sm-4 {
-  margin-right: 10px;
-  width: 31%;
+.blocks{
+  background-color: #eee;
+  margin: 20px;
+  margin-left: 0;
+  padding-top: 5%;
+  padding-left: 4%;
+  padding-right: 4%;
+  padding-bottom:10px;
 }
 
 .col-sm-5 {
-  width: 50vh;
-}
-
-.col-sm-9 {
-  width: 85vh;
+  width: 65vh;
 }
 
 .col-sm-4 {
-  background-color: #eee;
+  background-color: white;
 }
 
 /* New bootstrap for 5 columns */
@@ -47,22 +47,6 @@ a, a:visited, a:hover, a:active {
 .col-xs-5ths {
     width: 20%;
     float: left;
-}
-
-.blocks{
-  background-color: #eee;
-  margin-left: 0;
-  padding-bottom:10px;
-}
-
-.blocks{
-  background-color: #eee;
-  margin: 20px;
-  margin-left: 0;
-  padding-top: 5%;
-  padding-left: 4%;
-  padding-right: 4%;
-  padding-bottom:10px;
 }
 
 @media (min-width: 768px) {
@@ -185,27 +169,12 @@ a:hover {
 	}
 }
 
-.mtop0 {
-  margin-top: 0;
-}
-
 .mtop10 {
   margin-top: 8px;
 }
 
-.mtop40 {
-  margin-top: 40px;
-}
-
-.mtop50 {
-  margin-top: -50px;
-}
-
 .mleft0 {
   margin-left: 0;
-}
-.mleft20 {
-  margin-left: 20px;
 }
 
 .mwidth100 {
@@ -220,33 +189,6 @@ a:hover {
   position: relative;
   padding-top: 20px;
 }
-
-.styled-select {
-   height: 29px;
-   overflow: hidden;
-   width: 200px;
-   padding-left: 10px;
-   padding-top: 3px;
-}
-
-.styled-select select {
-   background: transparent;
-   border: none;
-   font-size: 14px;
-   height: 40px;
-   padding-left: 10px; /* If you add too much padding here, the options won't show in IE */
-   width: 200px;
-}
-
-.rounded {
-   -webkit-border-radius: 20px;
-   -moz-border-radius: 20px;
-   border-radius: 23px;
-}
-
-.purple  { background-color: #57068c; }
-
-.purple select  { color: white; }
 
 /* Data Tables */
 table.dataTable{
@@ -292,7 +234,7 @@ h1{
 }
 
 .jumbo {
-  font-size: 5em;
+  font-size: 7em;
   font-weight: 200;
   padding-left: 10px;
   color: #57068c;
@@ -1507,46 +1449,8 @@ div.underline{
 }
 
 #map {
-    width: 80vh;
+    width: 86%;
     height: 400px;
-    z-index: 0;
-}
-
-#maphome {
-  z-index: 0;
-  width: 86%;
-  height: 70;
-}
-
-.mapHomeBoro > span {
-  font-size: 20px;
-  font-weight: bold;
-  background-color: black;
-  color: white;
-  display: inline;
-  padding: 2px 5px;
-}
-
-.boroMetricsBad > span {
-  color: #a94442;
-  background-color:#f2dede;
-  font-size:20px;
-  font-weight: bold;
-}
-
-.bad {
-  color: #a94442;
-}
-
-.good {
-  color: #3c763d;
-}
-
-.boroMetricsGood > span {
-  color: #3c763d;
-  background-color: #dff0d8;
-  font-size:20px;
-  font-weight: bold;
 }
 
 .font20 {

@@ -101,54 +101,52 @@
     </nav>
 
     <div id='contentWrapper'>
-
       <div id="container">
-        <div class="row mtop50 mleft0">
-            <div id="maphome" style="position:absolute ;width:80%; height:100%">
+        <h1>Summary</h1>
+        <div class="row mleft0">
+          <div class="col-sm-5">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Excess Wait Time</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo">3.5 min</h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
+          </div>
+          <div class="col-sm-5">
+            <div class="rowbox">
+              <p class="span-date">31 May 2017</p>
+            </div>
+            <div class="rowbox">
+              <h2>Average Speed</h2>
+              <p>Short Explanation<p>
+            </div>
+            <div class="row">
+              <h1 class="jumbo">4.6 mph</h1>
+            </div>
+            <div class="row">
+              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            </div>
           </div>
         </div>
-
-        <div class="row mtop40 mleft20">
-          <div class="row">
-            <div class="col-sm-12">
-              <h1>Summary</h1>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-5">
-              <div class="rowbox">
-                <p class="span-date">31 May 2017</p>
-              </div>
-              <div class="rowbox">
-                <h2>Excess Wait Time</h2>
-                <p>Short Explanation<p>
-              </div>
-              <div class="row">
-                <h1 class="jumbo">3.5 min</h1>
-              </div>
-              <div class="row">
-                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+        <div class="row mleft0">
+          <h1>Speed Map</h1>
+          <div class="row mleft0">
+            <div class="col-sm-11">
+              <div class="row mleft0">
+                <div class="col-sm-11">
+                  <img src="{{ url_for('static', filename='img/traffic.JPG') }}" alt="traffic map" height="725px">
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="row mtop0">
-            <div class="col-sm-5">
-              <div class="rowbox">
-                <p class="span-date">31 May 2017</p>
-              </div>
-              <div class="rowbox">
-                <h2>Average Speed</h2>
-                <p>Short Explanation<p>
-              </div>
-              <div class="row">
-                <h1 class="jumbo">4.6 mph</h1>
-              </div>
-              <div class="row">
-                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -166,53 +164,6 @@
         </div>
       </div>
     </div> <!-- End Footer -->
-
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
-    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
-            integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
-            crossorigin=""></script>
-
-    <!-- map home script goes here -->
-    <script>
-    $( document ).ready(function() {
-        var maphome = L.map('maphome',{ zoomControl:false }).setView([40.71597, -74.05367], 12);
-        new L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
-      			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-      			maxZoom: 12,
-      			accessToken: 'pk.eyJ1IjoiaWZ3cmlnaHQiLCJhIjoiY2o0ZnJrbXdmMWJqcTMzcHNzdnV4bXd3cyJ9.1G8ErVmk7jP7PDuFp8KHpQ'
-  			}).addTo(maphome);
-        L.marker(new L.LatLng(40.78222, -73.96528), {icon:createLabelIcon("mapHomeBoro","<span>Manhattan</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.77522, -73.96528), {icon:createLabelIcon("boroMetricsGood","<span>1.2min</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.77022, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>3.7mph</span>")}).addTo(maphome);
-
-
-        L.marker(new L.LatLng(40.69245, -73.99036), {icon:createLabelIcon("mapHomeBoro","<span>Brooklyn</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.68545, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.68045, -73.99036), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
-
-        L.marker(new L.LatLng(40.75072, -73.94103), {icon:createLabelIcon("mapHomeBoro","<span>Queens</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.74372, -73.94103), {icon:createLabelIcon("boroMetricsGood","<span>1.7min</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.73872, -73.94103), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
-
-        L.marker(new L.LatLng(40.82037, -73.91164), {icon:createLabelIcon("mapHomeBoro","<span>Bronx</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.81337, -73.91164), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.80837, -73.91164), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
-
-        L.marker(new L.LatLng(40.6427, -74.0799), {icon:createLabelIcon("mapHomeBoro","<span>StatenIsland</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.6357, -74.0799), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
-        L.marker(new L.LatLng(40.6307, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
-
-      })
-
-      var createLabelIcon = function(labelClass,labelText){
-        return L.divIcon({
-          className: labelClass,
-          html: labelText
-        })
-      }
-    </script>
-
 
   </body>
   </html>
