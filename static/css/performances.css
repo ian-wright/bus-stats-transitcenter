@@ -65,6 +65,67 @@ a, a:visited, a:hover, a:active {
   padding-bottom:10px;
 }
 
+/* GRAPH STYLING */
+
+.blocks .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+
+.blocks path {
+  stroke: black;
+  fill: none;
+  stroke-width: 2px;
+}
+
+.blocks path.domain{
+    stroke: lightgrey;
+    stroke-opacity: 0.3;
+}
+
+.blocks g.tick{
+    stroke: lightgrey;
+    stroke-opacity: 0.2;
+}
+
+.blocks path.line {
+  stroke: #E5AB3F;
+  fill: #none;
+  stroke-width: 2px;
+}
+
+.blocks g.group0 path,
+.blocks g.group0 circle {
+  stroke: red;
+  fill: none;
+}
+
+.blocks g.hidden line,
+.blocks g.hidden path {
+  display: none;
+}
+
+.blocks g.tick text {
+  font-size: 1.1em;
+  fill: purple;
+}
+
+.blocks g text {
+  font-size: 0.8em;
+  fill: purple;
+}
+
+.blocks .grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.3;
+  shape-rendering: crispEdges;
+}
+
+.blocks .grid path {
+  stroke-width: 0;
+}
+.blocks svg {
+    background: #fff;
+}
+
 @media (min-width: 768px) {
     .col-sm-5ths {
         width: 20%;

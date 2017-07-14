@@ -7,17 +7,17 @@
 
       gr.chart1 = d3.select("#month-chart").append("svg")
                     .attr("class", "graph")
-                    .attr("width","720")
+                    .attr("width","640")
                     .attr("height","240");
 
       gr.chart2 = d3.select("#week-chart").append("svg")
                       .attr("class", "graph")
-                      .attr("width","720")
+                      .attr("width","640")
                       .attr("height","240");
 
       gr.chart3 = d3.select("#stop-chart").append("svg")
                       .attr("class", "graph")
-                      .attr("width","720")
+                      .attr("width","640")
                       .attr("height","240");
 
       gr.margin = {top: 20, right: 40, bottom: 30, left: 50};
@@ -254,7 +254,7 @@
           )
 
       // add the Y gridlines
-      g3.append("g")     
+      g3.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
           .call(make_y_gridlines(gr.y3)
