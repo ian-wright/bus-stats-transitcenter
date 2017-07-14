@@ -71,6 +71,7 @@
       // clear existing data from charts
       d3.selectAll(".graph > *").remove();
   
+
       //-------------------ALL DATES----------------------------------------------------------------------------  
       console.log("drawing all dates chart...");
 
@@ -218,6 +219,7 @@
           .attr("class", "line")
           .attr("d", gr.line2);
 
+
     //---------------STOP-BY-STOP--------------------------------------------------------------------------
       console.log("drawing stop chart...");
 
@@ -226,8 +228,10 @@
       var metricArray3 = [];
 
       data[date].forEach(function(stopData) {
-        stopArray3.push(stopData[gr.metricMap['stop']]);
-        metricArray3.push(stopData[gr.metricMap[metric]]);
+        if (stopData[gr.metricMap['stop']] != 0) {
+          stopArray3.push(stopData[gr.metricMap['stop']]);
+          metricArray3.push(stopData[gr.metricMap[metric]]);
+        };
       });
 
       //TODO - show stopname instead of stop_id
