@@ -14,9 +14,9 @@ db.create_all()
 
 # ESTABLISH SQLALCHEMY CONNECTION
 # WINDOWS setup
-#engine = create_engine('postgresql://root:root@localhost:5432/transit')
+engine = create_engine('postgresql://root:root@localhost:5432/transit')
 # MAC setup
-engine = create_engine('postgresql://localhost/transit')
+#engine = create_engine('postgresql://localhost/transit')
 # COMPUTE setup
 #engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
 

@@ -11,9 +11,9 @@ import os
 app = Flask(__name__)
 
 # WINDOWS setup
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -92,7 +92,7 @@ def get_available_routes():
     db_distinct = set(map(lambda rec: rec.rds_index.split('_')[0], db_distinct_records))
 
     # distinct geo routes
-    geo_files = os.listdir('data/profiles/')
+    geo_files = os.listdir('./data/profiles/')
     geo_files_filt = filter(lambda geo: '.geojson' in geo, geo_files)
     geo_distinct = set(map(lambda geo: geo.split('_')[0], geo_files_filt))
 
@@ -103,11 +103,13 @@ def get_available_routes():
 
 def get_profile(route):
     profile = InterDict()
-
     # attempt to load both directions' geometry
     geo = {}
     for direction in ['0','1']:
         try:
+            fname = './data/profiles/{}_{}.geojson'.format(route, direction)
+            print fname
+            print os.path.isfile(fname)
             with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
                 geo[direction] = geojson.load(infile)
         except IOError:
@@ -160,7 +162,7 @@ def get_metrics_df(route, window_start):
 
 def build_data_series(df, direc, dbin, hbin):
     """
-    given a direction, daybin, and hourbin, this function produces a listof tuples representing 
+    given a direction, daybin, and hourbin, this function produces a listof tuples representing
     stop-level metric data.
     FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value)]
     """
@@ -186,7 +188,7 @@ def build_data_series(df, direc, dbin, hbin):
 
 
 def build_response(profile, metrics_df):
-    
+
     response = InterDict()
 
     hourbins = ['0', '1', '2', '3', '4']
@@ -218,7 +220,7 @@ def build_response(profile, metrics_df):
                                                                                                              dbin,
                                                                                                              hbin)
         return response
-        
+
 
 
 @app.route('/routes/<string:route>/data')
@@ -226,10 +228,8 @@ def get_route(route):
     print 'getting data for route: {}'.format(route)
     window_start = str(get_last_update() + datetime.timedelta(days=-(DAYSBACK)))
     print 'window_start:', window_start
-    
     response = build_response(get_profile(route),
                               get_metrics_df(route, window_start))
-
     return jsonify(response)
 
 
