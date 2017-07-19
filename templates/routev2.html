@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1" style="padding: 9px 0;">        <ul class="nav navbar-nav navbar-right topbar">
+          <li>
+            <a ui-sref="methodologies" ui-sref-active="active" href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li>
+            <a ui-sref="about" ui-sref-active="active" href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+      <!-- sidebar -->
+      <div id="sidebar" class="collapse navbar-collapse navbar-collapse-1" aria-expanded="false" style="height: 0px;">
+        <div class="sidebar">
+          <ul class="nav navbar-nav sidebar-nav">
+            <li>
+              <div ng-class="{active: $state.includes('detail') || $state.includes('home') }">
+                <a ui-sref="home" href="{{ url_for('home') }}">
+                  Dashboard
+                </a>
+              </div>
+
+              <ul class="sidebarSubLinks">
+                <!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+                    Excess Wait Time
+                  </a>
+                </li><!-- end ngRepeat: mc in metricCategories -->
+                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+                    Speed
+                  </a>
+                </li>
+                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+                    Reliability Buffer Time
+                  </a>
+                </li>
+              </ul>
+
+            </li>
+            <li>
+              <div class="underline active" ui-sref-active="active">
+                <a href="/routes/BX39">
+                  Route Level Metrics
+                </a>
+              </div>
+              <div class="row mleft0">
+                <button type="submit" class="btn btn-default btn-route">
+                  <span>Select a route</span>
+                </button>
+              </div>
+            </li>
+
+            <li>
+              <div class="underline" ui-sref-active="active">
+                <a href="/glossary">
+                  Glossary
+                </a>
+              </div>
+            </li>
+
+          </ul>
+        </div> <!-- Side bar end -->
+      </div> <!-- Side bar collapse end -->
+
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+  <!-- content -->
+  <div id="container">
+    <div id="contentWrapper">
+      <!-- ewt, speed and chart -->
+      <section id="basicmetrics">
+        <div class="row mtop100">
+          <h1 id="bus_id">Loading Bus...</h1>
+        </div><!--row-->
+
+        <div class="row" id="topfilter">
+          <div class="col-sm-3">
+            <h4>DATE</h4>
+            <select id="dateSelect" size="1">
+              <!--dynamically add dates to a drop down here-->
+            </select>
+          </div>
+          <div class="col-sm-7">
+            <h4>TIME FILTERS</h4>
+            <select id="daySelect" size="1">
+              <option name= "daybin" value="0">Weekday</option>
+              <option name= "daybin" value="1">Weekend</option>
+              <option name= "daybin" value="2" selected="selected">All</option>
+            </select>
+            <select id="hourSelect" size="1">
+              <option name= "hourbin" value="0">Peak</option>
+              <option name= "hourbin" value="1">Off Peak</option>
+              <option name= "hourbin" value="2" selected="selected">All</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="row">
+              <div class="metricsblocks">
+                <div class="rowbox">
+                  <h2>Excess Wait Time</h2>
+                  <p>Short Explanation<p>
+                </div>
+                <div class="row">
+                  <h1 class="jumbo">3.5 min</h1>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="metricsblocks">
+                <div class="rowbox">
+                  <h2>Average Speed</h2>
+                  <p>Short Explanation<p>
+                </div>
+                <div class="row">
+                  <h1 class="jumbo">3.5 mph</h1>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- metrics -->
+
+          <div class="col-sm-8"> <!-- chart -->
+            <div class="row">
+              <div class="col-sm-2">
+                <h2>Trend</h2>
+              </div>
+              <div class="col-sm-8">
+                <ul class="nav nav-pills met-pills pull-left">
+                  <li class="active"><a href="#">EWT</a></li>
+                  <li><a href="#">Speed</a></li>
+                </ul>
+              </div>
+
+            </div>
+            <div class="row">
+              <ul class="nav nav-tabs">
+                <li class="active"><a href="#">Past Month</a></li>
+                <li><a href="#">Past 7 days</a></li>
+                <li><a href="#">By Stops</a></li>
+              </ul>
+              <div class="blocks">
+                <div id ="month-chart"></div>
+              </div>
+            </div>
+          </div> <!-- chart -->
+        </div><!--row container-->
+      </section>
+
+      <section>
+        <div class="row">
+          <h3>Your journey on this route</h3>
+          <span>Select two stops to know...</span>
+        </div><!--row-->
+        <div class="row mleft0"> <!--map -->
+          <div class="col-sm-8">
+            <div class="row">
+              <h4>DIRECTIONS</h4>
+              <select id="dirSelect" size="1">
+                <option name= "direction" id="dir0" value="0">Dir0</option>
+                <option name= "direction" id="dir1" value="1">Dir1</option>
+                <option name= "direction" id="dir2" value="2" selected="selected">All</option>
+              </select>
+              <div id="map"><!--map goes here!--></div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <h3>X to Y</h3>
+            <h4>METRIC</h4>
+            <form id="metricSelect">
+              <input type="radio" name="metric" value="ewt" checked> EWT
+              <input type="radio" name="metric" value="rbt"> RBT
+              <input type="radio" name="metric" value="speed" > speed
+            </form>
+            <p>Don't know how to present the result yet</p>
+        </div> <!-- map -->
+      </section>
+    </div> <!-- contentwrapper -->
+  </div> <!-- container -->
+
+
+</body>
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+<script>
+  var route = '{{ route }}';
+  console.log(route);
+  var dataURL = `/routes/${route}/data`;
+    $.getJSON(dataURL, function(data) {
+          tc.initialize(data, first=true);
+      });
+  </script>
+
+<script src="js/angular/angular.min.js"></script>
+<script src="js/angular/angular-animate.js"></script>
+<script src="js/angular/angular-sanitize.js"></script>
+<script src="js/angular/ui-bootstrap-tpls-2.5.0.js"></script>
+<script src="js/uib-datepicker.js"></script>
+<!-- for d3 chart-->
+<script type="text/javascript" src="js/libs/d3.v4.js"></script>
+</html>

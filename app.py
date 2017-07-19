@@ -238,13 +238,13 @@ def get_route(route):
 def dashboard(route):
     print 'routing a route!'
     avail = get_available_routes()
-    return render_template('route.html', route=route, avail=avail)
+    return render_template('routev2.html', route=route, avail=avail)
 
 
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template('home.html')
+    return render_template('homev2.html')
 
 
 @app.errorhandler(404)

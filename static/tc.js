@@ -58,7 +58,7 @@
 
 		updateMetricDisplay: function() {
 			console.log("updating metric display...");
-			
+
 			var allDates = tc.data["directions"][tc.selection.direction]
 				   				  ["daybins"][tc.selection.dayBin]
 				   				  ["hourbins"][tc.selection.hourBin];
@@ -92,15 +92,15 @@
 
 			// TODO - code to populate metric blocks according to selection here
 			console.log('parsed data:', parsed);
-			
+
 		},
 
 		resetDashboard:function(route) {
 			console.log(`resetting dashboard for ${route}...`);
 
 			// revert to default selections on new route (day=0, hour=0, dir=2)
-			$("input[value=0]", "#hourSelect").prop('checked', true);
-			$("input[value=0]", "#daySelect").prop('checked', true);
+			$("option[value=0]", "#hourSelect").prop('selected', true);
+			$("option[value=2]", "#daySelect").prop('selected', true);
 			$("input[value=ewt]", "#metricSelect").prop('checked', true);
 			$("option[value=2]", "#dirSelect").prop('selected', true);
 
@@ -214,14 +214,14 @@
 				console.log(startSeq, endSeq);
 				// change marker style for journey markers
 				tc.markerGroup.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence > startSeq) && 
+					if ((layer.feature.properties.stop_sequence > startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyMarkerStyle);
 					};
 				});
 				// change line style for journey linestrings
 				tc.lineGroup.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence >= startSeq) && 
+					if ((layer.feature.properties.stop_sequence >= startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyLineStyle);
 					};
@@ -274,7 +274,7 @@
 			var dir = tc.selection.direction;
 			if (dir == "2") {
 				dir = "0";
-			} 
+			}
 			console.log('direction to draw:', dir);
 
 			// get approximate center point of route, to center map view on
@@ -303,8 +303,8 @@
 			// scans all user toggles to update current selection (excluding bus stop)
 			console.log(`changed ${this}; updating selection...`);
 			console.log("original selection:", tc.selection)
-			tc.selection.dayBin = $("input[name=daybin]:checked", "#daySelect").val();
-			tc.selection.hourBin = $("input[name=hourbin]:checked", "#hourSelect").val();
+			tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+			tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
 			tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
 			tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 			// only refresh the map if either the direction or route selections have changed
