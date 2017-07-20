@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
+          <li>
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="active">
+            <a href="/routes/Bx39">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li>
+            <a href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+  <!-- content -->
+  <div class="container-route">
+    <section id="header">
+      <div class="row mtop40">
+        <h1 id="bus_id">Loading Bus...</h1>
+      </div><!--row-->
+
+      <div class="row" id="topfilter">
+        <div class="col-sm-2">
+          <h4>DATE</h4>
+          <select id="dateSelect" size="1">
+            <!--dynamically add dates to a drop down here-->
+          </select>
+        </div>
+        <div class="col-sm-5">
+          <h4>TIME FILTERS</h4>
+          <select id="daySelect" size="1">
+            <option name= "daybin" value="0">Weekday</option>
+            <option name= "daybin" value="1">Weekend</option>
+            <option name= "daybin" value="2" selected="selected">All</option>
+          </select>
+          <select id="hourSelect" size="1">
+            <option name= "hourbin" value="0">Peak</option>
+            <option name= "hourbin" value="1">Off Peak</option>
+            <option name= "hourbin" value="2" selected="selected">All</option>
+          </select>
+        </div>
+        <div class="col-sm-5">
+          <h4>DIRECTIONS</h4>
+          <select id="dirSelect" size="1" style="width:200px;">
+            <option name= "direction" id="dir0" value="0">Dir0</option>
+            <option name= "direction" id="dir1" value="1">Dir1</option>
+            <option name= "direction" id="dir2" value="2" selected="selected">All</option>
+          </select>
+        </div>
+      </div>
+      <div class="sep"></div>
+    </section>
+    <!-- ewt, speed and chart -->
+    <section id="basicmetrics">
+      <div class="row">
+        <h3>Route Level Metrics </h3>
+        <div class="col-sm-3">
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Wait Delay</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">3.5 min</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Average Speed</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">5 mph</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>EJT (?)</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">10 min</h1>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- metrics -->
+
+        <div class="col-sm-6"> <!-- chart -->
+          <div class="row">
+            <div class="col-sm-2">
+              <h2>Trend</h2>
+            </div>
+            <div class="col-sm-8">
+              <div class="btn-group" data-toggle="buttons" id="metricSelect">
+                <label class="btn btn-primary active">
+                  <input type="radio" name="metric" value="ewt" checked> EWT
+                </label>
+                <label class="btn btn-primary">
+                  <input type="radio" name="metric" value="rbt"> RBT
+                </label>
+                <label class="btn btn-primary">
+                  <input type="radio" name="metric" value="speed"> Speed
+                </label>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" data-target="#month-chart">Past Month</a></li>
+              <li><a data-toggle="tab" data-target="#week-chart">Past 7 days</a></li>
+              <li><a data-toggle="tab" data-target="#stop-chart">By Stops</a></li>
+            </ul>
+            <div class="tab-contents blocks">
+              <div id="month-chart" class="tab-pane fade in active">
+              </div>
+              <div id="week-chart" class="tab-pane fade">
+              </div>
+              <div id="stop-chart" class="tab-pane fade">
+              </div>
+            </div>
+          </div>
+        </div> <!-- chart -->
+
+        <div class="col-sm-3">
+          <div id="stacked-bar">
+            <h4>stackedbar goes here</h4>
+          </div>
+        </div><!--stackedbar-->
+
+      </div><!--row container-->
+    </section>
+
+    <section>
+      <div class="row">
+        <h3>Your journey on this route</h3>
+        <span>Select two stops below to know your average journey time.</span>
+      </div><!--row-->
+      <div class="row mleft0"> <!--map -->
+        <div class="col-sm-4">
+          <div class="row">
+            <div id="map"><!--map goes here!--></div>
+          </div>
+        </div>
+        <div class="col-sm-8">
+          <h3 class="h3-route"> X to Y </h3>
+          <div class="row">
+            <p>Your scheduled wait time is <span class="hilite">10min</span>. However, your average journey time is <span class="hilite">15 min</span>. Therefore, it is better to budget <span class="hilite">5</span> more minutes.</p>
+          </div>
+          <div class="row">
+            <div class="col-xs-6">
+              <div style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
+              stacked bar goes here
+              </div>
+            </div>
+            <div class="col-xs-6">
+              <h4>Your journey trendline</h4>
+              <div class="row">
+                <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
+                  <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
+                </ul>
+                <div class="tab-contents">
+                  <div id="journey-month-chart" class="tab-pane fade in active">
+                  </div>
+                  <div id="journey-week-chart" class="tab-pane fade">
+                    weekly chart goes here
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div> <!-- map -->
+    </section>
+  </div> <!-- container -->
+  <div id="footer"><!-- footer -->
+    <div id="footerInner">
+
+      <div id="rightFooter">
+        <a href="" target="_blank">
+          <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+        </a>
+        <a href="" target="_blank">
+          <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+        </a>
+      </div>
+    </div>
+  </div> <!-- End Footer -->
+
+
+</body>
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script>
+<script>
+  var route = '{{ route }}';
+  console.log(route);
+  var dataURL = `/routes/${route}/data`;
+    $.getJSON(dataURL, function(data) {
+          tc.initialize(data, first=true);
+      });
+  </script>
+<!-- for d3 chart-->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<!-- stacked bar -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
+</html>
