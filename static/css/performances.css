@@ -56,19 +56,22 @@ select {
 }
 
 .blocks{
-  background-color: #eee;
-  margin: 20px;
-  margin-left: 0;
-  padding-top: 5%;
-  padding-left: 4%;
-  padding-right: 4%;
-  padding-bottom:10px;
+  background-color: white;
+  margin: 0;
+  padding: 15px 0 10px 0;
+}
+
+#month-chart, #week-chart, #stop-chart {
+  width: 90%;
 }
 
 /* GRAPH STYLING */
 
 .blocks .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
+.blocks svg {
+  width: 100%;
+}
 
 .blocks path {
   stroke: black;

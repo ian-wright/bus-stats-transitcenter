@@ -39,15 +39,15 @@
       gr.parseTime = d3.timeParse("%Y-%m-%d");
 
       gr.line1 = d3.line()
-              .curve(d3.curveLinear)
+              .curve(d3.curveMonotoneX)
               .x(function(d){ return gr.x1(d.date);})
               .y(function(d){ return gr.y1(d.metric);});
       gr.line2 = d3.line()
-                .curve(d3.curveLinear)
+                .curve(d3.curveMonotoneX)
                 .x(function(d){ return gr.x2(d.date);})
                 .y(function(d){ return gr.y2(d.metric);});
       gr.line3 = d3.line()
-                .curve(d3.curveLinear)
+                .curve(d3.curveMonotoneX)
                 .x(function(d){ return gr.x3(d.stop);})
                 .y(function(d){ return gr.y3(d.metric);});
 
