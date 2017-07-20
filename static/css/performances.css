@@ -18,7 +18,7 @@ select {
 	padding-left: 0;
 }
 
-.col-sm-5{
+.metric-box-home{
   background: rgba(250, 250, 250, .8);
   margin: 20px;
   margin-left: 0;
@@ -176,8 +176,16 @@ a:hover {
 	margin: 10px;
 }
 
+.row-sm {
+  margin-bottom: 0;
+}
+
 .rowbox {
   margin: 20px;
+}
+
+.rowbox-sm {
+  margin: 10px 20px;
 }
 
 .border{
@@ -197,6 +205,24 @@ a:hover {
 .pageHeader{
 	margin-bottom: 2em;
 	margin-top: 3em;
+}
+
+.canvasjs-chart-credit {
+  display: none;
+}
+
+#stacked-bar{
+  border: 1px solid #ccc;
+  height: 100%;
+  width: 100%;
+}
+
+.fade.in {
+  display: block;
+}
+
+.fade {
+  display: none;
 }
 
 /* Footer */
@@ -342,40 +368,6 @@ a:hover {
 
 .purple select  { color: white; }
 
-/* Data Tables */
-table.dataTable{
-	border: 0;
-	color: #57068c;
-	margin-bottom: 0;
-	margin-top: 1em;
-}
-.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-	border-top: 1px solid #57068c;
-	border-bottom: 1px solid #57068c;
-}
-table.dataTable tbody{
-    border-top: 1px solid #57068c;
-	border-bottom: 1px solid #57068c;
-}
-table.dataTable td{
-    border-left: 1px solid #57068c;
-}
-table.dataTable td.categoryTd{
-    border-left: 1px solid transparent;
-	text-align: left;
-}
-.categoryTh{
-	text-align: left;
-}
-th{
-	text-transform: uppercase;
-    font-size: 0.625em;
-    /*text-align: right;*/
-}
-td{
-	/*text-align: right;*/
-	padding: 0.25em;
-}
 h1,h2,.h1{
 	padding: 0;
 	margin: 0;
@@ -392,6 +384,11 @@ h1{
   color: #57068c;
 }
 
+.jumbo2 {
+  font-size: 3em;
+  padding-top: 0px;
+}
+
 h2{
 	font-size:1.17em;
   text-transform: uppercase;
@@ -404,6 +401,24 @@ h3{
   font-weight: bold;
 	line-height: 1.4em;
 }
+
+h3.h3-route {
+  font-size: 2em;
+  margin-top: 0;
+  padding-left: 10px;
+}
+
+.metricboxsm {
+  background-color: #eee;
+  margin-right: 10px;
+  padding:10px;
+}
+
+p.small {
+  font-size: 0.9em;
+}
+
+
 h4{
 	text-transform: uppercase;
 	font-weight: 600;
@@ -428,17 +443,87 @@ h6 .small{
 	color: #a2bf05;
 }
 
+span.hilite {
+  color: #57068c;
+  font-weight: bold;
+  font-size: 1.25em;
+}
+
+.container-fluid {
+  margin: 0 20px;
+}
+
 #container {
-  margin-right: 40px;
+  margin: 40px 20px;
+}
+
+.container-route {
+  margin: 60px 40px;
+}
+
+#maphomediv {
+  margin-left: -20px;
+}
+
+#charthome {
+  margin: 60px 20px 20px 20px;
+}
+
+#header {
+  position: fixed;
+  z-index: 4;
+  width: 100%;
+  background-color: white;
 }
 
 #topfilter {
-  padding-bottom: 15px;
+  padding-bottom: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.filter {
+  display: inline;
+}
+
+.sep {
   border-bottom: 1px solid #ccc;
+  margin-left: -40px;
 }
 
 #basicmetrics {
   border-bottom: 1px solid #ccc;
+  padding-top: 140px;
+  padding-bottom: 15px;
+}
+
+#busSelector {
+  margin: 0 10px 0 0;
+  padding-top: 23px;
+  width: 120px;
+  height: 34px;
+  border: 1px solid #111;
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline;
+}
+
+#busSelector select {
+  background: transparent;
+  width: 150px;
+  font-size: 16px;
+  height: 34px;
+  border-color: transparent
+}
+
+#selectRoute {
+  display: inline; !important
+
+  width: 100px;
+}
+
+#bus_id {
+  display: inline;!important
 }
 
 .inline {
@@ -592,6 +677,24 @@ hr{
 	.explanationHeader{
 		padding-left: 1em;
 	}
+
+  .container-fluid {
+    margin-left: -10px;
+    margin-right: 0;
+  }
+
+  #container {
+    margin: 40px 0;
+  }
+
+  #maphomediv {
+    margin-left: 0;
+  }
+
+  .metric-box-home {
+    padding-top: 5px;
+  }
+
 }
 .explanationImage{
 	margin-bottom: 2.5em;
@@ -710,13 +813,6 @@ hr{
 	color: #57068c !important;
 	font-weight: normal;
 	font-size: 0.3em;
-}
-.plusMinus{
-    text-align: right;
-    height: 29px;
-}
-.plusMinus.dataTableOn{
-     margin-top: 1em;
 }
 .description{
 	font-size: 1.5em;
@@ -1222,6 +1318,29 @@ input.form-control, select.form-control, textarea.form-control{
     color: #FFF;
 }
 
+.btn-large {
+  margin-top: 20px;
+  text-align: center;
+  text-transform: uppercase;
+  border-radius: 50px;
+  font-size: 1.25em;
+  padding: 10px 20px;
+}
+
+.btn-primary {
+  background-color: #874dad;
+  border: 0px;
+}
+
+.btn-primary.active, .btn-primary:hover {
+  background-color: #57068c;
+  border: 0px;
+}
+
+.btn-primary.active:hover {
+  background-color: #43036d;
+}
+
 
 .btn-round{
   border-radius: 17px;
@@ -1384,7 +1503,7 @@ input.form-control, select.form-control, textarea.form-control{
 	margin-bottom: 0;
 	z-index: 5;
 	min-height: 8vh;
-  border-color: transparent;
+  border: 0;
 }
 @media(min-height: 643px) {
 	#navBars{
@@ -1401,15 +1520,12 @@ input.form-control, select.form-control, textarea.form-control{
 	height: 37px;
 	padding-left: 1em;
 }
-@media(max-width: 340px) { /* Hide 'Dashboard' text if the screen is so narrow that it would push it off the topbar */
+@media(max-width: 340px) {
 	#mainLogo .text{
-		display: none;
+		font-size: 1.5em;
 	  }
 }
 
-#topbarCollapse{
-	max-width:143.75em;
-}
 
 .navbar-brand{
 	padding: 0;
@@ -1426,6 +1542,7 @@ input.form-control, select.form-control, textarea.form-control{
 .topbar {
   font-family: 'Montserrat', sans-serif;
   font-weight: 200;
+  padding-top: 9px;
 }
 
 .topbar.collapsed{
@@ -1434,7 +1551,7 @@ input.form-control, select.form-control, textarea.form-control{
 	right: 2em;
 }
 .topbar li{
-	padding: 0.5em 0 0.5em 2em;
+	padding: 0.5em 0 0 2em;
 }
 .topbar li a {
   text-transform: uppercase;
@@ -1446,11 +1563,19 @@ input.form-control, select.form-control, textarea.form-control{
 
 .topbar>li>a>span {
   padding-top: 5px;
-  color: #FFF;
+  color: white;
+}
+
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:hover, .navbar-default .navbar-nav>.active>a:focus {
+  color: black;
+  background-color: transparent;
+  border-bottom: 3px solid #ccc;
+  padding-bottom: 22px;
 }
 
 .topbar a:hover {
-  font-weight: 500;
+  font-weight: 600;
+  color: white;
 }
 
 .navbar-default .navbar-toggle .icon-bar{ /* hamburger */
@@ -1666,15 +1791,15 @@ div.underline{
 }
 
 #map {
-    width: 80vh;
     height: 400px;
     z-index: 0;
 }
 
 #maphome {
   z-index: 0;
-  width:100%;
-  height: 800px;
+  position:absolute;
+  width: 100%;
+  height:80%;
 }
 
 .mapHomeBoro > span {
@@ -1699,6 +1824,10 @@ div.underline{
 
 .good {
   color: #3c763d;
+}
+
+.light-purple {
+  color: #E9DEFF;
 }
 
 .boroMetricsGood > span {

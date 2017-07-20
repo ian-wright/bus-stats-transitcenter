@@ -33,194 +33,213 @@
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1" style="padding: 9px 0;">        <ul class="nav navbar-nav navbar-right topbar">
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
           <li>
-            <a ui-sref="methodologies" ui-sref-active="active" href="/methodologies">
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="active">
+            <a href="/routes/Bx39">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
               <span>Methodologies</span>
             </a>
           </li>
           <li>
-            <a ui-sref="about" ui-sref-active="active" href="/about" style="padding-right:40px;">
+            <a href="/about" style="padding-right:40px;">
               <span>About</span>
             </a>
           </li>
         </ul>
       </div><!-- /.navbar-collapse -->
 
-      <!-- sidebar -->
-      <div id="sidebar" class="collapse navbar-collapse navbar-collapse-1" aria-expanded="false" style="height: 0px;">
-        <div class="sidebar">
-          <ul class="nav navbar-nav sidebar-nav">
-            <li>
-              <div ng-class="{active: $state.includes('detail') || $state.includes('home') }">
-                <a ui-sref="home" href="{{ url_for('home') }}">
-                  Dashboard
-                </a>
-              </div>
-
-              <ul class="sidebarSubLinks">
-                <!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Excess Wait Time
-                  </a>
-                </li><!-- end ngRepeat: mc in metricCategories -->
-                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Speed
-                  </a>
-                </li>
-                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Reliability Buffer Time
-                  </a>
-                </li>
-              </ul>
-
-            </li>
-            <li>
-              <div class="underline active" ui-sref-active="active">
-                <a href="/routes/BX39">
-                  Route Level Metrics
-                </a>
-              </div>
-              <div class="row mleft0">
-                <button type="submit" class="btn btn-default btn-route">
-                  <span>Select a route</span>
-                </button>
-              </div>
-            </li>
-
-            <li>
-              <div class="underline" ui-sref-active="active">
-                <a href="/glossary">
-                  Glossary
-                </a>
-              </div>
-            </li>
-
-          </ul>
-        </div> <!-- Side bar end -->
-      </div> <!-- Side bar collapse end -->
-
-
     </div><!-- /.container-fluid -->
   </nav><!-- end of the navbar -->
 
   <!-- content -->
-  <div id="container">
-    <div id="contentWrapper">
-      <!-- ewt, speed and chart -->
-      <section id="basicmetrics">
-        <div class="row mtop100">
-          <h1 id="bus_id">Loading Bus...</h1>
-        </div><!--row-->
+  <div class="container-route">
+    <section id="header">
+      <div class="row mtop40">
+        <h1 id="bus_id">Loading Bus...</h1>
+      </div><!--row-->
 
-        <div class="row" id="topfilter">
-          <div class="col-sm-3">
-            <h4>DATE</h4>
-            <select id="dateSelect" size="1">
-              <!--dynamically add dates to a drop down here-->
-            </select>
+      <div class="row" id="topfilter">
+        <div class="col-sm-2">
+          <h4>DATE</h4>
+          <select id="dateSelect" size="1">
+            <!--dynamically add dates to a drop down here-->
+          </select>
+        </div>
+        <div class="col-sm-5">
+          <h4>TIME FILTERS</h4>
+          <select id="daySelect" size="1">
+            <option name= "daybin" value="0">Weekday</option>
+            <option name= "daybin" value="1">Weekend</option>
+            <option name= "daybin" value="2" selected="selected">All</option>
+          </select>
+          <select id="hourSelect" size="1">
+            <option name= "hourbin" value="0">Peak</option>
+            <option name= "hourbin" value="1">Off Peak</option>
+            <option name= "hourbin" value="2" selected="selected">All</option>
+          </select>
+        </div>
+        <div class="col-sm-5">
+          <h4>DIRECTIONS</h4>
+          <select id="dirSelect" size="1" style="width:200px;">
+            <option name= "direction" id="dir0" value="0">Dir0</option>
+            <option name= "direction" id="dir1" value="1">Dir1</option>
+            <option name= "direction" id="dir2" value="2" selected="selected">All</option>
+          </select>
+        </div>
+      </div>
+      <div class="sep"></div>
+    </section>
+    <!-- ewt, speed and chart -->
+    <section id="basicmetrics">
+      <div class="row">
+        <h3>Route Level Metrics </h3>
+        <div class="col-sm-3">
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Wait Delay</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">3.5 min</h1>
+              </div>
+            </div>
           </div>
-          <div class="col-sm-7">
-            <h4>TIME FILTERS</h4>
-            <select id="daySelect" size="1">
-              <option name= "daybin" value="0">Weekday</option>
-              <option name= "daybin" value="1">Weekend</option>
-              <option name= "daybin" value="2" selected="selected">All</option>
-            </select>
-            <select id="hourSelect" size="1">
-              <option name= "hourbin" value="0">Peak</option>
-              <option name= "hourbin" value="1">Off Peak</option>
-              <option name= "hourbin" value="2" selected="selected">All</option>
-            </select>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Average Speed</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">5 mph</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>EJT (?)</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 class="jumbo jumbo2">10 min</h1>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- metrics -->
+
+        <div class="col-sm-6"> <!-- chart -->
+          <div class="row">
+            <div class="col-sm-2">
+              <h2>Trend</h2>
+            </div>
+            <div class="col-sm-8">
+              <div class="btn-group" data-toggle="buttons" id="metricSelect">
+                <label class="btn btn-primary active">
+                  <input type="radio" name="metric" value="ewt" checked> EWT
+                </label>
+                <label class="btn btn-primary">
+                  <input type="radio" name="metric" value="rbt"> RBT
+                </label>
+                <label class="btn btn-primary">
+                  <input type="radio" name="metric" value="speed"> Speed
+                </label>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" data-target="#month-chart">Past Month</a></li>
+              <li><a data-toggle="tab" data-target="#week-chart">Past 7 days</a></li>
+              <li><a data-toggle="tab" data-target="#stop-chart">By Stops</a></li>
+            </ul>
+            <div class="tab-contents">
+              <div id="month-chart" class="tab-pane fade in active">
+              </div>
+              <div id="week-chart" class="tab-pane fade">
+                weekly chart goes here
+              </div>
+              <div id="stop-chart" class="tab-pane fade">
+                chart by stops goes here
+              </div>
+            </div>
+          </div>
+        </div> <!-- chart -->
+
+        <div class="col-sm-3">
+          <div id="stacked-bar">
+            <h4>stackedbar goes here</h4>
+          </div>
+        </div><!--stackedbar-->
+
+      </div><!--row container-->
+    </section>
+
+    <section>
+      <div class="row">
+        <h3>Your journey on this route</h3>
+        <span>Select two stops below to know your average journey time.</span>
+      </div><!--row-->
+      <div class="row mleft0"> <!--map -->
+        <div class="col-sm-4">
+          <div class="row">
+            <div id="map"><!--map goes here!--></div>
           </div>
         </div>
-
-        <div class="row">
-          <div class="col-sm-4">
-            <div class="row">
-              <div class="metricsblocks">
-                <div class="rowbox">
-                  <h2>Excess Wait Time</h2>
-                  <p>Short Explanation<p>
-                </div>
-                <div class="row">
-                  <h1 class="jumbo">3.5 min</h1>
-                </div>
+        <div class="col-sm-8">
+          <h3 class="h3-route"> X to Y </h3>
+          <div class="row">
+            <p>Your scheduled wait time is <span class="hilite">10min</span>. However, your average journey time is <span class="hilite">15 min</span>. Therefore, it is better to budget <span class="hilite">5</span> more minutes.</p>
+          </div>
+          <div class="row">
+            <div class="col-xs-6">
+              <div style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
+              stacked bar goes here
               </div>
             </div>
-            <div class="row">
-              <div class="metricsblocks">
-                <div class="rowbox">
-                  <h2>Average Speed</h2>
-                  <p>Short Explanation<p>
-                </div>
-                <div class="row">
-                  <h1 class="jumbo">3.5 mph</h1>
-                </div>
-              </div>
-            </div>
-
-          </div> <!-- metrics -->
-
-          <div class="col-sm-8"> <!-- chart -->
-            <div class="row">
-              <div class="col-sm-2">
-                <h2>Trend</h2>
-              </div>
-              <div class="col-sm-8">
-                <ul class="nav nav-pills met-pills pull-left">
-                  <li class="active"><a href="#">EWT</a></li>
-                  <li><a href="#">Speed</a></li>
+            <div class="col-xs-6">
+              <h4>Your journey trendline</h4>
+              <div class="row">
+                <ul class="nav nav-tabs">
+                  <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
+                  <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
                 </ul>
+                <div class="tab-contents">
+                  <div id="journey-month-chart" class="tab-pane fade in active">
+                  </div>
+                  <div id="journey-week-chart" class="tab-pane fade">
+                    weekly chart goes here
+                  </div>
+                </div>
               </div>
-
-            </div>
-            <div class="row">
-              <ul class="nav nav-tabs">
-                <li class="active"><a href="#">Past Month</a></li>
-                <li><a href="#">Past 7 days</a></li>
-                <li><a href="#">By Stops</a></li>
-              </ul>
-              <div class="blocks">
-                <div id ="month-chart"></div>
-              </div>
-            </div>
-          </div> <!-- chart -->
-        </div><!--row container-->
-      </section>
-
-      <section>
-        <div class="row">
-          <h3>Your journey on this route</h3>
-          <span>Select two stops to know...</span>
-        </div><!--row-->
-        <div class="row mleft0"> <!--map -->
-          <div class="col-sm-8">
-            <div class="row">
-              <h4>DIRECTIONS</h4>
-              <select id="dirSelect" size="1">
-                <option name= "direction" id="dir0" value="0">Dir0</option>
-                <option name= "direction" id="dir1" value="1">Dir1</option>
-                <option name= "direction" id="dir2" value="2" selected="selected">All</option>
-              </select>
-              <div id="map"><!--map goes here!--></div>
             </div>
           </div>
-          <div class="col-sm-4">
-            <h3>X to Y</h3>
-            <h4>METRIC</h4>
-            <form id="metricSelect">
-              <input type="radio" name="metric" value="ewt" checked> EWT
-              <input type="radio" name="metric" value="rbt"> RBT
-              <input type="radio" name="metric" value="speed" > speed
-            </form>
-            <p>Don't know how to present the result yet</p>
-        </div> <!-- map -->
-      </section>
-    </div> <!-- contentwrapper -->
+      </div> <!-- map -->
+    </section>
   </div> <!-- container -->
+  <div id="footer"><!-- footer -->
+    <div id="footerInner">
+
+      <div id="rightFooter">
+        <a href="" target="_blank">
+          <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+        </a>
+        <a href="" target="_blank">
+          <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+        </a>
+      </div>
+    </div>
+  </div> <!-- End Footer -->
 
 
 </body>
@@ -234,6 +253,7 @@
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script>
 <script>
   var route = '{{ route }}';
   console.log(route);
@@ -242,12 +262,8 @@
           tc.initialize(data, first=true);
       });
   </script>
-
-<script src="js/angular/angular.min.js"></script>
-<script src="js/angular/angular-animate.js"></script>
-<script src="js/angular/angular-sanitize.js"></script>
-<script src="js/angular/ui-bootstrap-tpls-2.5.0.js"></script>
-<script src="js/uib-datepicker.js"></script>
 <!-- for d3 chart-->
-<script type="text/javascript" src="js/libs/d3.v4.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<!-- stacked bar -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
 </html>

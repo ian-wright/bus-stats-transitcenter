@@ -33,158 +33,125 @@
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
-      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1" style="padding: 9px 0;">
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
         <ul class="nav navbar-nav navbar-right topbar">
+          <li class="active">
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
           <li>
-            <a ui-sref="methodologies" ui-sref-active="active" href="/methodologies">
+            <a href="/routes/Bx39">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
               <span>Methodologies</span>
             </a>
           </li>
           <li>
-            <a ui-sref="about" ui-sref-active="active" href="/about" style="padding-right:40px;">
+            <a href="/about" style="padding-right:40px;">
               <span>About</span>
             </a>
           </li>
         </ul>
       </div><!-- /.navbar-collapse -->
 
-      <!-- sidebar -->
-      <div id="sidebar" class="collapse navbar-collapse navbar-collapse-1" aria-expanded="false" style="height: 0px;">
-        <div class="sidebar">
-          <ul class="nav navbar-nav sidebar-nav">
-            <li>
-              <div class="underline active" ng-class="{active: $state.includes('detail') || $state.includes('home') }">
-                <a ui-sref="home" href="{{ url_for('home') }}">
-                  Dashboard
-                </a>
-              </div>
-
-              <ul class="sidebarSubLinks">
-                <!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Excess Wait Time
-                  </a>
-                </li><!-- end ngRepeat: mc in metricCategories -->
-                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Speed
-                  </a>
-                </li>
-                <li class="underline ng-scope" ng-repeat="mc in metricCategories">
-                  <a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
-                    Reliability Buffer Time
-                  </a>
-                </li>
-              </ul>
-
-            </li>
-            <li>
-              <div ui-sref-active="active">
-                <a href="/routes/BX39">
-                  Route Level Metrics
-                </a>
-              </div>
-              <div class="row mleft0">
-                <button type="submit" class="btn btn-default btn-route">
-                  <span>Select a route</span>
-                </button>
-              </div>
-            </li>
-
-            <li>
-              <div class="underline" ui-sref-active="active">
-                <a href="/glossary">
-                  Glossary
-                </a>
-              </div>
-            </li>
-
-          </ul>
-        </div> <!-- Side bar end -->
-      </div> <!-- Side bar collapse end -->
-
-
     </div><!-- /.container-fluid -->
   </nav><!-- end of the navbar -->
 
   <!-- content -->
   <div id="container">
-    <div id="contentWrapper">
-      <section>
-        <!-- map -->
-        <div class="row mleft0">
-          <div id="maphome" style="position:absolute ;width: 85%; height:85%"></div>
-        </div>
+    <section>
+      <!-- map -->
+      <div class="row" id="maphomediv">
+        <div id="maphome"></div>
+      </div>
 
-        <!-- the boxes -->
-        <div class="row mtop60 mleft32">
-          <div class="col-sm-12">
-            <h1>Summary</h1>
-            <span class="span-date">31 May 2017</span>
+      <!-- the boxes -->
+      <div class="row mtop60 mleft32">
+        <div class="col-sm-12">
+          <h1>Summary</h1>
+          <span class="span-date">31 May 2017</span>
+        </div>
+      </div>
+
+      <div class="row mleft32">
+        <div class="col-sm-5 metric-box-home">
+          <div class="rowbox">
+            <h2>Excess Wait Time</h2>
+            <p>Short Explanation<p>
+          </div>
+          <div class="row">
+            <h1 class="jumbo">3.5 min</h1>
+          </div>
+          <div class="row">
+            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mtop0 mleft32">
+        <div class="col-sm-5 metric-box-home">
+          <div class="rowbox">
+            <h2>Average Speed</h2>
+            <p>Short Explanation<p>
+          </div>
+          <div class="row">
+            <h1 class="jumbo">4.6 mph</h1>
+          </div>
+          <div class="row">
+            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- section charts here -->
+    <section id="charthome">
+      <div class="row">
+
+        <div class="col-sm-6">
+          <h1>Excess Wait Time</h1>
+          <p class="span-date">Excess wait time is a blabla</p>
+          <div style="height:300px; border: 1px solid #ccc;">
+            <h4>past month trendline</h4>
           </div>
         </div>
 
-        <div class="row mleft32">
-          <div class="col-sm-5">
-            <div class="rowbox">
-              <h2>Excess Wait Time</h2>
-              <p>Short Explanation<p>
-            </div>
-            <div class="row">
-              <h1 class="jumbo">3.5 min</h1>
-            </div>
-            <div class="row">
-              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-            </div>
+        <div class="col-sm-6">
+          <h1>Average Speed</h1>
+          <p class="span-date">Average speed is blabla</p>
+          <div style="height:300px; border: 1px solid #ccc;">
+            <h4>Past Month trend line</h4>
           </div>
         </div>
+      </div>
 
-        <div class="row mtop0 mleft32">
-          <div class="col-sm-5">
-            <div class="rowbox">
-              <h2>Average Speed</h2>
-              <p>Short Explanation<p>
-            </div>
-            <div class="row">
-              <h1 class="jumbo">4.6 mph</h1>
-            </div>
-            <div class="row">
-              <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
-            </div>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- section charts here -->
-      <section id="charthome">
-        <div class="row mtop80">
-
-          <div class="col-sm-6">
-            <h1>Excess Wait Time</h1>
-            <p class="span-date">Excess wait time is a blabla</p>
-            <div class="blocks">
-              <h4>Past Month</h4>
-            </div>
-          </div>
-
-          <div class="col-sm-6">
-            <h1>Average Speed</h1>
-            <p class="span-date">Average speed is blabla</p>
-            <div class="blocks">
-              <h4>Past Month</h4>
-            </div>
-          </div>
-        </div>
-        <div class="row">
+      <div class="row">
+        <div class="col-sm-6">
           <h1>Reliability Buffer Time</h1>
-          <p class="span-date">Reliability buffer time is...</p>
-          <button>Find your journey here</button>
+          <p class="span-date">Reliability buffer time is a blabla</p>
+          <div style="height:300px; border: 1px solid #ccc;">
+            <h4>past month trendline</h4>
+          </div>
         </div>
-      </section>
-    </div>
-  </div><!--content wrapper-->
 
+        <div class="col-sm-6">
+          <h1>Excess Journey Time</h1>
+          <p class="span-date">Journey time is blabla</p>
+          <div style="height:300px; border: 1px solid #ccc;">
+            <h4>stacked bar</h4>
+          </div>
+        </div>
+        <div style="align:center">
+          <button class="btn btn-primary btn-large">Find how your journey performs here</button>
+        </div>
+      </div>
+    </section>
+  </div>
 </body>
 
 <div id="footer"><!-- footer -->
