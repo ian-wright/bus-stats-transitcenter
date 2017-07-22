@@ -2,7 +2,7 @@
 
   var gr = {
 
-    initialize: function() {
+    initializeCharts: function() {
       console.log("initializing charts...");
 
       gr.chart1 = d3.select("#month-chart").append("svg")
@@ -39,26 +39,37 @@
       gr.parseTime = d3.timeParse("%Y-%m-%d");
 
       gr.line1 = d3.line()
-              .curve(d3.curveMonotoneX)
+              .curve(d3.curveLinear)
               .x(function(d){ return gr.x1(d.date);})
               .y(function(d){ return gr.y1(d.metric);});
       gr.line2 = d3.line()
-                .curve(d3.curveMonotoneX)
+                .curve(d3.curveLinear)
                 .x(function(d){ return gr.x2(d.date);})
                 .y(function(d){ return gr.y2(d.metric);});
       gr.line3 = d3.line()
-                .curve(d3.curveMonotoneX)
+                .curve(d3.curveLinear)
                 .x(function(d){ return gr.x3(d.stop);})
                 .y(function(d){ return gr.y3(d.metric);});
 
-      gr.metricMap = {
+      gr.routeMetricMap = {
         'stop': 0,
         'ewt': 1,
         'rbt': 2,
-        'speed': 3
+        'speed': 3,
       };
 
-      gr.NameMap = {
+      gr.stopMetricMap = {
+        'stop': 0,
+        'ewt_95': 1,
+        'awt': 2,
+        'swt': 3,
+        'count': 4,
+        's_trip': 5,
+        'm_trip': 6,
+        'trip_95': 7
+      };
+
+      gr.nameMap = {
         'ewt': 'Estimated Wait Time (min)',
         'rbt': 'Reliability Buffer Time (min)',
         'speed': 'Speed (mph)'
@@ -152,7 +163,7 @@
       g1.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height1/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g1.append("path")
           .datum(chartcontent1)
@@ -212,7 +223,7 @@
       g2.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height2/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g2.append("path")
           .datum(chartcontent2)
@@ -278,7 +289,7 @@
       g3.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height3/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g3.append("path")
           .datum(chartcontent3)

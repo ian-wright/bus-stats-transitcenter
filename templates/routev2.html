@@ -9,7 +9,7 @@
   <meta name="author" content="NYU CUSP">
   <!-- <link rel="icon" href="../../favicon.ico"> -->
   <title>NYC Bus Profile Dashboard</title>
-  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <!-- TODO - static resources: What should be downloaded vs. pulled down from CDN? -->
   <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
@@ -72,7 +72,7 @@
               <option name="route" value="{{ route }}">{{ route }}</option>
             {% endfor %}
           </select>
-          <span id="bus_id">Loading Bus...</span>
+          <span id="busLongName">Loading Bus...</span>
         </h1>
       </div><!--row-->
 
@@ -86,14 +86,14 @@
         <div class="col-sm-5">
           <h4>TIME FILTERS</h4>
           <select id="daySelect" size="1">
-            <option name= "daybin" value="0">Weekday</option>
+            <option name= "daybin" value="0" selected="selected">Weekday</option>
             <option name= "daybin" value="1">Weekend</option>
-            <option name= "daybin" value="2" selected="selected">All</option>
+            <option name= "daybin" value="2">All</option>
           </select>
           <select id="hourSelect" size="1">
-            <option name= "hourbin" value="0">Peak</option>
+            <option name= "hourbin" value="0" selected="selected">Peak</option>
             <option name= "hourbin" value="1">Off Peak</option>
-            <option name= "hourbin" value="2" selected="selected">All</option>
+            <option name= "hourbin" value="2">All</option>
           </select>
         </div>
         <div class="col-sm-5">
@@ -252,20 +252,25 @@
 
 <!--javascripts -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script> -->
+<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
         integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<!-- stacked bar -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
+
 <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
 <script>
   var route = '{{ route }}';
   console.log(route);
   var dataURL = `/routes/${route}/data`;
     $.getJSON(dataURL, function(data) {
-          tc.initialize(data, first=true);
+          tc.initializeDashboard(data, first=true);
       });
 </script>
 <script type="text/javascript">
@@ -276,9 +281,5 @@
   });
   });
 </script>
-<!-- for d3 chart-->
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<!-- stacked bar -->
-<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
+
 </html>
