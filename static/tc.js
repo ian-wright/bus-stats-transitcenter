@@ -327,6 +327,7 @@
 		},
 
 
+		// NEVER CALLED
 		refreshTable: function() {
 			console.log("refreshing table...");
 			// clear existing table
