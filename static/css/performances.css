@@ -62,7 +62,7 @@ select {
 }
 
 #month-chart, #week-chart, #stop-chart {
-  width: 90%;
+  width: 100%;
 }
 
 /* GRAPH STYLING */
@@ -519,10 +519,9 @@ span.hilite {
   border-color: transparent
 }
 
-#selectRoute {
+#routeSelect {
   display: inline; !important
-
-  width: 100px;
+  width: 50px;
 }
 
 #bus_id {
@@ -1893,4 +1892,28 @@ height: 100%;
         position: relative;
         margin-right: 0;
     }
+}
+
+/* overriding select2 */
+
+.select2-container {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: auto;
+    vertical-align: middle;
+    margin-top: -5px !important;
+}
+
+.select2-container .select2-selection--single {
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    height: 54px !important;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444;
+    line-height: 50px !important;
 }

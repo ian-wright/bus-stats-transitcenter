@@ -30,7 +30,8 @@
 			}
 
 			// set headline text
-			$("#bus_id").text(data["route_id"] + ": " + data["long_name"]);
+			$("#selectRoute").text(data["route_id"]);
+			$("#bus_id").text(data["long_name"]);
 
 			// set direction headsign selection options
 			$("#dir0").text(data["directions"]["0"]["headsign"]);
