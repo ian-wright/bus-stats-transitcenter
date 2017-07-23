@@ -22,6 +22,7 @@
 
         stopLookup: {0: {}, 1: {}},
 
+        // for low-n warning message
         countMin: 30,
 
         routeMetricMap: {
@@ -42,11 +43,33 @@
 	        trip_95: 7
       	},
 
+      	graphLineConfig: {
+			type: 'scatter',
+			mode: 'lines',
+			line: {
+				color: 'rgb(87, 6, 140)',
+				width: 3
+			}
+		},
+
+		graphLayout: {
+			width: "100%",
+			height: "100%",
+			showlegend: false
+		},
+
+		axisNames: {
+	        ewt: '(minutes)',
+	        rbt: '(minutes)',
+	        speed: '(mph)'
+		},
+
+
 		initializeDashboard: function(data, first) {
 			console.log("initializing dashboard...");
 			tc.rawData = data;
 
-			// handle bad data error
+			// handle bad data errors
 			if (data["status"]=="error") {
 				var current = $(location).attr('href');
 				window.location.replace(current + "/404");
@@ -152,6 +175,10 @@
 			    	console.log('1st stop selection:', justClicked.feature.properties.stop_id);
 				    tc.selection.stop = [justClicked];
 				    justClicked.setStyle(startMarkerStyle);
+
+				    var startId = tc.selection.stop[0].feature.properties.stop_id;
+					var startName = tc.stopLookup[tc.selection.direction][startId]["name"]
+					$("#stopNamePair").text(`${startName} to --`);
 
 				// if this is the endpoint of a journey selection
 				} else if (tc.selection.stop.length == 1){
@@ -271,6 +298,22 @@
 		resetDashboard:function(route) {
 			console.log(`resetting dashboard for ${route}...`);
 			$("#busLongName").text("Loading Bus...");
+
+			// reset route-level summary
+			$("#route-ewt").text(`-- mins`);
+			$("#route-rbt").text(`-- mins`);
+			$("#route-speed").text(`-- mph`);
+			$("#stop-chart div").remove();
+			$("#month-chart div").remove();
+			$("#week-chart div").remove();
+
+			// reset journey-level summary
+			$("#stopNamePair").text("-- to --");
+			$(".hilite").text("-- min");
+			$("#countWarning").text("");
+			$("#journey-month-chart div").remove();
+			$("#journey-week-chart div").remove();
+			$("#journey-bar-chart div").remove();
 
 			// revert to default selections on new route (day=0, hour=0, dir=2)
 			$("input[value=0]", "#hourSelect").prop('checked', true);
@@ -445,9 +488,9 @@
 			console.log("updating metric display...");
 
 			// update route-level summary
-			$("#route-ewt").text(tc.selectionData[tc.selection.date]["route"]["ewt"]);
-			$("#route-rbt").text(tc.selectionData[tc.selection.date]["route"]["rbt"]);
-			$("#route-speed").text(tc.selectionData[tc.selection.date]["route"]["speed"]);
+			$("#route-ewt").text(`${tc.selectionData[tc.selection.date]["route"]["ewt"]} mins`);
+			$("#route-rbt").text(`${tc.selectionData[tc.selection.date]["route"]["rbt"]} mins`);
+			$("#route-speed").text(`${tc.selectionData[tc.selection.date]["route"]["speed"]} mph`);
 
 			// draw route-level charts
 			tc.drawRouteLineCharts();
@@ -477,14 +520,20 @@
 					$("#countWarning").text(`*BEWARE: metrics for this journey were computed w/ low sample size (n < ${tc.countMin})`);
 				};
 
+				// draw journey-level charts
+				tc.drawJourneyLineCharts(computed);
+				tc.drawJourneyBarCharts(computed);
+
 			} else if (tc.selection.stop == 0) {
-				// clear the journey metrics/graphs
+				// clear the journey-level metrics and graphs
 				$("#stopNamePair").text("-- to --");
 				$(".hilite").text("-- min");
 				$("#countWarning").text("");
-			};
+				$("#journey-month-chart div").remove();
+				$("#journey-week-chart div").remove();
+				$("#journey-bar-chart div").remove();
 
-			// draw journey-level charts
+			};
 
 		},
 
@@ -533,51 +582,34 @@
 		drawRouteLineCharts: function() {
 			console.log("drawing route line charts...");
 
-			var axisNames = {
-		        ewt: '(minutes)',
-		        rbt: '(minutes)',
-		        speed: '(mph)'
-    		};
-
-			var lineConfig = {
-				type: 'scatter',
-				mode: 'lines',
-				line: {
-					color: 'rgb(87, 6, 140)',
-					width: 3
-				}
-			};
-
-			var layout = {
-			  width: 650,
-			  height: 450
-			};
-
 			var time_x = [];
 			var time_y = [];
 			Object.keys(tc.selectionData).forEach(function(date) {
 				time_x.push(date);
 				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
 			});
-			//console.log("time_x", time_x, "time_y", time_y);
 
-			var monthLine = Object.create(lineConfig);
-			monthLine.x = time_x;
-			monthLine.y = time_y;
+			var monthLine = Object.create(tc.graphLineConfig);
+			monthLine["x"] = time_x;
+			monthLine["y"] = time_y;
 
-			var weekLine = Object.create(lineConfig);
-			weekLine.x = time_x.slice(-7);
-			weekLine.y = time_y.slice(-7);
+			var weekLine = Object.create(tc.graphLineConfig);
+			weekLine["x"] = time_x.slice(-7);
+			weekLine["y"] = time_y.slice(-7);
 
-			var timeLayout = Object.create(layout);
-			timeLayout.yaxis = {title: axisNames[tc.selection.metric]};
-			timeLayout.xaxis = {showline: true};
+			var timeLayout = Object.create(tc.graphLayout);
+			timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+			timeLayout["xaxis"] = {zeroline: false};
 
-			Plotly.newPlot('month-chart', [monthLine], timeLayout, {displayModeBar: false});
-			Plotly.newPlot('week-chart', [weekLine], timeLayout, {displayModeBar: false});
+			Plotly.newPlot("month-chart", [monthLine], timeLayout, {displayModeBar: false});
+			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
 
 			//only draw stop-by-stop chart for ewt and rbt (not speed)
 			if (["ewt", "rbt"].includes(tc.selection.metric)) {
+
+				// remove the "No stop-level chart for speed" warning if it's there
+				$("#stop-chart div").remove();
+
 				var stopNames = [];
 				var stops_y = [];
 				var stopEnum = [];
@@ -586,33 +618,154 @@
 					stopNames.push(tc.stopLookup[tc.selection.direction][stop]["name"]);
 					stops_y.push(tc.selectionData[tc.selection.date]["stops"][stop][conversionMap[tc.selection.metric]]);
 				});
-				//console.log("stopNames", stopNames, "stops_y", stops_y, "stops_x", stopEnum);
 
 				for (var i = 1; i <= stops_y.length; i++) {
 				    stopEnum.push(i);
 				};
 
-				var stopLine = Object.create(lineConfig);
-				stopLine.x = stopEnum;
-				stopLine.y = stops_y;
-				stopLine.text = stopNames;
+				var stopLine = Object.create(tc.graphLineConfig);
+				stopLine["x"] = stopEnum;
+				stopLine["y"] = stops_y;
+				stopLine["text"] = stopNames;
 
-				var stopsLayout = Object.create(layout);
-				stopsLayout.xaxis = {range: [1, stopEnum.length + 1], showline: true};
-				stopsLayout.yaxis = {title: axisNames[tc.selection.metric]};
+				var stopsLayout = Object.create(tc.graphLayout);
+				stopsLayout["xaxis"] = {range: [1, stopEnum.length + 1], zeroline: false};
+				stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
 
-				Plotly.newPlot('stop-chart', [stopLine], stopsLayout, {displayModeBar: false});
+				Plotly.newPlot("stop-chart", [stopLine], stopsLayout, {displayModeBar: false});
 
 			} else {
 				// delete the stops chart
 				$("#stop-chart div").remove();
+				$("#stop-chart").append("<div>No stop-level chart for speed.</div>");
 			};
 		},
 
 
-		// drawRouteLineCharts: function() {
+		// drawRouteBarCharts: function() {
 		// 	var blerp;
 		// }
+
+		drawJourneyLineCharts: function(data) {
+			console.log("drawing journey line charts...");
+			console.log(data);
+
+			// just draw time series of two lines: awt + m_trip
+			var time_x = [];
+			var time_y_wait = [];
+			var time_y_trip = [];
+			Object.keys(data).forEach(function(date) {
+				time_x.push(date);
+				time_y_wait.push(data[date]["awt"]);
+				time_y_trip.push(data[date]["m_trip"]);
+			});
+
+			var monthWaitLine = Object.create(tc.graphLineConfig);
+			monthWaitLine.name = "avg. wait time";
+			monthWaitLine.x = time_x;
+			monthWaitLine.y = time_y_wait;
+			monthWaitLine.fill = 'tozeroy';
+			monthWaitLine.line = {
+				color: 'rgb(74, 79, 85)',
+				width: 3
+			};
+			monthWaitLine.showlegend = false;
+
+			var monthTripLine = Object.create(tc.graphLineConfig);
+			monthTripLine.name = "avg. trip time";
+			monthTripLine.x = time_x;
+			monthTripLine.y = time_y_trip;
+			monthTripLine.fill = 'tonexty';
+			monthTripLine.showlegend = false;
+
+			var stackedMonthData = [
+				monthWaitLine,
+				monthTripLine
+			];
+
+			var weekWaitLine = Object.create(monthWaitLine);
+			weekWaitLine.x = time_x.slice(-7);
+			weekWaitLine.y = time_y_wait.slice(-7);
+
+			var weekTripLine = Object.create(monthTripLine);
+			weekTripLine.x = time_x.slice(-7);
+			weekTripLine.y = time_y_trip.slice(-7);
+
+			var stackedWeekData = [
+				weekWaitLine,
+				weekTripLine
+			];
+
+			var timeLayout = Object.create(tc.graphLayout);
+			timeLayout["yaxis"] = {title: "Journey Time (mins"};
+
+			function stackedArea(stackedData) {
+				for(var i=1; i<stackedData.length; i++) {
+					for(var j=0; j<(Math.min(stackedData[i]['y'].length, stackedData[i-1]['y'].length)); j++) {
+						stackedData[i]['y'][j] += stackedData[i-1]['y'][j];
+					}
+				}
+				console.log("stackedData", stackedData);
+				return stackedData;
+			};
+
+			Plotly.newPlot("journey-month-chart", stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
+			Plotly.newPlot("journey-week-chart", stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
+		},
+
+
+		drawJourneyBarCharts: function(data) {
+			console.log("drawing journey bar charts...");
+			console.log(data);
+
+			// draw three stacked bars for selected date: (swt + s_trip), (awt + m_trip), and (ewt_95 + trip_95)
+			
+
+			var d = data[tc.selection.date];
+
+			var waitData = {
+				x: ["Scheduled", "Average", "Planning"],
+				y: [d.swt, d.awt, d.ewt_95],
+				name: 'Wait Time',
+				type: 'bar',
+				marker: {
+					color: 'rgb(74, 79, 85)',
+					line: {
+				      color: 'rgb(74, 79, 85)',
+				      width: 2
+				    }
+				},
+				showlegend: false,
+				opacity: 0.5
+			};
+
+			var onboardData = {
+				x: ["Scheduled", "Average", "Planning"],
+				y: [d.s_trip, d.m_trip, d.trip_95],
+				name: 'Onboard Time',
+				type: 'bar',
+				marker: {
+					color: 'rgb(87, 6, 140)',
+					line: {
+				      color: 'rgb(87, 6, 140)',
+				      width: 2,
+				    }
+				},
+				showlegend: false,
+				opacity: 0.5
+			};
+
+			var data = [waitData, onboardData];
+
+			var barLayout = Object.create(tc.graphLayout);
+			// var layout = {barmode: 'stack'};
+			barLayout["barmode"] = "stack";
+			barLayout["bargap"] = 0.1;
+			barLayout["yaxis"] = {title: "Journey Time (mins"};
+
+			Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
+
+		}
 	};
 
 	// add our tc object to global window scope

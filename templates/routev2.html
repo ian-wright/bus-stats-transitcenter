@@ -102,7 +102,7 @@
           </select>
         </div>
         <div class="col-sm-5">
-          <h4>DIRECTIONS</h4>
+          <h4>DIRECTION</h4>
           <select id="dirSelect" size="1" style="width:200px;">
             <option name= "direction" id="dir0" value="0">Dir0</option>
             <option name= "direction" id="dir1" value="1">Dir1</option>
@@ -115,7 +115,7 @@
     <!-- ewt, speed and chart -->
     <section id="basicmetrics">
       <div class="row">
-        <h3>Route Level Metrics </h3>
+        <h3>Route Summary</h3>
         <div class="col-sm-3">
           <div class="row">
             <div class="metricsblocks">
@@ -123,7 +123,7 @@
                 <h2>Avg. Wait Delay</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-ewt" class="jumbo jumbo2">3.5 min</h1>
+                <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1>
               </div>
             </div>
           </div>
@@ -133,7 +133,7 @@
                 <h2>Trip Planning Buffer</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-rbt" class="jumbo jumbo2">5 mph</h1>
+                <h1 id= "route-rbt" class="jumbo jumbo2">-- mph</h1>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-speed" class="jumbo jumbo2">10 min</h1>
+                <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1>
               </div>
             </div>
           </div>
@@ -190,6 +190,7 @@
         <div class="col-sm-3">
           <div id="stacked-bar">
             <h4>stackedbar goes here</h4>
+            (this would just be a single bar with two parts...)
           </div>
         </div><!--stackedbar-->
 
@@ -198,8 +199,8 @@
 
     <section>
       <div class="row">
-        <h3>Your journey on this route</h3>
-        <span>Select two stops below to know your average journey time.</span>
+        <h3>Stop-to-Stop Journey</h3>
+        <span>Select two stops below to learn about your journey.</span>
       </div><!--row-->
       <div class="row mleft0"> <!--map -->
         <div class="col-sm-4">
@@ -211,19 +212,21 @@
           <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
           <div class="row">
             <p>
+            (I don't know how to word/design/format this section... but there are 6 numbers to show.)
+            </p>
+            <p>
             Scheduled wait time: <span id="journey-swt" class="hilite">--min</span>.
             Scheduled onboard time: <span id="journey-s-trip" class="hilite">--min</span>.
-            Average wait time: <span id="journey-awt" class="hilite">10min</span>.
+            Average wait time: <span id="journey-awt" class="hilite">--min</span>.
             Average onboard time: <span id="journey-m-trip" class="hilite">--min</span>.
-            95% wait time: <span id="journey-ewt-95" class="hilite">10min</span>.
+            95% wait time: <span id="journey-ewt-95" class="hilite">--min</span>.
             95% onboard time: <span id="journey-trip-95" class="hilite">--min</span>.
             </p>
             <p id="countWarning"></p>
           </div>
           <div class="row">
             <div class="col-xs-6">
-              <div style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
-              stacked bar goes here
+              <div id="journey-bar-chart" style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
               </div>
             </div>
             <div class="col-xs-6">
@@ -237,7 +240,6 @@
                   <div id="journey-month-chart" class="tab-pane fade in active">
                   </div>
                   <div id="journey-week-chart" class="tab-pane fade">
-                    weekly chart goes here
                   </div>
                 </div>
               </div>
