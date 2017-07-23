@@ -123,7 +123,7 @@
                 <h2>Avg. Wait Delay</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route_ewt" class="jumbo jumbo2">3.5 min</h1>
+                <h1 id= "route-ewt" class="jumbo jumbo2">3.5 min</h1>
               </div>
             </div>
           </div>
@@ -133,7 +133,7 @@
                 <h2>Trip Planning Buffer</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route_rbt" class="jumbo jumbo2">5 mph</h1>
+                <h1 id= "route-rbt" class="jumbo jumbo2">5 mph</h1>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route_speed" class="jumbo jumbo2">10 min</h1>
+                <h1 id= "route-speed" class="jumbo jumbo2">10 min</h1>
               </div>
             </div>
           </div>
@@ -158,13 +158,13 @@
             <div class="col-sm-8">
               <div class="btn-group" data-toggle="buttons" id="metricSelect">
                 <label class="btn btn-primary active">
-                  <input type="radio" name="metric" value="ewt" checked> EWT
+                  <input type="radio" name="metric" value="ewt" checked> Avg. Wait
                 </label>
                 <label class="btn btn-primary">
-                  <input type="radio" name="metric" value="rbt"> RBT
+                  <input type="radio" name="metric" value="rbt"> Planning Buffer
                 </label>
                 <label class="btn btn-primary">
-                  <input type="radio" name="metric" value="speed"> Speed
+                  <input type="radio" name="metric" value="speed"> Avg. Speed
                 </label>
               </div>
             </div>
@@ -208,9 +208,17 @@
           </div>
         </div>
         <div class="col-sm-8">
-          <h3 class="h3-route"> X to Y </h3>
+          <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
           <div class="row">
-            <p>Your scheduled wait time is <span class="hilite">10min</span>. However, your average journey time is <span class="hilite">15 min</span>. Therefore, it is better to budget <span class="hilite">5</span> more minutes.</p>
+            <p>
+            Scheduled wait time: <span id="journey-swt" class="hilite">--min</span>.
+            Scheduled onboard time: <span id="journey-s-trip" class="hilite">--min</span>.
+            Average wait time: <span id="journey-awt" class="hilite">10min</span>.
+            Average onboard time: <span id="journey-m-trip" class="hilite">--min</span>.
+            95% wait time: <span id="journey-ewt-95" class="hilite">10min</span>.
+            95% onboard time: <span id="journey-trip-95" class="hilite">--min</span>.
+            </p>
+            <p id="countWarning"></p>
           </div>
           <div class="row">
             <div class="col-xs-6">
@@ -258,16 +266,19 @@
 <!--javascripts -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script> -->
-<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
+
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
         integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <!-- stacked bar -->
-<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script> -->
 
-<script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
 <script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
 <!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
 <script>

@@ -63,7 +63,7 @@ def test_mode(stop_columns, route_columns, engine):
                               'ewt_95': round(random() * 10, 1),
                               'awt': round(random() * 10, 1),
                               'swt': round(random() * 10, 1),
-                              'count': round(random() * 10, 1),
+                              'count': round(random() * 30, 1),
                               's_trip': round(random() * 10, 1),
                               'm_trip': round(random() * 10, 1),
                               'trip_95': round(random() * 10, 1)

@@ -20,7 +20,27 @@
         rawData: null,
         selectionData: null,
 
-        stopLookup: {"0": {}, "1": {}},
+        stopLookup: {0: {}, 1: {}},
+
+        countMin: 30,
+
+        routeMetricMap: {
+	        stop: 0,
+	        ewt: 1,
+	        rbt: 2,
+	        speed: 3,
+      	},
+
+      	stopMetricMap: {
+	        stop: 0,
+	        ewt_95: 1,
+	        awt: 2,
+	        swt: 3,
+	        count: 4,
+	        s_trip: 5,
+	        m_trip: 6,
+	        trip_95: 7
+      	},
 
 		initializeDashboard: function(data, first) {
 			console.log("initializing dashboard...");
@@ -55,7 +75,7 @@
 			if (first==true) {
 				console.log('first map load...')
 				tc.initializeMap();
-				gr.initializeCharts();
+				//gr.initializeCharts();
 				tc.registerSelectionHandlers();
 				tc.registerRouteChangeHandler();
 			};
@@ -205,7 +225,7 @@
 		        	// add marker to group of all markers
 		        	tc.markerGroup.addLayer(layer);
 		        	layer._leaflet_id = feature.properties.stop_id;
-		        	console.log(`adding point to map; stop_id ${feature.properties.stop_id}, _leaflet_id ${layer._leaflet_id}`);
+
 			    } else if (feature.geometry.type == 'LineString') {
 		        	// add line segment to group of all line segments
 		        	tc.lineGroup.addLayer(layer);
@@ -340,20 +360,20 @@
 				// get a single day's stop-level data, in object format
 				allDates[date]["stops"].forEach(function(stop) {
 					var stopValues = {};
-					for (var metricName in gr.stopMetricMap) {
+					for (var metricName in tc.stopMetricMap) {
 						if (metricName != 'stop') {
-							stopValues[metricName] = stop[gr.stopMetricMap[metricName]];
+							stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
 						};
 					};
-					oneDay["stops"][stop[gr.stopMetricMap['stop']]] = stopValues;
+					oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
 				});
 
 				// get a single day's route-level data, in object format
 				var routeData = allDates[date]["route"]["0"];
 				var routeValues = {};
-				for (var metricName in gr.routeMetricMap) {
+				for (var metricName in tc.routeMetricMap) {
 					if (metricName != 'stop') {
-						routeValues[metricName] = routeData[gr.routeMetricMap[metricName]];
+						routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
 					};
 				};
 
@@ -425,26 +445,49 @@
 			console.log("updating metric display...");
 
 			// update route-level summary
-			$("#route_ewt").text(tc.selectionData[tc.selection.date]["route"]["ewt"]);
-			$("#route_rbt").text(tc.selectionData[tc.selection.date]["route"]["rbt"]);
-			$("#route_speed").text(tc.selectionData[tc.selection.date]["route"]["speed"]);
+			$("#route-ewt").text(tc.selectionData[tc.selection.date]["route"]["ewt"]);
+			$("#route-rbt").text(tc.selectionData[tc.selection.date]["route"]["rbt"]);
+			$("#route-speed").text(tc.selectionData[tc.selection.date]["route"]["speed"]);
 
 			// draw route-level charts
-			// gr.updateCharts(tc.selectionData,
-			// 				tc.selection.metric,
-			// 				selectedStop,
-			// 				tc.selection.date);
+			tc.drawRouteLineCharts();
+			//tc.drawRouteBarCharts();
 
 			// update journey metrics
 			if (tc.selection.stop.constructor == Array && tc.selection.stop.length == 2) {
+
+				var startId = tc.selection.stop[0].feature.properties.stop_id;
+				var startName = tc.stopLookup[tc.selection.direction][startId]["name"]
+				var endId = tc.selection.stop[1].feature.properties.stop_id;
+				var endName = tc.stopLookup[tc.selection.direction][endId]["name"]
+				$("#stopNamePair").text(`${startName} to ${endName}`);
+
 				var computed = tc.computeJourneyMetrics();
+				var count = computed[tc.selection.date]["count"];
 				console.log("computed journey:", computed);
+
+				$("#journey-swt").text(`${computed[tc.selection.date]["swt"].toFixed(1)} min`);
+				$("#journey-s-trip").text(`${computed[tc.selection.date]["s_trip"].toFixed(1)} min`);
+				$("#journey-awt").text(`${computed[tc.selection.date]["awt"].toFixed(1)} min`);
+				$("#journey-m-trip").text(`${computed[tc.selection.date]["m_trip"].toFixed(1)} min`);
+				$("#journey-ewt-95").text(`${computed[tc.selection.date]["ewt_95"].toFixed(1)} min`);
+				$("#journey-trip-95").text(`${computed[tc.selection.date]["trip_95"].toFixed(1)} min`);
+
+				if (count < tc.countMin) {
+					$("#countWarning").text(`*BEWARE: metrics for this journey were computed w/ low sample size (n < ${tc.countMin})`);
+				};
+
 			} else if (tc.selection.stop == 0) {
-				// clear the journey metrics/maps
+				// clear the journey metrics/graphs
+				$("#stopNamePair").text("-- to --");
+				$(".hilite").text("-- min");
+				$("#countWarning").text("");
 			};
 
 			// draw journey-level charts
+
 		},
+
 
 		computeJourneyMetrics: function() {
 			console.log("computing journey metrics...");
@@ -463,19 +506,20 @@
 					var seq = stopLookup[stop_id]["sequence"];
 					[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
 
-						var waitTime = metricNames[0];
-						var onboardTime = metricNames[1];
+						var waitTimeName = metricNames[0];
+						var onboardTimeName = metricNames[1];
 
 						if (seq == startSeq) {
-							// originationg bus stop
-							oneDay[waitTime] = tc.selectionData[date]["stops"][stop_id][waitTime];
+							// originating bus stop; take wait time at this stop
+							oneDay[waitTimeName] = tc.selectionData[date]["stops"][stop_id][waitTimeName];
+							oneDay["count"] = tc.selectionData[date]["stops"][stop_id]["count"];
 						};
 						if ((seq >= startSeq) && (seq < endSeq)) {
-							// mid-journey bus stop
-							if (oneDay[onboardTime]) {
-								oneDay[onboardTime] += tc.selectionData[date]["stops"][stop_id][waitTime];
+							// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
+							if (oneDay[onboardTimeName]) {
+								oneDay[onboardTimeName] += tc.selectionData[date]["stops"][stop_id][onboardTimeName];
 							} else {
-								oneDay[onboardTime] = tc.selectionData[date]["stops"][stop_id][waitTime];
+								oneDay[onboardTimeName] = tc.selectionData[date]["stops"][stop_id][onboardTimeName];
 							}
 						};
 					});
@@ -483,7 +527,92 @@
 				computed[date] = oneDay;
 			});
 			return computed;
-		}
+		},
+
+
+		drawRouteLineCharts: function() {
+			console.log("drawing route line charts...");
+
+			var axisNames = {
+		        ewt: '(minutes)',
+		        rbt: '(minutes)',
+		        speed: '(mph)'
+    		};
+
+			var lineConfig = {
+				type: 'scatter',
+				mode: 'lines',
+				line: {
+					color: 'rgb(87, 6, 140)',
+					width: 3
+				}
+			};
+
+			var layout = {
+			  width: 650,
+			  height: 450
+			};
+
+			var time_x = [];
+			var time_y = [];
+			Object.keys(tc.selectionData).forEach(function(date) {
+				time_x.push(date);
+				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
+			});
+			//console.log("time_x", time_x, "time_y", time_y);
+
+			var monthLine = Object.create(lineConfig);
+			monthLine.x = time_x;
+			monthLine.y = time_y;
+
+			var weekLine = Object.create(lineConfig);
+			weekLine.x = time_x.slice(-7);
+			weekLine.y = time_y.slice(-7);
+
+			var timeLayout = Object.create(layout);
+			timeLayout.yaxis = {title: axisNames[tc.selection.metric]};
+			timeLayout.xaxis = {showline: true};
+
+			Plotly.newPlot('month-chart', [monthLine], timeLayout, {displayModeBar: false});
+			Plotly.newPlot('week-chart', [weekLine], timeLayout, {displayModeBar: false});
+
+			//only draw stop-by-stop chart for ewt and rbt (not speed)
+			if (["ewt", "rbt"].includes(tc.selection.metric)) {
+				var stopNames = [];
+				var stops_y = [];
+				var stopEnum = [];
+				var conversionMap = {"ewt": "awt", "rbt": "ewt_95"};
+				Object.keys(tc.selectionData[tc.selection.date]["stops"]).forEach(function(stop){
+					stopNames.push(tc.stopLookup[tc.selection.direction][stop]["name"]);
+					stops_y.push(tc.selectionData[tc.selection.date]["stops"][stop][conversionMap[tc.selection.metric]]);
+				});
+				//console.log("stopNames", stopNames, "stops_y", stops_y, "stops_x", stopEnum);
+
+				for (var i = 1; i <= stops_y.length; i++) {
+				    stopEnum.push(i);
+				};
+
+				var stopLine = Object.create(lineConfig);
+				stopLine.x = stopEnum;
+				stopLine.y = stops_y;
+				stopLine.text = stopNames;
+
+				var stopsLayout = Object.create(layout);
+				stopsLayout.xaxis = {range: [1, stopEnum.length + 1], showline: true};
+				stopsLayout.yaxis = {title: axisNames[tc.selection.metric]};
+
+				Plotly.newPlot('stop-chart', [stopLine], stopsLayout, {displayModeBar: false});
+
+			} else {
+				// delete the stops chart
+				$("#stop-chart div").remove();
+			};
+		},
+
+
+		// drawRouteLineCharts: function() {
+		// 	var blerp;
+		// }
 	};
 
 	// add our tc object to global window scope

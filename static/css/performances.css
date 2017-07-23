@@ -73,7 +73,12 @@ select {
   width: 100%;
 }
 
-.blocks path {
+.svg-container {
+	width: 100%;
+	height: 100%;
+}
+
+/*.blocks path {
   stroke: black;
   fill: none;
   stroke-width: 2px;
@@ -102,8 +107,7 @@ select {
 }
 
 .blocks g.hidden line,
-.blocks g.hidden path {
-  display: none;
+art  display: none;
 }
 
 .blocks g.tick text {
@@ -127,7 +131,7 @@ select {
 }
 .blocks svg {
     background: #fff;
-}
+}*/
 
 @media (min-width: 768px) {
     .col-sm-5ths {
