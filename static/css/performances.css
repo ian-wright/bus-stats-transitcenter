@@ -469,7 +469,7 @@ span.hilite {
 }
 
 #charthome {
-  margin: 60px 20px 20px 20px;
+  margin: 80px 20px 20px 20px;
 }
 
 #header {
@@ -1323,10 +1323,11 @@ input.form-control, select.form-control, textarea.form-control{
 .btn-large {
   margin-top: 20px;
   text-align: center;
-  text-transform: uppercase;
-  border-radius: 50px;
+  border-radius: 5px;
   font-size: 1.25em;
   padding: 10px 20px;
+  background-color: #57068c;
+  width: 100%;
 }
 
 .btn-primary {
