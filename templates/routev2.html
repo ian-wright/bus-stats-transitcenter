@@ -12,9 +12,10 @@
   <!-- TODO - static resources: What should be downloaded vs. pulled down from CDN? -->
   <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
-  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <!-- <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet"> -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
 </head>
 
 <body>
@@ -68,8 +69,12 @@
       <div class="row mtop40">
         <h1>
           <select id="routeSelect" class="selectRoute">
-            {% for route in avail %}
-              <option name="route" value="{{ route }}">{{ route }}</option>
+            {% for routeChoice in avail %}
+              {% if routeChoice == route %}
+              <option name="route" value="{{ routeChoice }}" selected="selected">{{ routeChoice }}</option>
+              {% else %}
+              <option name="route" value="{{ routeChoice }}">{{ routeChoice }}</option>
+              {% endif %}
             {% endfor %}
           </select>
           <span id="busLongName">Loading Bus...</span>
@@ -115,10 +120,20 @@
           <div class="row">
             <div class="metricsblocks">
               <div class="rowbox-sm">
-                <h2>Wait Delay</h2>
+                <h2>Avg. Wait Delay</h2>
               </div>
               <div class="row row-sm">
-                <h1 class="jumbo jumbo2">3.5 min</h1>
+                <h1 id= "route_ewt" class="jumbo jumbo2">3.5 min</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Trip Planning Buffer</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 id= "route_rbt" class="jumbo jumbo2">5 mph</h1>
               </div>
             </div>
           </div>
@@ -128,17 +143,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 class="jumbo jumbo2">5 mph</h1>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="metricsblocks">
-              <div class="rowbox-sm">
-                <h2>EJT (?)</h2>
-              </div>
-              <div class="row row-sm">
-                <h1 class="jumbo jumbo2">10 min</h1>
+                <h1 id= "route_speed" class="jumbo jumbo2">10 min</h1>
               </div>
             </div>
           </div>
@@ -267,19 +272,9 @@
 <!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
 <script>
   var route = '{{ route }}';
-  console.log(route);
   var dataURL = `/routes/${route}/data`;
     $.getJSON(dataURL, function(data) {
           tc.initializeDashboard(data, first=true);
       });
 </script>
-<script type="text/javascript">
-  $(document).ready(function() {
-  $("#routeSelect").select2({
-    dropdownAutoWidth : true,
-    width: 'auto'
-  });
-  });
-</script>
-
 </html>

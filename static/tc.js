@@ -17,11 +17,14 @@
         markerGroup: L.layerGroup(),
         lineGroup: L.layerGroup(),
 
-        data: null,
+        rawData: null,
+        selectionData: null,
+
+        stopLookup: {"0": {}, "1": {}},
 
 		initializeDashboard: function(data, first) {
 			console.log("initializing dashboard...");
-			tc.data = data;
+			tc.rawData = data;
 
 			// handle bad data error
 			if (data["status"]=="error") {
@@ -30,8 +33,12 @@
 			}
 
 			// set headline text
-			//$("#selectRoute").text(data["route_id"]);
 			$("#busLongName").text(data["long_name"]);
+			// enable select2 on route selector
+			$("#routeSelect").select2({
+				dropdownAutoWidth : true,
+				width: 'auto'
+			});
 
 			// set direction headsign selection options
 			$("#dir0").text(data["directions"]["0"]["headsign"]);
@@ -53,9 +60,11 @@
 				tc.registerRouteChangeHandler();
 			};
 
-			// default to route-level stop selection
+			// create a utility object for use in graphing and calculations
+			tc.buildStopLookup();
+
 			tc.selection.stop = 0;
-			tc.updateSelection();
+			tc.updateController("heavy");
 		},
 
 
@@ -117,7 +126,6 @@
 			function clickFeature(e) {
 			    var justClicked = e.target;
 			    console.log("clicking a stop...");
-			    console.log("original selection:", tc.selection);
 
 			    // if this is the first stop selection
 			    if (tc.selection.stop == 0) {
@@ -133,19 +141,18 @@
 						tc.selection.stop.push(justClicked);
 						justClicked.setStyle(endMarkerStyle);
 						paintJourney();
+						tc.updateController("light");
 					} else {
 						console.log("can't drive backwards!");
 					};
 
 				// have already selected a journey, so reset the map selection
 				} else {
+					console.log('1st stop selection:', justClicked.feature.properties.stop_id);
 					resetMapStyle();
 					tc.selection.stop = ['justClicked'];
 					justClicked.setStyle(startMarkerStyle);
 				};
-
-				console.log("new selection:", tc.selection);
-				tc.updateMetricDisplay();
 			};
 
 			function resetMapStyle() {
@@ -153,17 +160,16 @@
 				// revert marker and line styles to default values
 				tc.markerGroup.eachLayer(function(layer){layer.setStyle(defaultMarkerStyle)});
 				tc.lineGroup.eachLayer(function(layer){layer.setStyle(defaultLineStyle)});
-				// reset stop selection to ALL (0)
+				// reset stop selection to NONE (0)
 				tc.selection.stop = 0;
-				tc.updateMetricDisplay();
+				tc.updateController("light");
 
 			};
 
 			function paintJourney() {
-				console.log("painting the journey...");
 				var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
 				var endSeq = tc.selection.stop[1].feature.properties.stop_sequence;
-				console.log(startSeq, endSeq);
+				console.log(`painting the journey from ${startSeq} to ${endSeq}...`);
 				// change marker style for journey markers
 				tc.markerGroup.eachLayer(function(layer){
 					if ((layer.feature.properties.stop_sequence > startSeq) && 
@@ -178,7 +184,6 @@
 						layer.setStyle(journeyLineStyle);
 					};
 				});
-
 			};
 
 			function onEachFeature(feature, layer) {
@@ -199,13 +204,13 @@
 		        	});
 		        	// add marker to group of all markers
 		        	tc.markerGroup.addLayer(layer);
-		        	// TODO - color first and last markers accordingly (route level)
-			    };
-
-		        if (feature.geometry.type == 'LineString') {
+		        	layer._leaflet_id = feature.properties.stop_id;
+		        	console.log(`adding point to map; stop_id ${feature.properties.stop_id}, _leaflet_id ${layer._leaflet_id}`);
+			    } else if (feature.geometry.type == 'LineString') {
 		        	// add line segment to group of all line segments
 		        	tc.lineGroup.addLayer(layer);
 			    };
+			    
 			};
 
 			// create a geojson map layer, passing a function to generate custom markers from geo points
@@ -222,21 +227,29 @@
 
 		registerSelectionHandlers: function() {
 			console.log("registering selection handlers...");
-			$("#daySelect, #hourSelect, #dirSelect, #dateSelect, #metricSelect").on("change", tc.updateSelection);
+
+			$("#dateSelect, #metricSelect").change(function() {
+				tc.updateController("light");
+			});
+			$("#daySelect, #hourSelect").change(function() {
+				tc.updateController("medium");
+			});
+			$("#dirSelect").change(function() {
+				tc.updateController("heavy");
+			});
 		},
 
 
 		registerRouteChangeHandler: function() {
 			console.log("registering route change handler...");
 			$("#routeSelect").change(function() {
-				tc.resetDashboard($(this).val());
+				tc.resetDashboard($("#routeSelect").val());
 			});
 		},
 
 
 		resetDashboard:function(route) {
 			console.log(`resetting dashboard for ${route}...`);
-
 			$("#busLongName").text("Loading Bus...");
 
 			// revert to default selections on new route (day=0, hour=0, dir=2)
@@ -256,46 +269,115 @@
 		},
 
 
-		updateSelection: function() {
-			// scans all user toggles to update current selection (excluding bus stop)
-			console.log(`changed ${this.id}; updating selection...`);
-			console.log("original selection:", tc.selection)
-			tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
-			tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
-			tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
-			tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-			// only refresh the map if the direction selection has changed
-			var newRoute = tc.data["route_id"];
-			var newDirection = $("option[name=direction]:selected", "#dirSelect").val();
-			if ((newDirection != tc.selection.direction) || (newRoute != tc.selection.route)) {
-			//if (newDirection != tc.selection.direction) {
-				console.log("direction selection has changed!");
-				tc.selection.direction = newDirection;
-				tc.selection.route = tc.data["route_id"];
-				console.log("new selection:", tc.selection)
-				tc.redrawMap();
+		buildStopLookup: function() {
+			console.log("building stopLookup...");
+			["0","1"].forEach(function(dir){
+				var stops = tc.rawData["directions"][dir]["geo"]["features"].forEach(function(feat) {
+					if (feat["geometry"]["type"] == "Point") {
+						tc.stopLookup[dir][feat["properties"]["stop_id"]] = {"name": feat["properties"]["stop_name"],
+						 													 "sequence": feat["properties"]["stop_sequence"]};
+					};
+				});
+			});
+		},
+
+
+		updateController: function(level) {
+
+			// light --> stop/date/metric --> (metrics/graphs)
+			// medium --> daybin/hourbin --> (rebuild data, metrics/graphs)
+			// heavy --> direction/route --> (map, rebuild data, metrics/graphs)
+
+			switch (level) {
+				case "light":
+					console.log("updateController: level LIGHT");
+					//console.log("original selection:", tc.selection);
+					// if this is a stop change, stop selection already changed at click event
+					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
+					tc.updateMetricDisplay();
+					break;
+				case "medium":
+					console.log("updateController: level MEDIUM");
+					//console.log("original selection:", tc.selection);
+					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
+					tc.buildDataObject();
+					tc.updateMetricDisplay();
+					break;
+				case "heavy":
+					console.log("updateController: level HEAVY");
+					//console.log("original selection:", tc.selection);
+					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
+					tc.selection.direction = $("option[name=direction]:selected", "#dirSelect").val();
+					tc.selection.route = tc.rawData["route_id"];
+					tc.buildDataObject();
+					tc.redrawMap();
+					//tc.updateMetricDisplay();
+					break;	
 			};
-			console.log("new selection:", tc.selection)
+			//console.log("new selection:", tc.selection);
+		},
 
-			// TODO - put code here to update the view block that echos the current selection
 
-			// refresh data table for all selection changes
-			//tc.refreshTable();
-			tc.updateMetricDisplay();
+		buildDataObject: function(){
+			console.log("building data object...");
+			// get all historical data for given (direction, daybin, hourbin) selection
+			var allDates = tc.rawData["directions"][tc.selection.direction]
+				   				  ["daybins"][tc.selection.dayBin]
+				   				  ["hourbins"][tc.selection.hourBin]
+				   				  ["dates"];
+			var selectionData = {};
+			// transform allDates into object-style structure
+			Object.keys(allDates).forEach(function (date) {
+				var oneDay = {"route": null, "stops": {}};
+
+				// get a single day's stop-level data, in object format
+				allDates[date]["stops"].forEach(function(stop) {
+					var stopValues = {};
+					for (var metricName in gr.stopMetricMap) {
+						if (metricName != 'stop') {
+							stopValues[metricName] = stop[gr.stopMetricMap[metricName]];
+						};
+					};
+					oneDay["stops"][stop[gr.stopMetricMap['stop']]] = stopValues;
+				});
+
+				// get a single day's route-level data, in object format
+				var routeData = allDates[date]["route"]["0"];
+				var routeValues = {};
+				for (var metricName in gr.routeMetricMap) {
+					if (metricName != 'stop') {
+						routeValues[metricName] = routeData[gr.routeMetricMap[metricName]];
+					};
+				};
+
+				oneDay["route"] = routeValues;
+				selectionData[date] = oneDay;
+			});
+			tc.selectionData = selectionData;
+			console.log("selectionData", selectionData);
 		},
 
 
 		redrawMap: function() {
 			console.log("redrawing map...");
-			var dir = tc.selection.direction;
+			
 			// default the map view to direction '0' when user selects 'all' directions
+			var dir = tc.selection.direction;
 			if (dir == "2") {
 				dir = "0";
-			} 
+				console.log("direction ALL selected; defaulting to 0");
+			}; 
 			console.log('direction to draw:', dir);
 
 			// get approximate center point of route, to center map view on
-			var stops = tc.data["directions"][dir]["geo"]["features"].filter(function(feat) {
+			var stops = tc.rawData["directions"][dir]["geo"]["features"].filter(function(feat) {
 							return feat["geometry"]["type"] == "Point";
 						});
 			// sort-->reverse ensures that coordinates are in correct lat/lon order
@@ -306,96 +388,102 @@
 			tc.mapObject.setView(mapCenter, 13);
 
 			// remove markers and reset layer groups
-			tc.markerGroup.eachLayer(function(layer){tc.mapObject.removeLayer(layer)});
-			tc.markerGroup = L.layerGroup(),
-			tc.lineGroup.eachLayer(function(layer){tc.mapObject.removeLayer(layer)});
-			tc.lineGroup = L.layerGroup(),
+			tc.mapLayer.clearLayers();
+			tc.markerGroup = L.layerGroup();
+			tc.lineGroup = L.layerGroup();
+			tc.mapLayer.addData(tc.rawData["directions"][dir]["geo"]);
 
-			//console.log("adding data to map:", tc.data["directions"][dir]["geo"]);
-			tc.mapLayer.addData(tc.data["directions"][dir]["geo"]);
+			// console.log("adding data to map:", tc.rawData["directions"][dir]["geo"]);
+			
+
+			// set a default journey to display
+			var oneFifth = Math.floor((stops.length) / 5);
+			var startSeq = 2 * oneFifth;
+			var endSeq = 3 * oneFifth;
+
+			var startId = stops.filter(function(stop) {
+				return stop.properties.stop_sequence == startSeq;
+			})[0].properties.stop_id;
+			console.log("startId", startId);
+
+			var endId = stops.filter(function(stop) {
+				return stop.properties.stop_sequence == endSeq;
+			})[0].properties.stop_id;
+			console.log("endId", endId);
+
+			// emulate 'click' events on a sample journey through middle fifth of route
+			tc.selection.stop = 0;
+			var startMarker = tc.mapLayer.getLayer(startId)
+			startMarker.fireEvent('click'); 
+			var endMarker = tc.mapLayer.getLayer(endId)
+			endMarker.fireEvent('click'); 
+
 		},
 
 
 		updateMetricDisplay: function() {
 			console.log("updating metric display...");
-			
-			var allDates = tc.data["directions"][tc.selection.direction]
-				   				  ["daybins"][tc.selection.dayBin]
-				   				  ["hourbins"][tc.selection.hourBin];
 
-			var oneDay = {"route": null, "stops": {}};
-			allDates["dates"][tc.selection.date]["stops"].forEach(function(stop) {
-				var stopValues = {};
-				for (var metricName in gr.stopMetricMap) {
-					if (metricName != 'stop') {
-						stopValues[metricName] = stop[gr.stopMetricMap[metricName]];
-					};
-				};
-				oneDay["stops"][stop[gr.stopMetricMap['stop']]] = stopValues;
-			});
+			// update route-level summary
+			$("#route_ewt").text(tc.selectionData[tc.selection.date]["route"]["ewt"]);
+			$("#route_rbt").text(tc.selectionData[tc.selection.date]["route"]["rbt"]);
+			$("#route_speed").text(tc.selectionData[tc.selection.date]["route"]["speed"]);
 
-			var routeData = allDates["dates"][tc.selection.date]["route"]
-			var routeValues = {};
-			for (var metricName in gr.routeMetricMap) {
-				if (metricName != 'stop') {
-					routeValues[metricName] = routeData[gr.routeMetricMap[metricName]];
-				};
+			// draw route-level charts
+			// gr.updateCharts(tc.selectionData,
+			// 				tc.selection.metric,
+			// 				selectedStop,
+			// 				tc.selection.date);
+
+			// update journey metrics
+			if (tc.selection.stop.constructor == Array && tc.selection.stop.length == 2) {
+				var computed = tc.computeJourneyMetrics();
+				console.log("computed journey:", computed);
+			} else if (tc.selection.stop == 0) {
+				// clear the journey metrics/maps
 			};
-			oneDay["route"] = routeValues;
 
-			console.log('oneDay', oneDay);
+			// draw journey-level charts
+		},
 
+		computeJourneyMetrics: function() {
+			console.log("computing journey metrics...");
 
-			// handle the display of ROUTE vs. JOURNEY vs. STOP
-			if  (tc.selection.stop == 0) {
-				// route-level case
-				var selectedStop = 0;
-				console.log('updating metrics; route-level!');
+			var stopLookup = tc.stopLookup[tc.selection.direction];
 
-			} else if (tc.selection.stop.length == 1){
-				// stop-level case
-				var selectedStop = tc.selection.stop[0].feature.properties.stop_id;
-				console.log('updating metrics; stop-level!');
+			var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
+			var endSeq = tc.selection.stop[1].feature.properties.stop_sequence;
 
-			} else {
-				// journey-level case
-				var selectedStop = tc.selection.stop.map(function(terminal){
-					return terminal.feature.properties.stop_id
+			var computed = {};
+			Object.keys(tc.selectionData).forEach(function(date) {
+
+				var oneDay = {};
+				Object.keys(tc.selectionData[date]["stops"]).forEach(function(stop_id) {
+
+					var seq = stopLookup[stop_id]["sequence"];
+					[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
+
+						var waitTime = metricNames[0];
+						var onboardTime = metricNames[1];
+
+						if (seq == startSeq) {
+							// originationg bus stop
+							oneDay[waitTime] = tc.selectionData[date]["stops"][stop_id][waitTime];
+						};
+						if ((seq >= startSeq) && (seq < endSeq)) {
+							// mid-journey bus stop
+							if (oneDay[onboardTime]) {
+								oneDay[onboardTime] += tc.selectionData[date]["stops"][stop_id][waitTime];
+							} else {
+								oneDay[onboardTime] = tc.selectionData[date]["stops"][stop_id][waitTime];
+							}
+						};
+					});
 				});
-				console.log('updating metrics; journey-level!');
-			}
-
-			//update table (no table anymore)
-			//tc.refreshTable();
-
-			// draw D3 charts
-			gr.updateCharts(allDates,
-							tc.selection.metric,
-							selectedStop,
-							tc.selection.date);
-
-			// TODO - code to populate metric blocks according to selection here	
+				computed[date] = oneDay;
+			});
+			return computed;
 		}
-
-	
-		// refreshTable: function() {
-		// 	console.log("refreshing table...");
-		// 	// clear existing table
-		// 	$("#dataTable").empty();
-		// 	// write a header row
-		// 	$("#dataTable").append(`<tr><th>Stop</th><th>EWT</th><th>RBT</th><th>Speed</th></tr>`);
-		// 	// write data rows
-		// 	tc.data["directions"][tc.selection.direction]
-		// 			 ["daybins"][tc.selection.dayBin]
-		// 			 ["hourbins"][tc.selection.hourBin]
-		// 			 [tc.selection.date]
-		// 			 .forEach(function(stop){
-		// 			 	$("#dataTable").append(`<tr><td>${stop[0]}</td><td>${stop[1]}</td><td>${stop[2]}</td><td>${stop[3]}</td></tr>`);
-		// 			 });
-		// },
-
-
-		
 	};
 
 	// add our tc object to global window scope
