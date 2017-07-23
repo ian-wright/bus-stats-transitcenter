@@ -2,66 +2,71 @@
 
   var gr = {
 
-    initialize: function() {
+    initializeCharts: function() {
       console.log("initializing charts...");
 
-      gr.chart1 = d3.select("#month-chart").append("svg")
+      gr.monthChart = d3.select("#month-chart").append("svg")
                     .attr("class", "graph")
                     .attr("width","640")
                     .attr("height","240");
 
-      gr.chart2 = d3.select("#week-chart").append("svg")
+      gr.weekChart = d3.select("#week-chart").append("svg")
                       .attr("class", "graph")
                       .attr("width","640")
                       .attr("height","240");
 
-      gr.chart3 = d3.select("#stop-chart").append("svg")
+      gr.stopChart = d3.select("#stop-chart").append("svg")
                       .attr("class", "graph")
                       .attr("width","640")
                       .attr("height","240");
 
       gr.margin = {top: 20, right: 40, bottom: 30, left: 50};
 
-      gr.width1 = +gr.chart1.attr("width") - gr.margin.left - gr.margin.right;
-      gr.height1 = +gr.chart1.attr("height") - gr.margin.top - gr.margin.bottom;
-      gr.width2 = +gr.chart2.attr("width") - gr.margin.left - gr.margin.right;
-      gr.height2 = +gr.chart2.attr("height") - gr.margin.top - gr.margin.bottom;
-      gr.width3 = +gr.chart3.attr("width") - gr.margin.left - gr.margin.right;
-      gr.height3 = +gr.chart3.attr("height") - gr.margin.top - gr.margin.bottom;
+      gr.width = +gr.monthChart.attr("width") - gr.margin.left - gr.margin.right;
+      gr.height = +gr.monthChart.attr("height") - gr.margin.top - gr.margin.bottom;
 
-      gr.x1 = d3.scaleTime().range([0, gr.width1]);
-      gr.y1 = d3.scaleLinear().range([gr.height1, 0]);
-      gr.x2 = d3.scaleTime().range([0, gr.width2]);
-      gr.y2 = d3.scaleLinear().range([gr.height2, 0]);
-      gr.x3 = d3.scaleLinear().range([0, gr.width3]);
-      gr.y3 = d3.scaleLinear().range([gr.height3, 0]);
+      gr.x = d3.scaleTime().range([0, gr.width]);
+      gr.y = d3.scaleLinear().range([gr.height, 0]);
 
       gr.parseTime = d3.timeParse("%Y-%m-%d");
 
-      gr.line1 = d3.line()
-              .curve(d3.curveMonotoneX)
-              .x(function(d){ return gr.x1(d.date);})
-              .y(function(d){ return gr.y1(d.metric);});
-      gr.line2 = d3.line()
-                .curve(d3.curveMonotoneX)
-                .x(function(d){ return gr.x2(d.date);})
-                .y(function(d){ return gr.y2(d.metric);});
-      gr.line3 = d3.line()
-                .curve(d3.curveMonotoneX)
-                .x(function(d){ return gr.x3(d.stop);})
-                .y(function(d){ return gr.y3(d.metric);});
+      gr.monthLine = d3.line()
+              .curve(d3.curveLinear)
+              .x(function(d){ return gr.x(d.date);})
+              .y(function(d){ return gr.y(d.metric);});
+      gr.weekLine = d3.line()
+                .curve(d3.curveLinear)
+                .x(function(d){ return gr.x(d.date);})
+                .y(function(d){ return gr.y(d.metric);});
+      gr.stopLine = d3.line()
+                .curve(d3.curveLinear)
+                .x(function(d){ return gr.x(d.stop);})
+                .y(function(d){ return gr.y(d.metric);});
 
-      gr.metricMap = {
+      gr.routeMetricMap = {
         'stop': 0,
         'ewt': 1,
         'rbt': 2,
-        'speed': 3
+        'speed': 3,
       };
 
-      gr.NameMap = {
+      gr.stopMetricMap = {
+        'stop': 0,
+        'ewt_95': 1,
+        'awt': 2,
+        'swt': 3,
+        'count': 4,
+        's_trip': 5,
+        'm_trip': 6,
+        'trip_95': 7
+      };
+
+      gr.nameMap = {
         'ewt': 'Estimated Wait Time (min)',
         'rbt': 'Reliability Buffer Time (min)',
-        'speed': 'Speed (mph)'
+        'speed': 'Speed (mph)',
+        'awt': 'Average Wait Time (min)',
+        'swt': 'Scheduled Wait Time (min)',
       };
     },
 
@@ -72,10 +77,10 @@
       d3.selectAll(".graph > *").remove();
 
 
-      //-------------------ALL DATES----------------------------------------------------------------------------
+      //-------------------30 DAYS----------------------------------------------------------------------------
       console.log("drawing all dates chart...");
 
-      var g1 = gr.chart1.append("g")
+      var g1 = gr.monthChart.append("g")
                         .attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
 
       var dateArray1 = [];
@@ -103,8 +108,8 @@
         chartcontent1.push({'date':gr.parseTime(dateArray1[i]), 'metric':metricArray1[i]});
       }
 
-      gr.x1.domain(d3.extent(chartcontent1, function(d,i) { return d.date; }));
-      gr.y1.domain([0,d3.max(metricArray1)]);
+      gr.x.domain(d3.extent(chartcontent1, function(d,i) { return d.date; }));
+      gr.y.domain([0,d3.max(metricArray1)]);
 
       function make_x_gridlines(x) {
           return d3.axisBottom(x)
@@ -122,7 +127,7 @@
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height1 + ")")
           .attr("stroke-width", "2")
-          .call(make_x_gridlines(gr.x1)
+          .call(make_x_gridlines(gr.x)
               .tickSize(-gr.height1)
               .tickFormat("")
           )
@@ -131,19 +136,19 @@
       g1.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
-          .call(make_y_gridlines(gr.y1)
-              .tickSize(-gr.width1)
+          .call(make_y_gridlines(gr.y)
+              .tickSize(-gr.monthwidth)
               .tickFormat("")
           )
 
       g1.append("g")
           .attr("transform", "translate(0," + gr.height1 + ")")
-          .call(d3.axisBottom(gr.x1).ticks(7))
+          .call(d3.axisBottom(gr.x).ticks(7))
           .select(".domain");
 
       //yaxis
       g1.append("g")
-          .call(d3.axisLeft(gr.y1).ticks(5))
+          .call(d3.axisLeft(gr.y).ticks(5))
           .append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 6)
@@ -152,19 +157,19 @@
       g1.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height1/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g1.append("path")
           .datum(chartcontent1)
           .attr("class", "line")
-          .attr("d", gr.line1);
+          .attr("d", gr.monthLine);
 
 
     //-------------------WEEKLY----------------------------------------------------------------------------
       console.log("drawing week chart...");
       var numDays = 7;
 
-      var g2 = gr.chart2.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
+      var g2 = gr.weekChart.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
 
       var dateArray2 = dateArray1.slice(-numDays,);
       var metricArray2 = metricArray1.slice(-numDays,);
@@ -174,15 +179,15 @@
         chartcontent2.push({date:gr.parseTime(dateArray2[i]),metric:metricArray2[i]});
       }
 
-      gr.x2.domain(d3.extent(chartcontent2, function(d,i) { return d.date; }));
-      gr.y2.domain([0,d3.max(metricArray2)]);
+      gr.x.domain(d3.extent(chartcontent2, function(d,i) { return d.date; }));
+      gr.y.domain([0,d3.max(metricArray2)]);
 
       // add the X gridlines
       g2.append("g")
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height2 + ")")
           .attr("stroke-width", "2")
-          .call(make_x_gridlines(gr.x2)
+          .call(make_x_gridlines(gr.x)
               .tickSize(-gr.height2)
               .tickFormat("")
           )
@@ -191,19 +196,19 @@
       g2.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
-          .call(make_y_gridlines(gr.y2)
+          .call(make_y_gridlines(gr.y)
               .tickSize(-gr.width2)
               .tickFormat("")
           )
 
       g2.append("g")
           .attr("transform", "translate(0," + gr.height2 + ")")
-          .call(d3.axisBottom(gr.x2).ticks(7))
+          .call(d3.axisBottom(gr.x).ticks(7))
           .select(".domain");
 
       //yaxis
       g2.append("g")
-          .call(d3.axisLeft(gr.y2).ticks(5))
+          .call(d3.axisLeft(gr.y).ticks(5))
           .append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 6)
@@ -212,18 +217,18 @@
       g2.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height2/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g2.append("path")
           .datum(chartcontent2)
           .attr("class", "line")
-          .attr("d", gr.line2);
+          .attr("d", gr.weekLine);
 
 
     //---------------STOP-BY-STOP--------------------------------------------------------------------------
       console.log("drawing stop chart...");
 
-      var g3 = gr.chart3.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
+      var g3 = gr.stopChart.append("g").attr("transform", "translate(" + gr.margin.left + "," + gr.margin.top + ")");
       var stopArray3 = [];
       var metricArray3 = [];
 
@@ -241,14 +246,14 @@
         chartcontent3.push({stop:stopArray3[i],metric:metricArray3[i]});
       }
 
-      gr.x3.domain([d3.min(stopArray3),d3.max(stopArray3)]);
-      gr.y3.domain([0,d3.max(metricArray3)]);
+      gr.x.domain([d3.min(stopArray3),d3.max(stopArray3)]);
+      gr.y.domain([0,d3.max(metricArray3)]);
       // add the X gridlines
       g3.append("g")
           .attr("class", "grid")
           .attr("transform", "translate(0," + gr.height3 + ")")
           .attr("stroke-width", "2")
-          .call(make_x_gridlines(gr.x3)
+          .call(make_x_gridlines(gr.x)
               .tickSize(-gr.height3)
               .tickFormat("")
           )
@@ -257,19 +262,19 @@
       g3.append("g")
           .attr("class", "grid")
           .attr("stroke-width", "2")
-          .call(make_y_gridlines(gr.y3)
+          .call(make_y_gridlines(gr.y)
               .tickSize(-gr.width3)
               .tickFormat("")
           )
 
       g3.append("g")
           .attr("transform", "translate(0," + gr.height3 + ")")
-          .call(d3.axisBottom(gr.x3).ticks(7))
+          .call(d3.axisBottom(gr.x).ticks(7))
           .select(".domain");
 
       //yaxis
       g3.append("g")
-          .call(d3.axisLeft(gr.y3).ticks(5))
+          .call(d3.axisLeft(gr.y).ticks(5))
           .append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 6)
@@ -278,12 +283,12 @@
       g3.append("text")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" +(-20) +","+(gr.height3/2)+")rotate(-90)")
-                .text(gr.NameMap[metric]);
+                .text(gr.nameMap[metric]);
 
       g3.append("path")
           .datum(chartcontent3)
           .attr("class", "line")
-          .attr("d", gr.line3);
+          .attr("d", gr.stopLine);
 
     },
   };

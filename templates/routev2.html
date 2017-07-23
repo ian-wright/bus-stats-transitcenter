@@ -9,12 +9,13 @@
   <meta name="author" content="NYU CUSP">
   <!-- <link rel="icon" href="../../favicon.ico"> -->
   <title>NYC Bus Profile Dashboard</title>
-  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <!-- TODO - static resources: What should be downloaded vs. pulled down from CDN? -->
   <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
-  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <!-- <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet"> -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
 </head>
 
 <body>
@@ -68,11 +69,15 @@
       <div class="row mtop40">
         <h1>
           <select id="routeSelect" class="selectRoute">
-            {% for route in avail %}
-              <option name="route" value="{{ route }}">{{ route }}</option>
+            {% for routeChoice in avail %}
+              {% if routeChoice == route %}
+              <option name="route" value="{{ routeChoice }}" selected="selected">{{ routeChoice }}</option>
+              {% else %}
+              <option name="route" value="{{ routeChoice }}">{{ routeChoice }}</option>
+              {% endif %}
             {% endfor %}
           </select>
-          <span id="bus_id">Loading Bus...</span>
+          <span id="busLongName">Loading Bus...</span>
         </h1>
       </div><!--row-->
 
@@ -86,18 +91,18 @@
         <div class="col-sm-5">
           <h4>TIME FILTERS</h4>
           <select id="daySelect" size="1">
-            <option name= "daybin" value="0">Weekday</option>
+            <option name= "daybin" value="0" selected="selected">Weekday</option>
             <option name= "daybin" value="1">Weekend</option>
-            <option name= "daybin" value="2" selected="selected">All</option>
+            <option name= "daybin" value="2">All</option>
           </select>
           <select id="hourSelect" size="1">
-            <option name= "hourbin" value="0">Peak</option>
+            <option name= "hourbin" value="0" selected="selected">Peak</option>
             <option name= "hourbin" value="1">Off Peak</option>
-            <option name= "hourbin" value="2" selected="selected">All</option>
+            <option name= "hourbin" value="2">All</option>
           </select>
         </div>
         <div class="col-sm-5">
-          <h4>DIRECTIONS</h4>
+          <h4>DIRECTION</h4>
           <select id="dirSelect" size="1" style="width:200px;">
             <option name= "direction" id="dir0" value="0">Dir0</option>
             <option name= "direction" id="dir1" value="1">Dir1</option>
@@ -110,15 +115,25 @@
     <!-- ewt, speed and chart -->
     <section id="basicmetrics">
       <div class="row">
-        <h3>Route Level Metrics </h3>
+        <h3>Route Summary</h3>
         <div class="col-sm-3">
           <div class="row">
             <div class="metricsblocks">
               <div class="rowbox-sm">
-                <h2>Wait Delay</h2>
+                <h2>Avg. Wait Delay</h2>
               </div>
               <div class="row row-sm">
-                <h1 class="jumbo jumbo2">3.5 min</h1>
+                <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="metricsblocks">
+              <div class="rowbox-sm">
+                <h2>Trip Planning Buffer</h2>
+              </div>
+              <div class="row row-sm">
+                <h1 id= "route-rbt" class="jumbo jumbo2">-- mph</h1>
               </div>
             </div>
           </div>
@@ -128,17 +143,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 class="jumbo jumbo2">5 mph</h1>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="metricsblocks">
-              <div class="rowbox-sm">
-                <h2>EJT (?)</h2>
-              </div>
-              <div class="row row-sm">
-                <h1 class="jumbo jumbo2">10 min</h1>
+                <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1>
               </div>
             </div>
           </div>
@@ -153,13 +158,13 @@
             <div class="col-sm-8">
               <div class="btn-group" data-toggle="buttons" id="metricSelect">
                 <label class="btn btn-primary active">
-                  <input type="radio" name="metric" value="ewt" checked> EWT
+                  <input type="radio" name="metric" value="ewt" checked> Avg. Wait
                 </label>
                 <label class="btn btn-primary">
-                  <input type="radio" name="metric" value="rbt"> RBT
+                  <input type="radio" name="metric" value="rbt"> Planning Buffer
                 </label>
                 <label class="btn btn-primary">
-                  <input type="radio" name="metric" value="speed"> Speed
+                  <input type="radio" name="metric" value="speed"> Avg. Speed
                 </label>
               </div>
             </div>
@@ -185,6 +190,7 @@
         <div class="col-sm-3">
           <div id="stacked-bar">
             <h4>stackedbar goes here</h4>
+            (this would just be a single bar with two parts...)
           </div>
         </div><!--stackedbar-->
 
@@ -193,8 +199,8 @@
 
     <section>
       <div class="row">
-        <h3>Your journey on this route</h3>
-        <span>Select two stops below to know your average journey time.</span>
+        <h3>Stop-to-Stop Journey</h3>
+        <span>Select two stops below to learn about your journey.</span>
       </div><!--row-->
       <div class="row mleft0"> <!--map -->
         <div class="col-sm-4">
@@ -203,14 +209,24 @@
           </div>
         </div>
         <div class="col-sm-8">
-          <h3 class="h3-route"> X to Y </h3>
+          <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
           <div class="row">
-            <p>Your scheduled wait time is <span class="hilite">10min</span>. However, your average journey time is <span class="hilite">15 min</span>. Therefore, it is better to budget <span class="hilite">5</span> more minutes.</p>
+            <p>
+            (I don't know how to word/design/format this section... but there are 6 numbers to show.)
+            </p>
+            <p>
+            Scheduled wait time: <span id="journey-swt" class="hilite">--min</span>.
+            Scheduled onboard time: <span id="journey-s-trip" class="hilite">--min</span>.
+            Average wait time: <span id="journey-awt" class="hilite">--min</span>.
+            Average onboard time: <span id="journey-m-trip" class="hilite">--min</span>.
+            95% wait time: <span id="journey-ewt-95" class="hilite">--min</span>.
+            95% onboard time: <span id="journey-trip-95" class="hilite">--min</span>.
+            </p>
+            <p id="countWarning"></p>
           </div>
           <div class="row">
             <div class="col-xs-6">
-              <div style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
-              stacked bar goes here
+              <div id="journey-bar-chart" style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
               </div>
             </div>
             <div class="col-xs-6">
@@ -224,7 +240,6 @@
                   <div id="journey-month-chart" class="tab-pane fade in active">
                   </div>
                   <div id="journey-week-chart" class="tab-pane fade">
-                    weekly chart goes here
                   </div>
                 </div>
               </div>
@@ -252,33 +267,27 @@
 
 <!--javascripts -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script> -->
+<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
+
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
 <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
         integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script>
-<script>
-  var route = '{{ route }}';
-  console.log(route);
-  var dataURL = `/routes/${route}/data`;
-    $.getJSON(dataURL, function(data) {
-          tc.initialize(data, first=true);
-      });
-</script>
-<script type="text/javascript">
-  $(document).ready(function() {
-  $("#routeSelect").select2({
-    dropdownAutoWidth : true,
-    width: 'auto'
-  });
-  });
-</script>
-<!-- for d3 chart-->
-<script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 <!-- stacked bar -->
-<script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script> -->
+
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
+<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
+<script>
+  var route = '{{ route }}';
+  var dataURL = `/routes/${route}/data`;
+    $.getJSON(dataURL, function(data) {
+          tc.initializeDashboard(data, first=true);
+      });
+</script>
 </html>
