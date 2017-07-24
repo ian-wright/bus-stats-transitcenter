@@ -663,10 +663,6 @@
 		},
 
 
-		// drawRouteBarCharts: function() {
-		// 	var blerp;
-		// }
-
 		drawJourneyLineCharts: function(data) {
 			console.log("drawing journey line charts...");
 			console.log(data);
@@ -819,7 +815,6 @@
 			barLayout["width"] = 600;
 			barLayout["height"] = 360;
 
-			// Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
 			Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
 		},
 
