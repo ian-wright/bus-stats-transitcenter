@@ -104,9 +104,9 @@
         <div class="col-sm-5">
           <h4>DIRECTION</h4>
           <select id="dirSelect" size="1" style="width:200px;">
-            <option name= "direction" id="dir0" value="0">Dir0</option>
+            <option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
             <option name= "direction" id="dir1" value="1">Dir1</option>
-            <option name= "direction" id="dir2" value="2" selected="selected">All</option>
+            <option name= "direction" id="dir2" value="2">All</option>
           </select>
         </div>
       </div>
@@ -188,11 +188,18 @@
         </div> <!-- chart -->
 
         <div class="col-sm-3">
-          <div id="stacked-bar">
-            <h4>stackedbar goes here</h4>
-            (this would just be a single bar with two parts...)
+          <div class="glossary">
+            <div class="row">
+              <h4>Glossary</h4>
+            </div>
+            <div class="row">
+              <ul>
+                <li>Average wait delay: how "late" the bus in average</li>
+                <li>Trip planning buffer: additional minutes you should consider to make sure you are on time 95% (??)</li>
+              </ul>
+            </div>
           </div>
-        </div><!--stackedbar-->
+        </div>
 
       </div><!--row container-->
     </section>
@@ -202,7 +209,7 @@
         <h3>Stop-to-Stop Journey</h3>
         <span>Select two stops below to learn about your journey.</span>
       </div><!--row-->
-      <div class="row mleft0"> <!--map -->
+      <div class="row mleft0">
         <div class="col-sm-4">
           <div class="row">
             <div id="map"><!--map goes here!--></div>
@@ -210,42 +217,83 @@
         </div>
         <div class="col-sm-8">
           <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
-          <div class="row">
-            <p>
-            (I don't know how to word/design/format this section... but there are 6 numbers to show.)
-            </p>
-            <p>
-            Scheduled wait time: <span id="journey-swt" class="hilite">--min</span>.
-            Scheduled onboard time: <span id="journey-s-trip" class="hilite">--min</span>.
-            Average wait time: <span id="journey-awt" class="hilite">--min</span>.
-            Average onboard time: <span id="journey-m-trip" class="hilite">--min</span>.
-            95% wait time: <span id="journey-ewt-95" class="hilite">--min</span>.
-            95% onboard time: <span id="journey-trip-95" class="hilite">--min</span>.
-            </p>
-            <p id="countWarning"></p>
-          </div>
-          <div class="row">
-            <div class="col-xs-6">
-              <div id="journey-bar-chart" style="height:200px; border: 1px solid #ccc; margin-right: 10px;">
-              </div>
-            </div>
-            <div class="col-xs-6">
-              <h4>Your journey trendline</h4>
-              <div class="row">
-                <ul class="nav nav-tabs">
-                  <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
-                  <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
-                </ul>
-                <div class="tab-contents">
-                  <div id="journey-month-chart" class="tab-pane fade in active">
+          <div class="row mtop0">
+            <div class="col-sm-12">
+              <div class="row mleft0 mtop0">
+                <div class="col-sm-4 sm-metrics-container">
+                  <p class="small">Scheduled</p>
+                  <div class="col-xs-5 sm-metrics-wait">
+                    <span class="journey-swt num journey-metrics">--</span><span class="hilite"> min</span>
                   </div>
-                  <div id="journey-week-chart" class="tab-pane fade">
+                  <div class="col-xs-7 sm-metrics-onboard">
+                    <span class="journey-s-trip num journey-metrics">--</span><span class="hilite"> min</span>
+                  </div>
+                </div>
+                <div class="col-sm-4 sm-metrics-container">
+                  <p class="small">Average</p>
+                  <div class="col-xs-5 sm-metrics-wait">
+                    <span class="journey-awt num journey-metrics">--</span><span class="hilite"> min</span>
+                  </div>
+                  <div class="col-xs-7 sm-metrics-onboard">
+                    <span class="journey-m-trip num journey-metrics">--</span><span class="hilite"> min</span>
+                  </div>
+                </div>
+                <div class="col-sm-4 sm-metrics-container">
+                  <p class="small">Planning</p>
+                  <div class="col-xs-5 sm-metrics-wait">
+                    <span class="journey-ewt-95 num journey-metrics">--</span><span class="hilite"> min</span>
+                  </div>
+                  <div class="col-xs-7 sm-metrics-onboard">
+                    <span class="journey-trip-95 num journey-metrics">--</span><span class="hilite"> min</span>
                   </div>
                 </div>
               </div>
+              <div class="row mtop0 mleft0">
+                <div class="info">
+                  <span class="sm-metrics-wait">wait time</span>
+                  <span class="sm-metrics-onboard">on board time</span>
+                </div>
+              </div>
+              <div class="row mleft0 mtop40">
+                <p>
+                  < Narration / explanation here >
+                </p>
+                <p>
+                Scheduled wait time: <span class="journey-swt hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                Scheduled onboard time: <span class="journey-s-trip hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                Average wait time: <span class="journey-awt hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                Average onboard time: <span class="journey-m-trip hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                95% wait time: <span class="journey-ewt-95 hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                95% onboard time: <span class="journey-trip-95 hilite journey-metrics">--</span><span class="hilite"> min</span>.
+                </p>
+                <p id="countWarning" class="warning"></p>
+              </div>
             </div>
           </div>
+        </div>
       </div> <!-- map -->
+      <div class="row mtop40">
+        <div class="col-sm-6">
+          <h4>Your Journey Performance</h4>
+          <div id="journey-bar-chart" class="responsive-plot">
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <h4>Your journey trendline</h4>
+          <div class="row">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
+              <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
+            </ul>
+            <div class="tab-contents">
+              <div id="journey-month-chart" class="tab-pane fade in active">
+              </div>
+              <div id="journey-week-chart" class="tab-pane fade">
+              </div>
+            </div>
+          </div>
+          </div>
+      </div>
     </section>
   </div> <!-- container -->
   <div id="footer"><!-- footer -->

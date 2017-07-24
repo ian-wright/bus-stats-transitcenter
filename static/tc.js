@@ -9,7 +9,7 @@
             dayBin: null, // ...
             hourBin: null, // ...
             date: null, // ...
-            stop: null //controlled by map 
+            stop: null //controlled by map
         },
 
         mapObject: L.map('map'),
@@ -219,14 +219,14 @@
 				console.log(`painting the journey from ${startSeq} to ${endSeq}...`);
 				// change marker style for journey markers
 				tc.markerGroup.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence > startSeq) && 
+					if ((layer.feature.properties.stop_sequence > startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyMarkerStyle);
 					};
 				});
 				// change line style for journey linestrings
 				tc.lineGroup.eachLayer(function(layer){
-					if ((layer.feature.properties.stop_sequence >= startSeq) && 
+					if ((layer.feature.properties.stop_sequence >= startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyLineStyle);
 					};
@@ -257,7 +257,7 @@
 		        	// add line segment to group of all line segments
 		        	tc.lineGroup.addLayer(layer);
 			    };
-			    
+
 			};
 
 			// create a geojson map layer, passing a function to generate custom markers from geo points
@@ -382,7 +382,7 @@
 					tc.buildDataObject();
 					tc.redrawMap();
 					//tc.updateMetricDisplay();
-					break;	
+					break;
 			};
 			//console.log("new selection:", tc.selection);
 		},
@@ -430,13 +430,13 @@
 
 		redrawMap: function() {
 			console.log("redrawing map...");
-			
+
 			// default the map view to direction '0' when user selects 'all' directions
 			var dir = tc.selection.direction;
 			if (dir == "2") {
 				dir = "0";
 				console.log("direction ALL selected; defaulting to 0");
-			}; 
+			};
 			console.log('direction to draw:', dir);
 
 			// get approximate center point of route, to center map view on
@@ -457,7 +457,7 @@
 			tc.mapLayer.addData(tc.rawData["directions"][dir]["geo"]);
 
 			// console.log("adding data to map:", tc.rawData["directions"][dir]["geo"]);
-			
+
 
 			// set a default journey to display
 			var oneFifth = Math.floor((stops.length) / 5);
@@ -477,9 +477,9 @@
 			// emulate 'click' events on a sample journey through middle fifth of route
 			tc.selection.stop = 0;
 			var startMarker = tc.mapLayer.getLayer(startId)
-			startMarker.fireEvent('click'); 
+			startMarker.fireEvent('click');
 			var endMarker = tc.mapLayer.getLayer(endId)
-			endMarker.fireEvent('click'); 
+			endMarker.fireEvent('click');
 
 		},
 
@@ -509,15 +509,15 @@
 				var count = computed[tc.selection.date]["count"];
 				console.log("computed journey:", computed);
 
-				$("#journey-swt").text(`${computed[tc.selection.date]["swt"].toFixed(1)} min`);
-				$("#journey-s-trip").text(`${computed[tc.selection.date]["s_trip"].toFixed(1)} min`);
-				$("#journey-awt").text(`${computed[tc.selection.date]["awt"].toFixed(1)} min`);
-				$("#journey-m-trip").text(`${computed[tc.selection.date]["m_trip"].toFixed(1)} min`);
-				$("#journey-ewt-95").text(`${computed[tc.selection.date]["ewt_95"].toFixed(1)} min`);
-				$("#journey-trip-95").text(`${computed[tc.selection.date]["trip_95"].toFixed(1)} min`);
+				$(".journey-swt").text(`${computed[tc.selection.date]["swt"].toFixed(1)}`);
+				$(".journey-s-trip").text(`${computed[tc.selection.date]["s_trip"].toFixed(1)}`);
+				$(".journey-awt").text(`${computed[tc.selection.date]["awt"].toFixed(1)}`);
+				$(".journey-m-trip").text(`${computed[tc.selection.date]["m_trip"].toFixed(1)}`);
+				$(".journey-ewt-95").text(`${computed[tc.selection.date]["ewt_95"].toFixed(1)}`);
+				$(".journey-trip-95").text(`${computed[tc.selection.date]["trip_95"].toFixed(1)}`);
 
 				if (count < tc.countMin) {
-					$("#countWarning").text(`*BEWARE: metrics for this journey were computed w/ low sample size (n < ${tc.countMin})`);
+					$("#countWarning").text(`BEWARE: metrics for this journey were computed w/ low sample size (n < ${tc.countMin})`);
 				};
 
 				// draw journey-level charts
@@ -527,7 +527,7 @@
 			} else if (tc.selection.stop == 0) {
 				// clear the journey-level metrics and graphs
 				$("#stopNamePair").text("-- to --");
-				$(".hilite").text("-- min");
+				$(".journey-metrics").text("--");
 				$("#countWarning").text("");
 				$("#journey-month-chart div").remove();
 				$("#journey-week-chart div").remove();
@@ -600,6 +600,15 @@
 			var timeLayout = Object.create(tc.graphLayout);
 			timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
 			timeLayout["xaxis"] = {zeroline: false};
+			timeLayout["margin"] = {
+				"l": 40,
+				"r": 20,
+				"b": 30,
+				"t": 0,
+				"pad": 0
+			};
+			timeLayout["width"] = 640;
+			timeLayout["height"] = 250;
 
 			Plotly.newPlot("month-chart", [monthLine], timeLayout, {displayModeBar: false});
 			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
@@ -631,6 +640,9 @@
 				var stopsLayout = Object.create(tc.graphLayout);
 				stopsLayout["xaxis"] = {range: [1, stopEnum.length + 1], zeroline: false};
 				stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+				stopsLayout["margin"] = timeLayout["margin"];
+				stopsLayout["width"] = 640;
+				stopsLayout["height"] = 250;
 
 				Plotly.newPlot("stop-chart", [stopLine], stopsLayout, {displayModeBar: false});
 
@@ -698,6 +710,15 @@
 
 			var timeLayout = Object.create(tc.graphLayout);
 			timeLayout["yaxis"] = {title: "Journey Time (mins"};
+			timeLayout["margin"] = {
+				"l": 40,
+				"r": 20,
+				"b": 30,
+				"t": 20,
+				"pad": 0
+			};
+			timeLayout["width"] = 600;
+			timeLayout["height"] = 300;
 
 			function stackedArea(stackedData) {
 				for(var i=1; i<stackedData.length; i++) {
@@ -719,7 +740,22 @@
 			console.log(data);
 
 			// draw three stacked bars for selected date: (swt + s_trip), (awt + m_trip), and (ewt_95 + trip_95)
-			
+			// var d3 = Plotly.d3;
+			//
+			// var WIDTH_IN_PERCENT_OF_PARENT = 90,
+    	// 		HEIGHT_IN_PERCENT_OF_PARENT = 90;
+			//
+		  // var gd3 = d3.select("div[id='journey-bar-chart']")
+			//     .append('div')
+		  //     .style({
+		  //       width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+		  //       'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+		  //       height: HEIGHT_IN_PERCENT_OF_PARENT + '%',
+		  //       'margin-top': 0
+		  //     });
+			//
+		  // var journeyBarChart = gd3.node()
+
 
 			var d = data[tc.selection.date];
 
@@ -760,12 +796,24 @@
 			var barLayout = Object.create(tc.graphLayout);
 			// var layout = {barmode: 'stack'};
 			barLayout["barmode"] = "stack";
-			barLayout["bargap"] = 0.1;
+			barLayout["autosize"] = true;
+			barLayout["bargap"] = 0.8;
+			barLayout["bargroupgap"] = 0.01;
 			barLayout["yaxis"] = {title: "Journey Time (mins"};
+			barLayout["margin"] = {
+				"l": 40,
+				"r": 20,
+				"b": 30,
+				"t": 0,
+				"pad": 0
+			};
+			barLayout["width"] = 600;
+			barLayout["height"] = 360;
 
+			// Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
 			Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
+		},
 
-		}
 	};
 
 	// add our tc object to global window scope

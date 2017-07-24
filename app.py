@@ -18,9 +18,9 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -33,8 +33,8 @@ DAYSBACK = 30
 
 ########## SQLALCHEMY MODELS ###########
 
-# umm sounds like they want ewt, awt, swt, ewt_95 
-# (tho not convinced this makes mathematic sense as we are calculating it, zak is talking it over with chris), 
+# umm sounds like they want ewt, awt, swt, ewt_95
+# (tho not convinced this makes mathematic sense as we are calculating it, zak is talking it over with chris),
 # counts, speed, scheduled trip, median trip (not displayed, just to color the rbt) & rbt
 
 class StopMetric(db.Model):
@@ -223,7 +223,7 @@ def get_metrics_dfs(route, window_start):
             return None
 
     stop_metrics_df = query_table(StopMetric, route, window_start)
-    route_metrics_df = query_table(RouteMetric, route, window_start)  
+    route_metrics_df = query_table(RouteMetric, route, window_start)
 
     if ((route_metrics_df is None) or (stop_metrics_df is None)):
         return None
@@ -240,7 +240,7 @@ def build_data_series(dfs, direc, dbin, hbin):
     direc = int(direc)
     dbin = int(dbin)
     hbin = int(hbin)
-    
+
     def filter_df(df, metric_list, direc, dbin, hbin):
         return df.loc[(df['daybin'] == dbin) &
                       (df['hourbin'] == hbin) &
@@ -254,7 +254,7 @@ def build_data_series(dfs, direc, dbin, hbin):
         # all data records for a given date (one record per bus stop)
         one_day = df.loc[df.date == day, :]
         return one_day.apply(lambda row: [clean_nan(row['stop'])] +
-                                         [clean_nan(row[metric]) for metric in metric_list], 
+                                         [clean_nan(row[metric]) for metric in metric_list],
                                          axis=1).tolist()
 
     stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
@@ -288,7 +288,7 @@ def build_response(profile, dfs):
                 response['directions'][direction]['headsign'] = profile['directions'][direction]['headsign']
                 response['directions'][direction]['geo'] = profile['directions'][direction]['geo']
 
-        # now we can iterate through all hourbin/daybin/direction combination 
+        # now we can iterate through all hourbin/daybin/direction combination
         # and populate response object with data
         for direction in directions:
             for dbin in daybins:
