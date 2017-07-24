@@ -64,6 +64,12 @@
 	        speed: '(mph)'
 		},
 
+		metricHovers: {
+	        ewt: 'avg. wait',
+	        rbt: 'planning buffer',
+	        speed: 'avg speed'
+		},
+
 
 		initializeDashboard: function(data, first) {
 			console.log("initializing dashboard...");
@@ -592,10 +598,12 @@
 			var monthLine = Object.create(tc.graphLineConfig);
 			monthLine["x"] = time_x;
 			monthLine["y"] = time_y;
+			monthLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var weekLine = Object.create(tc.graphLineConfig);
 			weekLine["x"] = time_x.slice(-7);
 			weekLine["y"] = time_y.slice(-7);
+			weekLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var timeLayout = Object.create(tc.graphLayout);
 			timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
@@ -627,6 +635,7 @@
 				stopLine["x"] = stopEnum;
 				stopLine["y"] = stops_y;
 				stopLine["text"] = stopNames;
+				stopLine["name"] = tc.metricHovers[tc.selection.metric];
 
 				var stopsLayout = Object.create(tc.graphLayout);
 				stopsLayout["xaxis"] = {range: [1, stopEnum.length + 1], zeroline: false};
