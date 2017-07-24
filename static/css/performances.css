@@ -29,10 +29,6 @@ select {
   width: 50vh;
 }
 
-.col-sm-9 {
-  width: 85vh;
-}
-
 /* New bootstrap for 5 columns */
 .col-xs-5ths,
 .col-sm-5ths,
@@ -76,6 +72,34 @@ select {
 .svg-container {
 	width: 100%;
 	height: 100%;
+}
+
+.plot-container.plotly {
+  overflow: hidden;
+}
+
+/* sm metrics */
+.sm-metrics-container {
+  padding-right: 10px;
+
+}
+
+.sm-metrics-wait {
+  background-color: #eee;
+  padding: 5px;
+}
+
+.sm-metrics-onboard {
+  background-color: rgba(87, 6, 140, 0.2);
+  padding: 5px;
+}
+
+.num {
+  font-size: 2em !important;
+}
+
+.info {
+  font-size: small;
 }
 
 /*.blocks path {
@@ -401,8 +425,9 @@ h2{
   text-transform: uppercase;
 }
 h3{
+  margin-top: 40px;
   font-size: 2.5em;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 	font-weight: 100;
 	color: #444;
   font-weight: bold;
@@ -410,7 +435,7 @@ h3{
 }
 
 h3.h3-route {
-  font-size: 2em;
+  font-size: 1.6em;
   margin-top: 0;
   padding-left: 10px;
 }
@@ -423,8 +448,15 @@ h3.h3-route {
 
 p.small {
   font-size: 0.9em;
+  margin-top: 10px;
+  margin-bottom: 5px;
 }
 
+p.warning {
+  font-size: 0.9em;
+  color: #a94442;
+  background-color:#f2dede;
+}
 
 h4{
 	text-transform: uppercase;
@@ -473,7 +505,7 @@ span.hilite {
 }
 
 #charthome {
-  margin: 60px 20px 20px 20px;
+  margin: 80px 20px 20px 20px;
 }
 
 #header {
@@ -530,6 +562,13 @@ span.hilite {
 
 #bus_id {
   display: inline;!important
+}
+
+.glossary {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-left: 20px;
 }
 
 .inline {
@@ -1327,10 +1366,11 @@ input.form-control, select.form-control, textarea.form-control{
 .btn-large {
   margin-top: 20px;
   text-align: center;
-  text-transform: uppercase;
-  border-radius: 50px;
+  border-radius: 5px;
   font-size: 1.25em;
   padding: 10px 20px;
+  background-color: #57068c;
+  width: 100%;
 }
 
 .btn-primary {

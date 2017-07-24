@@ -80,8 +80,7 @@
       <div class="row mleft32">
         <div class="col-sm-5 metric-box-home">
           <div class="rowbox">
-            <h2>Excess Wait Time</h2>
-            <p>Short Explanation<p>
+            <h2>Average Delay</h2>
           </div>
           <div class="row">
             <h1 class="jumbo">3.5 min</h1>
@@ -96,7 +95,6 @@
         <div class="col-sm-5 metric-box-home">
           <div class="rowbox">
             <h2>Average Speed</h2>
-            <p>Short Explanation<p>
           </div>
           <div class="row">
             <h1 class="jumbo">4.6 mph</h1>
@@ -114,42 +112,57 @@
       <div class="row">
 
         <div class="col-sm-6">
-          <h1>Excess Wait Time</h1>
-          <p class="span-date">Excess wait time is a blabla</p>
-          <div style="height:300px; border: 1px solid #ccc;">
-            <h4>past month trendline</h4>
+          <div class="row">
+            <h1>Average Delay</h1>
+            <p>Average delay, or academically known as excess wait time, is a difference between actual wait time and scheduled wait time</p>
+            <div>
+              <h4>Past 7 days trend</h4>
+              <div class="blocks" id="ewt-home-chart"></div>
+            </div>
           </div>
         </div>
 
         <div class="col-sm-6">
-          <h1>Average Speed</h1>
-          <p class="span-date">Average speed is blabla</p>
-          <div style="height:300px; border: 1px solid #ccc;">
-            <h4>Past Month trend line</h4>
+          <div class="row">
+            <h1>Average Speed</h1>
+            <p>How fast the buses are in average.</p>
+            <div>
+              <h4>Past 7 days trend</h4>
+              <div class="blocks" id="speed-home-chart"></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="row">
         <div class="col-sm-6">
-          <h1>Reliability Buffer Time</h1>
-          <p class="span-date">Reliability buffer time is a blabla</p>
-          <div style="height:300px; border: 1px solid #ccc;">
-            <h4>past month trendline</h4>
+          <div class="row">
+            <h1>Reliability Buffer Time</h1>
+            <p>This represents the slack time added to typical travel time in order to ensure timeliness of arrival. A high RBT suggests unreliable service, as there is greater variability in travel time</p>
+            <div>
+              <h4>Past 7 days trend</h4>
+              <div class="blocks" id="rbt-home-chart"></div>
+            </div>
           </div>
         </div>
 
         <div class="col-sm-6">
-          <h1>Excess Journey Time</h1>
-          <p class="span-date">Journey time is blabla</p>
-          <div style="height:300px; border: 1px solid #ccc;">
-            <h4>stacked bar</h4>
+          <div class="row">
+            <h1>Excess Journey Time</h1>
+            <p>Difference between actual journey time and scheduled journey time.</p>
+            <div style="height:300px; border: 1px solid #ccc;">
+              <h4>stacked bar</h4>
+            </div>
           </div>
         </div>
-        <div style="align:center">
-          <button class="btn btn-primary btn-large">Find how your journey performs here</button>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-4 col-sm-offset-4">
+          <button class="btn btn-primary btn-large">Find your journey!</button>
         </div>
       </div>
+
     </section>
   </div>
 </body>

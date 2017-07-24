@@ -22,7 +22,7 @@ def test_mode(stop_columns, route_columns, engine):
   daybins = [0, 1, 2] # 0: 'all', 1: 'weekday', 2: 'weekend'
   directions = [0, 1, 2] # 0: first direc, 1: second direc, 2: all direcs
   # let stop_id '0' represent route-level metrics
-  routes = {'B46': [1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 0], 
+  routes = {'B46': [1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 0],
             'BX19': [2220, 2221, 2222, 2223, 2224, 2225, 2226, 2227, 2228, 2229, 0],
             'BX39': [101819, 101820, 103317, 103318, 103319, 103320, 102985, 802139, 102417, 102418, 102419, 103321, 103322, 103902, 103323, 101496, 101497, 101498, 103542, 101499, 103365, 103366, 103657, 103328, 103329, 103330, 103331, 103332, 103333, 103334, 103335, 102942, 102757, 102759, 103118, 102762, 103119, 102765, 102766, 102767, 102768, 102769, 101149, 101150, 102775, 0],
             'Q60': [4440, 4441, 4442, 4443, 4444, 4445, 4446, 4447, 4448, 4449, 0],
@@ -98,15 +98,6 @@ def main():
           eg)   python db_load.py mac prod data/oct_data_stop.csv data/oct_data_route.csv
           """
     sys.exit()
-    
-  # CLEAR EXISTING TABLES AND REBUILD SCHEMA
-  db.drop_all()
-  db.create_all()
-
-  stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95', 
-               'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']
-
-  route_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt', 'rbt', 'speed']
 
   # ESTABLISH SQLALCHEMY CONNECTION
   os = sys.argv[1]
@@ -117,6 +108,15 @@ def main():
   elif os == "compute":
     engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
 
+  # CLEAR EXISTING TABLES AND REBUILD SCHEMA
+  db.drop_all()
+  db.create_all()
+
+  stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95',
+               'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']
+
+  route_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt', 'rbt', 'speed']
+
   mode = sys.argv[2]
   if mode =="prod":
     infile = sys.argv[3]
@@ -124,7 +124,5 @@ def main():
   else:
     test_mode(stop_cols, route_cols, engine)
 
-
 if __name__ == '__main__':
   main()
-
