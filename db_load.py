@@ -79,11 +79,27 @@ def test_mode(stop_columns, route_columns, engine):
   print 'successfully loaded fake data (FAKE NEWS).'
 
 
+def convert_null(val):
+  if val == 'null':
+    return None
+  else:
+    return val
+
+
 def prod_mode(stop_infile, route_infile, stop_columns, route_columns, engine):
   # READ DATA FROM CSV FILE, AND WRITE TO POSTGRES
   print 'reading data file...'
-  stop_df = pd.read_csv(stop_infile, names=stop_columns)
-  route_df = pd.read_csv(route_infile, names=route_columns)
+  
+  stop_df = pd.read_csv(stop_infile)
+  # temporary: remove the speed col from stop data
+  stop_df.drop(['speed'], axis=1, inplace=True)
+  stop_df = stop_df.applymap(convert_null)
+
+  route_df = pd.read_csv(route_infile)
+  # temporary: remove the count col from route data
+  route_df.drop(['count'], axis=1, inplace=True)
+  route_df = route_df.applymap(convert_null)
+
   stop_df.to_sql('stop_metrics', engine, if_exists='append', index=False)
   route_df.to_sql('route_metrics', engine, if_exists='append', index=False)
   print 'successfully loaded data.'
@@ -119,7 +135,8 @@ def main():
 
   mode = sys.argv[2]
   if mode =="prod":
-    infile = sys.argv[3]
+    stop_infile = sys.argv[3]
+    route_infile = sys.argv[4]
     prod_mode(stop_infile, route_infile, stop_cols, route_cols, engine)
   else:
     test_mode(stop_cols, route_cols, engine)
