@@ -118,14 +118,15 @@
     <section id="basicmetrics">
       <div class="row">
         <h3>Route Summary</h3>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
           <div class="row">
             <div class="metricsblocks">
               <div class="rowbox-sm">
-                <h2>Avg. Wait Delay</h2>
+                <h2>Avg. Delay at Stop</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1>
+                <!-- <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1> -->
+                <h1 class="jumbo jumbo2">1.7 mins</h1>
               </div>
             </div>
           </div>
@@ -135,7 +136,8 @@
                 <h2>Trip Planning Buffer</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-rbt" class="jumbo jumbo2">-- mph</h1>
+                <!-- <h1 id= "route-rbt" class="jumbo jumbo2">-- mph</h1> -->
+                <h1 class="jumbo jumbo2">9.7%</h1>
               </div>
             </div>
           </div>
@@ -145,14 +147,15 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1>
+                <!-- <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1> -->
+                <h1 class="jumbo jumbo2">7.5 mph</h1>
               </div>
             </div>
           </div>
 
         </div> <!-- metrics -->
 
-        <div class="col-sm-6"> <!-- chart -->
+        <div class="col-sm-5 pleft30"> <!-- chart -->
           <div class="row">
             <div class="col-sm-2">
               <h2>Trend</h2>
@@ -160,11 +163,11 @@
             <div class="col-sm-8">
               <div class="btn-group" data-toggle="buttons" id="metricSelect">
                 <label class="btn btn-primary active">
-                  <input type="radio" name="metric" value="ewt" checked> Avg. Wait
+                  <input type="radio" name="metric" value="ewt" checked> Avg. Delay
                 </label>
-                <label class="btn btn-primary">
+                <!-- <label class="btn btn-primary">
                   <input type="radio" name="metric" value="rbt"> Planning Buffer
-                </label>
+                </label> -->
                 <label class="btn btn-primary">
                   <input type="radio" name="metric" value="speed"> Avg. Speed
                 </label>
@@ -189,16 +192,10 @@
           </div>
         </div> <!-- chart -->
 
-        <div class="col-sm-3">
-          <div class="glossary">
-            <div class="row">
-              <h4>Glossary</h4>
-            </div>
-            <div class="row">
-              <ul>
-                <li>Average wait delay: how "late" the bus in average</li>
-                <li>Trip planning buffer: additional minutes you should consider to make sure you are on time 95% (??)</li>
-              </ul>
+        <div class="col-sm-5 pleft30"> <!-- accumulative chart -->
+          <div class="row">
+            <h2>Accumulative Travel Time Across Stops</h2>
+            <div id="accumulative-chart">
             </div>
           </div>
         </div>
@@ -217,57 +214,35 @@
             <div id="map"><!--map goes here!--></div>
           </div>
         </div>
-        <div class="col-sm-8">
+        <div class="col-sm-8 pleft30">
           <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
           <div class="row mtop0">
             <div class="col-sm-12">
-              <div class="row mleft0 mtop0">
-                <div class="col-sm-4 sm-metrics-container">
-                  <p class="small">Scheduled</p>
-                  <div class="col-xs-5 sm-metrics-wait">
-                    <span class="journey-swt num journey-metrics">--</span><span class="hilite"> min</span>
-                  </div>
-                  <div class="col-xs-7 sm-metrics-onboard">
-                    <span class="journey-s-trip num journey-metrics">--</span><span class="hilite"> min</span>
+
+              <div class="row mleft0">
+                <div class="col-sm-6">
+                  <h4>Your Journey Performance</h4>
+                  <div id="journey-bar-chart" class="responsive-plot">
                   </div>
                 </div>
-                <div class="col-sm-4 sm-metrics-container">
-                  <p class="small">Average</p>
-                  <div class="col-xs-5 sm-metrics-wait">
-                    <span class="journey-awt num journey-metrics">--</span><span class="hilite"> min</span>
-                  </div>
-                  <div class="col-xs-7 sm-metrics-onboard">
-                    <span class="journey-m-trip num journey-metrics">--</span><span class="hilite"> min</span>
-                  </div>
-                </div>
-                <div class="col-sm-4 sm-metrics-container">
-                  <p class="small">Planning</p>
-                  <div class="col-xs-5 sm-metrics-wait">
-                    <span class="journey-ewt-95 num journey-metrics">--</span><span class="hilite"> min</span>
-                  </div>
-                  <div class="col-xs-7 sm-metrics-onboard">
-                    <span class="journey-trip-95 num journey-metrics">--</span><span class="hilite"> min</span>
+                <div class="col-sm-6 pleft30">
+                  <h4>Your journey trendline</h4>
+                  <div class="row">
+                    <ul class="nav nav-tabs">
+                      <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
+                      <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
+                    </ul>
+                    <div class="tab-contents">
+                      <div id="journey-month-chart" class="tab-pane fade in active">
+                      </div>
+                      <div id="journey-week-chart" class="tab-pane fade">
+                      </div>
+                    </div>
                   </div>
                 </div>
+
               </div>
-              <div class="row mtop0 mleft0">
-                <div class="info">
-                  <span class="sm-metrics-wait">wait time</span>
-                  <span class="sm-metrics-onboard">on board time</span>
-                </div>
-              </div>
-              <div class="row mleft0 mtop40">
-                <p>
-                  < Narration / explanation here >
-                </p>
-                <p>
-                Scheduled wait time: <span class="journey-swt hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                Scheduled onboard time: <span class="journey-s-trip hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                Average wait time: <span class="journey-awt hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                Average onboard time: <span class="journey-m-trip hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                95% wait time: <span class="journey-ewt-95 hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                95% onboard time: <span class="journey-trip-95 hilite journey-metrics">--</span><span class="hilite"> min</span>.
-                </p>
+              <div>
                 <p id="countWarning" class="warning"></p>
               </div>
             </div>
@@ -275,26 +250,8 @@
         </div>
       </div> <!-- map -->
       <div class="row mtop40">
-        <div class="col-sm-6">
-          <h4>Your Journey Performance</h4>
-          <div id="journey-bar-chart" class="responsive-plot">
-          </div>
-        </div>
-        <div class="col-sm-6">
-          <h4>Your journey trendline</h4>
-          <div class="row">
-            <ul class="nav nav-tabs">
-              <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
-              <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
-            </ul>
-            <div class="tab-contents">
-              <div id="journey-month-chart" class="tab-pane fade in active">
-              </div>
-              <div id="journey-week-chart" class="tab-pane fade">
-              </div>
-            </div>
-          </div>
-          </div>
+
+
       </div>
     </section>
   </div> <!-- container -->

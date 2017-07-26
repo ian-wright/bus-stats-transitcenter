@@ -164,7 +164,8 @@
 			var defaultLineStyle = {
 			    color: "#57068c",
 			    weight: 1.5,
-			    opacity: 1
+			    opacity: 1,
+					shape: 'spline'
 			};
 			var journeyLineStyle = {
 			    color: "#847d7b",
@@ -312,6 +313,7 @@
 			$("#stop-chart div").remove();
 			$("#month-chart div").remove();
 			$("#week-chart div").remove();
+			$("#accumulative-chart div").remove();
 
 			// reset journey-level summary
 			$("#stopNamePair").text("-- to --");
@@ -500,6 +502,7 @@
 
 			// draw route-level charts
 			tc.drawRouteLineCharts();
+			tc.drawCumulativeLineCharts();
 			//tc.drawRouteBarCharts();
 
 			// update journey metrics
@@ -588,16 +591,56 @@
 		drawRouteLineCharts: function() {
 			console.log("drawing route line charts...");
 
-			var time_x = [];
-			var time_y = [];
-			Object.keys(tc.selectionData).forEach(function(date) {
-				time_x.push(date);
-				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
-			});
+			// MONA - UNCOMMENT FOR BX39 MOCKUP PURPOSE
+			// var time_x = [];
+			// var time_y = [];
+			// Object.keys(tc.selectionData).forEach(function(date) {
+			// 	time_x.push(date);
+			// 	time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
+			// });
+
+
+			var time_x = ['2016-05-29 00:00:00',
+ '2016-05-31 00:00:00',
+ '2016-06-01 00:00:00',
+ '2016-06-02 00:00:00',
+ '2016-06-03 00:00:00',
+ '2016-06-04 00:00:00',
+ '2016-06-05 00:00:00',
+ '2016-06-06 00:00:00',
+ '2016-06-07 00:00:00',
+ '2016-06-08 00:00:00',
+ '2016-06-10 00:00:00',
+ '2016-06-11 00:00:00',
+ '2016-06-12 00:00:00',
+ '2016-06-13 00:00:00',
+ '2016-06-14 00:00:00',
+ '2016-06-15 00:00:00',
+ '2016-06-16 00:00:00',
+ '2016-06-17 00:00:00',
+ '2016-06-18 00:00:00',
+ '2016-06-19 00:00:00',
+ '2016-06-20 00:00:00',
+ '2016-06-21 00:00:00',
+ '2016-06-22 00:00:00',
+ '2016-06-23 00:00:00',
+ '2016-06-24 00:00:00',
+ '2016-06-25 00:00:00',
+ '2016-06-26 00:00:00',
+ '2016-06-27 00:00:00'];
+			var time_y = [ 1.216,  2.488,  1.894,  2.116,  1.95 ,  1.454,  0.566,  1.906,
+        1.958,  1.786,  2.306,  1.424,  1.322,  2.17 ,  1.808,  1.74 ,
+        1.312,  1.69 ,  2.174,  1.864,  1.412,  1.238,  1.742,  1.758,
+        1.84 ,  1.598,  0.974,  1.932];
 
 			var monthLine = Object.create(tc.graphLineConfig);
 			monthLine["x"] = time_x;
 			monthLine["y"] = time_y;
+			monthLine["line"] = {
+				shape: 'spline',
+				color: "#57068c",
+				weight: 1.5
+			};
 			monthLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var weekLine = Object.create(tc.graphLineConfig);
@@ -662,20 +705,154 @@
 			};
 		},
 
+		//MONA: add cumulative
+		drawCumulativeLineCharts: function(date) {
+			console.log("drawing accumulative line charts...");
+
+			stop_x = [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+       34, 35, 36, 37, 38, 39, 40, 41];
+
+			trip_y_actual =  [  1.4 ,   3.13,   5.12,   6.19,   7.14,   8.07,   9.54,  10.56,
+        11.89,  16.97,  24.74,  25.7 ,  27.23,  28.08,  30.23,  31.3 ,
+        31.84,  32.68,  34.37,  35.45,  36.49,  37.31,  38.85,  40.28,
+        41.6 ,  42.64,  43.79,  44.83,  46.06,  47.59,  48.87,  51.01,
+        53.1 ,  54.34,  54.34,  55.74,  56.39,  57.41,  58.08,  59.16,
+        60.28,  60.83];
+
+			trip_y_schedule = [  1.58,   4.23,   5.36,   6.5 ,   7.58,   8.26,  10.91,  12.04,
+        14.33,  15.01,  15.01,  15.9 ,  17.18,  18.13,  20.4 ,  21.3 ,
+        22.43,  23.62,  24.68,  26.27,  27.92,  28.53,  29.74,  31.57,
+        33.04,  33.84,  35.02,  35.57,  36.29,  37.5 ,  39.64,  40.53,
+        43.43,  44.35,  44.35,  45.08,  46.02,  49.97,  51.21,  52.45,
+        53.62,  57.8 ];
+
+			var accSchedLine = Object.create(tc.graphLineConfig);
+			accSchedLine.name = "scheduled trip time";
+			accSchedLine.x = stop_x;
+			accSchedLine.y = trip_y_schedule;
+			accSchedLine.line = {
+		    color: '#aaaaaa',
+		    width: 3,
+				shape: 'spline',
+				dash: 'dot'
+		  };
+			accSchedLine.showlegend = true;
+			// accSchedLine.legend =  {"orientation": "h"};
+
+			var accActualLine = Object.create(tc.graphLineConfig);
+			accActualLine.name = "actual trip time";
+			accActualLine.x = stop_x;
+			accActualLine.y = trip_y_actual;
+			accActualLine.line = {
+				color: '#57068c',
+		    width: 3,
+				shape: 'spline'
+			};
+			accActualLine.showlegend = true;
+			// accActualLine.legend =  {"orientation": "h"};
+
+			var stackedAccData = [
+				accSchedLine,
+				accActualLine
+			];
+
+			var timeLayout = Object.create(tc.graphLayout);
+		  timeLayout["yaxis"] = {title: "Accumulative Trip Time"};
+		  timeLayout["margin"] = {
+		    "l": 40,
+		    "r": 20,
+		    "b": 0,
+		    "t": 30,
+		    "pad": 0
+		  };
+		  timeLayout["width"] = 600;
+		  timeLayout["height"] = 380;
+			timeLayout["xaxis"] = {zeroline: false};
+			timeLayout["showlegend"] = true;
+			timeLayout["legend"]= {"orientation": "h"};
+
+			Plotly.newPlot("accumulative-chart", stackedAccData, timeLayout, {displayModeBar: false});
+		},
+
 
 		drawJourneyLineCharts: function(data) {
 			console.log("drawing journey line charts...");
 			console.log(data);
 
+			// MONA AGAIN
 			// just draw time series of two lines: awt + m_trip
-			var time_x = [];
-			var time_y_wait = [];
-			var time_y_trip = [];
-			Object.keys(data).forEach(function(date) {
-				time_x.push(date);
-				time_y_wait.push(data[date]["awt"]);
-				time_y_trip.push(data[date]["m_trip"]);
-			});
+			// var time_x = [];
+			// var time_y_wait = [];
+			// var time_y_trip = [];
+			// Object.keys(data).forEach(function(date) {
+			// 	time_x.push(date);
+			// 	time_y_wait.push(data[date]["awt"]);
+			// 	time_y_trip.push(data[date]["m_trip"]);
+			// });
+
+			time_x = ['2016-05-29 00:00:00',
+							 '2016-05-31 00:00:00',
+							 '2016-06-01 00:00:00',
+							 '2016-06-02 00:00:00',
+							 '2016-06-03 00:00:00',
+							 '2016-06-04 00:00:00',
+							 '2016-06-05 00:00:00',
+							 '2016-06-06 00:00:00',
+							 '2016-06-07 00:00:00',
+							 '2016-06-08 00:00:00',
+							 '2016-06-10 00:00:00',
+							 '2016-06-11 00:00:00',
+							 '2016-06-12 00:00:00',
+							 '2016-06-13 00:00:00',
+							 '2016-06-14 00:00:00',
+							 '2016-06-15 00:00:00',
+							 '2016-06-16 00:00:00',
+							 '2016-06-17 00:00:00',
+							 '2016-06-18 00:00:00',
+							 '2016-06-19 00:00:00',
+							 '2016-06-20 00:00:00',
+							 '2016-06-21 00:00:00',
+							 '2016-06-22 00:00:00',
+							 '2016-06-23 00:00:00',
+							 '2016-06-24 00:00:00',
+							 '2016-06-25 00:00:00',
+							 '2016-06-26 00:00:00',
+							 '2016-06-27 00:00:00',
+							 '2016-06-28 00:00:00'];
+ 			time_y_wait = [7.88,
+										 6.12,
+										 5.49,
+										 6.64,
+										 7.02,
+										 7.7,
+										 6.66,
+										 5.42,
+										 5.97,
+										 5.52,
+										 5.52,
+										 6.82,
+										 7.19,
+										 5.83,
+										 4.94,
+										 5.39,
+										 4.81,
+										 5.36,
+										 7.94,
+										 6.51,
+										 5.57,
+										 4.91,
+										 5.44,
+										 5.61,
+										 5.7,
+										 7.32,
+										 7.28,
+										 5.34,
+										 5.47];
+			time_y_trip = [ 13.54,  14.3 ,  15.4 ,  20.21,  15.  ,  12.88,  12.95,  15.68,
+        15.28,  15.79,  14.81,  12.65,  14.13,  14.77,  15.18,  14.84,
+        14.96,  15.61,  14.  ,  12.27,  14.9 ,  14.33,  14.84,  14.22,
+        15.52,  13.07,  13.64,  13.79,  14.32];
 
 			var monthWaitLine = Object.create(tc.graphLineConfig);
 			monthWaitLine.name = "avg. wait time";
@@ -714,7 +891,7 @@
 			];
 
 			var timeLayout = Object.create(tc.graphLayout);
-			timeLayout["yaxis"] = {title: "Journey Time (mins"};
+			timeLayout["yaxis"] = {title: "Journey Time (mins)"};
 			timeLayout["margin"] = {
 				"l": 40,
 				"r": 20,
@@ -765,8 +942,11 @@
 			var d = data[tc.selection.date];
 
 			var waitData = {
+				// MONA
+				// x: ["Scheduled", "Average", "Planning"],
+				// y: [d.swt, d.awt, d.ewt_95],
 				x: ["Scheduled", "Average", "Planning"],
-				y: [d.swt, d.awt, d.ewt_95],
+				y: [6.1, 7.88, 3.23],
 				name: 'Wait Time',
 				type: 'bar',
 				marker: {
@@ -782,7 +962,9 @@
 
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
-				y: [d.s_trip, d.m_trip, d.trip_95],
+				// MONA
+				// y: [d.s_trip, d.m_trip, d.trip_95],
+				y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
 				marker: {
@@ -802,17 +984,17 @@
 			// var layout = {barmode: 'stack'};
 			barLayout["barmode"] = "stack";
 			barLayout["autosize"] = true;
-			barLayout["bargap"] = 0.8;
+			barLayout["bargap"] = 0.5;
 			barLayout["bargroupgap"] = 0.01;
 			barLayout["yaxis"] = {title: "Journey Time (mins"};
 			barLayout["margin"] = {
 				"l": 40,
 				"r": 20,
 				"b": 30,
-				"t": 0,
+				"t": 10,
 				"pad": 0
 			};
-			barLayout["width"] = 600;
+			barLayout["width"] = 500;
 			barLayout["height"] = 360;
 
 			Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});

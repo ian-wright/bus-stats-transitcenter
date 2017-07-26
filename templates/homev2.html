@@ -79,9 +79,9 @@
       </div>
 
       <div class="row mleft32">
-        <div class="col-sm-5 metric-box-home">
+        <div class="col-sm-3 metric-box-home">
           <div class="rowbox">
-            <h2>Avg. Wait Delay</h2>
+            <h2>Average Delay At Stop</h2>
           </div>
           <div class="row">
             <h1 class="jumbo">3.5 min</h1>
@@ -90,15 +90,25 @@
             <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
           </div>
         </div>
+        <div class="col-sm-3 metric-box-home">
+          <div class="rowbox">
+            <h2>Average Journey Time Offset</h2>
+          </div>
+          <div class="row">
+            <h1 class="jumbo">11.7%</h1>
+          </div>
+          <div class="row">
+            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+          </div>
+        </div>
       </div>
-
       <div class="row mtop0 mleft32">
-        <div class="col-sm-5 metric-box-home">
+        <div class="col-sm-3 metric-box-home">
           <div class="rowbox">
             <h2>Average Speed</h2>
           </div>
           <div class="row">
-            <h1 class="jumbo">4.6 mph</h1>
+            <h1 class="jumbo">5.8 mph</h1>
           </div>
           <div class="row">
             <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
@@ -110,60 +120,45 @@
 
     <!-- section charts here -->
     <section id="charthome">
-      <div class="row">
+      <div class="section-container">
+         <div id="section-header">
+           <h1 class="light">The Metrics</h1>
+         </div>
+         <div id="section-content">
+           <div class="row">
+             <div class="col-sm-4">
+              <div class="exp">
+               <h3 class="light">Average Delay At Stop</h3>
+               <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
+              </div>
+             </div>
+             <div class="col-sm-4">
+               <div class="exp">
+               <h3 class="light">Average Journey Time Offset</h3>
+               <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
+              </div>
+             </div>
+             <div class="col-sm-4">
+               <div class="exp">
+               <h3 class="light">Average Speed</h3>
+               <p class="lead">The average speed of the buses.</p>
+               </div>
+             </div>
+           </div>
+           <div class="row">
+             <div class="col-sm-3 col-sm-offset-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">route level performance</a>
+             </div>
+             </div>
+             <div class="col-sm-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">how we calculate the metrics</a>
+             </div>
+             </div>
+           </div>
+         </div>
 
-        <div class="col-sm-6">
-          <h1>Average Wait Delay</h1>
-          <p>Average wait delay is ....</p>
-          <div class="row">
-            <div id = "EWT" style="height:300px;">
-              <!-- <h4>past month trendline</h4> -->
-            </div>
-          </div>
-
-        </div>
-
-        <div class="col-sm-6">
-          <h1>Average Speed</h1>
-          <p>Average speed is blabla</p>
-          <div class="row">
-            <div id = "AS" style="height:300px;">
-              <!-- <h4>Past Month trend line</h4> -->
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-sm-6">
-          <h1>Trip Plannig Buffer</h1>
-          <p>Reliability buffer time is a blabla</p>
-          <div class="row">
-            <div id = "RBT" style="height:300px;">
-              <!-- <h4>past month trendline</h4> -->
-            </div>
-          </div>
-
-        </div>
-
-        <div class="col-sm-6">
-          <h1>Journey Performance</h1>
-          <p>Scheduled journey time vs. actual journey time</p>
-          <div class="row">
-            <div id="EJT" style="height:300px;">
-              <!-- <h4>stacked bar</h4> -->
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-4 col-sm-offset-4">
-            <button class="btn btn-primary btn-large">
-              <a href="/routes/BX39">Find how your journey performs here
-              </a>
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   </div>
