@@ -233,7 +233,8 @@ def get_metrics_dfs(route, window_start):
 
 def build_data_series(dfs, direc, dbin, hbin):
     """
-    given a direction, daybin, and hourbin, this function produces a list of tuples
+    given a direction, daybin, and hourbin, this function produces a dictionary object
+    of {date: {route-level: data, stop-level: data}}, where 
     representing stop-level metric data for each day
     FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value_1, metric_value_2)]
     """
@@ -253,9 +254,12 @@ def build_data_series(dfs, direc, dbin, hbin):
         """
         # all data records for a given date (one record per bus stop)
         one_day = df.loc[df.date == day, :]
-        return one_day.apply(lambda row: [clean_nan(row['stop'])] +
-                                         [clean_nan(row[metric]) for metric in metric_list],
-                                         axis=1).tolist()
+        if len(one_day) != 0:
+            return one_day.apply(lambda row: [clean_nan(row['stop'])] +
+                                             [clean_nan(row[metric]) for metric in metric_list],
+                                             axis=1).tolist()
+        else 
+            return
 
     stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
     route_filtered = filter_df(dfs['route_df'], route_metric_list, direc, dbin, hbin)
@@ -268,6 +272,12 @@ def build_data_series(dfs, direc, dbin, hbin):
 def build_response(profile, dfs):
 
     response = InterDict()
+
+    # hourbins = set(list(dfs["stop_df"].hourbin.unique()) + list(dfs["route_df"].hourbin.unique()))
+    # daybins = set(list(dfs["stop_df"].daybin.unique()) + list(dfs["route_df"].daybin.unique()))
+    # directions = set(list(dfs["stop_df"].direction.unique()) + list(dfs["route_df"].direction.unique()))
+
+    # print ("hourbins, daybins, directions", hourbins, daybins, directions)
 
     hourbins = ['0', '1', '2', '3', '4']
     daybins = ['0', '1', '2']
