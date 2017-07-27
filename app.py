@@ -9,6 +9,7 @@ import geojson
 import datetime
 import os
 import math
+import timeit
 
 
 ########## CONFIG ###########
@@ -18,9 +19,9 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -129,6 +130,8 @@ def split_direc_stop(rds_index, col):
 def clean_nan(val):
     if math.isnan(val):
         return None
+    elif val == 'null':
+        return None
     else:
         return val
 
@@ -140,12 +143,14 @@ route_metric_list = ['ewt', 'rbt', 'speed']
 ########## APP LOGIC ###########
 
 def get_last_update():
+    print 'server: getting last update'
     # assumes that all metric tables are updated in synchro (so, just query one)
     return RouteMetric.query.order_by(RouteMetric.date.desc()).first().date
 
 
 def get_available_routes():
     # returns the intersection of available routes from profiles and db
+    print 'server: getting available routes'
 
     # distinct database routes
     db_distinct_records = RouteMetric.query.distinct(RouteMetric.rds_index).all()
@@ -163,7 +168,7 @@ def get_available_routes():
 
 def get_profile(route):
     profile = InterDict()
-    print 'getting profiles for route: {}'.format(route)
+    print 'server: getting profiles for route: {}'.format(route)
     # attempt to load both directions' geometry
     geo = {}
     for direction in ['0','1']:
@@ -173,12 +178,12 @@ def get_profile(route):
                 geo[direction] = geojson.load(infile)
         except IOError:
             # geometry doesn't exist
-            print "couldn't find geometry profile for route {}, direction {}".format(route, direction)
+            print "server: couldn't find geometry profile for route {}, direction {}".format(route, direction)
             pass
 
     # allow server to continue even if there are no geometry profiles available
     if '0' in geo:
-        print 'found profile direction: 0'
+        print 'server: found profile direction: 0'
         profile['route_id'] = geo['0']['properties']['route_id']
         profile['short_name'] = geo['0']['properties']['short_name']
         profile['long_name'] = geo['0']['properties']['long_name']
@@ -187,7 +192,7 @@ def get_profile(route):
         profile['directions']['0']['geo'] = {k: geo['0'][k] for k in ('type', 'features')}
 
     if '1' in geo:
-        print 'found profile direction: 1'
+        print 'server: found profile direction: 1'
         profile['route_id'] = geo['1']['properties']['route_id']
         profile['short_name'] = geo['1']['properties']['short_name']
         profile['long_name'] = geo['1']['properties']['long_name']
@@ -208,7 +213,7 @@ def get_metrics_dfs(route, window_start):
     queries both db tables for all records associated with given route_id, after a given date.
     returns a dictionary with stop- and route-level pandas dataframes
     """
-    print 'querying metrics for route: {}'.format(route)
+    print 'server: querying metric tables for route: {}'.format(route)
 
     def query_table(table_class, route, window_start):
         df = pd.read_sql(db.session.query(table_class)
@@ -231,45 +236,57 @@ def get_metrics_dfs(route, window_start):
         return {'stop_df': stop_metrics_df, 'route_df': route_metrics_df}
 
 
-def build_data_series(dfs, direc, dbin, hbin):
-    """
-    given a direction, daybin, and hourbin, this function produces a dictionary object
-    of {date: {route-level: data, stop-level: data}}, where 
-    representing stop-level metric data for each day
-    FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value_1, metric_value_2)]
-    """
-    direc = int(direc)
-    dbin = int(dbin)
-    hbin = int(hbin)
+# def build_data_series(dfs, direc, dbin, hbin):
+#     """
+#     given a direction, daybin, and hourbin, this function produces a dictionary object
+#     of {date: {route-level: data, stop-level: data}}, where 
+#     representing stop-level metric data for each day
+#     FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value_1, metric_value_2)]
+#     """
+#     direc = int(direc)
+#     dbin = int(dbin)
+#     hbin = int(hbin)
 
-    def filter_df(df, metric_list, direc, dbin, hbin):
-        return df.loc[(df['daybin'] == dbin) &
-                      (df['hourbin'] == hbin) &
-                      (df['direction'] == direc),
-                      ['date', 'stop'] + metric_list]
+#     def filter_df(df, metric_list, direc, dbin, hbin):
+#         return df.loc[(df['daybin'] == dbin) &
+#                       (df['hourbin'] == hbin) &
+#                       (df['direction'] == direc),
+#                       ['date', 'stop'] + metric_list]
 
-    def package_metrics(day, df, metric_list):
-        """
-        generates a list of stop-level data tuples corresponding to a single calendar day
-        """
-        # all data records for a given date (one record per bus stop)
-        one_day = df.loc[df.date == day, :]
-        if len(one_day) != 0:
-            return one_day.apply(lambda row: [clean_nan(row['stop'])] +
-                                             [clean_nan(row[metric]) for metric in metric_list],
-                                             axis=1).tolist()
-        else 
-            return
+#     def package_metrics(day, df, metric_list):
+#         """
+#         generates a list of stop-level data tuples corresponding to a single calendar day
+#         """
+#         # all data records for a given date (one record per bus stop)
+#         one_day = df.loc[df.date == day, :]
+#         if len(one_day) != 0:
+#             return one_day.apply(lambda row: [clean_nan(row['stop'])] +
+#                                              [clean_nan(row[metric]) for metric in metric_list],
+#                                              axis=1).tolist()
+#         else 
+#             return
 
-    stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
-    route_filtered = filter_df(dfs['route_df'], route_metric_list, direc, dbin, hbin)
+#     stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
+#     route_filtered = filter_df(dfs['route_df'], route_metric_list, direc, dbin, hbin)
 
-    return {"dates": {str(day): {"route": package_metrics(day, route_filtered, route_metric_list),
-                                 "stops": package_metrics(day, stop_filtered, stop_metric_list)} \
-        for day in route_filtered.date.unique()}}
+#     return {"dates": {str(day): {"route": package_metrics(day, route_filtered, route_metric_list),
+#                                  "stops": package_metrics(day, stop_filtered, stop_metric_list)} \
+#         for day in route_filtered.date.unique()}}
+
+def package_metrics(row, mode):
+
+    if mode == 'route':
+        metric_list = route_metric_list
+        return [clean_nan(row['stop'])] + [clean_nan(row[metric]) for metric in metric_list]
+    else:
+        # mode = 'stop'
+        metric_list = stop_metric_list
+        return [[clean_nan(row['stop'])] + [clean_nan(row[metric]) for metric in metric_list]]
+    
 
 
 def build_response(profile, dfs):
+    print 'server: building response object'
 
     response = InterDict()
 
@@ -279,9 +296,9 @@ def build_response(profile, dfs):
 
     # print ("hourbins, daybins, directions", hourbins, daybins, directions)
 
-    hourbins = ['0', '1', '2', '3', '4']
-    daybins = ['0', '1', '2']
-    directions = ['0', '1', '2']
+    # hourbins = ['0', '1', '2', '3', '4']
+    # daybins = ['0', '1', '2']
+    # directions = ['0', '1', '2']
 
     if (profile is None) or (dfs is None):
         return {'status': 'error'}
@@ -300,11 +317,37 @@ def build_response(profile, dfs):
 
         # now we can iterate through all hourbin/daybin/direction combination
         # and populate response object with data
-        for direction in directions:
-            for dbin in daybins:
-                for hbin in hourbins:
-                    response['directions'][direction]['daybins'][dbin]['hourbins'][hbin] = \
-                    build_data_series(dfs, direction, dbin, hbin)
+        # for direction in directions:
+        #     for dbin in daybins:
+        #         for hbin in hourbins:
+        #             response['directions'][direction]['daybins'][dbin]['hourbins'][hbin] = \
+        #             build_data_series(dfs, direction, dbin, hbin)
+
+        for i, row in dfs['route_df'].iterrows():
+            direction = str(row['direction'])
+            dbin = str(row['daybin'])
+            hbin = str(row['hourbin'])
+            date = str(row['date'])
+            response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['route'] = \
+            package_metrics(row, mode='route')
+
+        for i, row in dfs['stop_df'].iterrows():
+            direction = str(row['direction'])
+            dbin = str(row['daybin'])
+            hbin = str(row['hourbin'])
+            date = str(row['date'])
+            if response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['stops']:
+                response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['stops'] = \
+                response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['stops'] + \
+                package_metrics(row, mode='stop')
+            else:
+                response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['stops'] = \
+                package_metrics(row, mode='stop')
+
+
+
+        
+
         return response
 
 
@@ -313,20 +356,23 @@ def build_response(profile, dfs):
 # basic data endpoint
 @app.route('/routes/<string:route>/data')
 def get_data(route):
-    print 'getting data for route: {}'.format(route)
+    start = timeit.timeit()
+    print 'server: handling data request for: {}'.format(route)
 
     window_start = str(get_last_update() + datetime.timedelta(days=-(DAYSBACK)))
     print 'window_start:', window_start
 
     response = build_response(get_profile(route),
                               get_metrics_dfs(route, window_start))
+    end = timeit.timeit()
+    print 'server: data request handled in {} seconds.'.format(end - start)
     return jsonify(response)
 
 
 # standard template route
 @app.route('/routes/<string:route>')
 def dashboard(route):
-    print 'loading template for route : {}'.format(route)
+    print 'server: loading template for route : {}'.format(route)
     avail = get_available_routes()
     return render_template('routev2.html', route=route, avail=avail)
 
@@ -342,7 +388,7 @@ def home():
 @app.errorhandler(404)
 @app.route('/routes/<string:route>/404')
 def not_found(route):
-    print 'rendering a 404'
+    print 'server: rendering a 404'
     return render_template('404.html'), 404
 
 

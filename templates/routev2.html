@@ -83,9 +83,11 @@
 
       <div class="row" id="topfilter">
         <div class="col-sm-2">
-          <h4>DATE</h4>
+          <h4>DATE RANGE</h4>
           <select id="dateSelect" size="1">
-            <!--dynamically add dates to a drop down here-->
+            <option name= "dateRange" value="1" selected="selected">Past Month</option>
+            <option name= "dateRange" value="2">Past Year</option>
+            <option name= "dateRange" value="3">All Time</option>
           </select>
         </div>
         <div class="col-sm-5">
@@ -108,7 +110,6 @@
           <select id="dirSelect" size="1" style="width:200px;">
             <option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
             <option name= "direction" id="dir1" value="1">Dir1</option>
-            <option name= "direction" id="dir2" value="2">All</option>
           </select>
         </div>
       </div>
@@ -122,22 +123,22 @@
           <div class="row">
             <div class="metricsblocks">
               <div class="rowbox-sm">
-                <h2>Avg. Delay at Stop</h2>
+                <h2>Avg. Delay at Stops</h2>
               </div>
               <div class="row row-sm">
-                <!-- <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1> -->
-                <h1 class="jumbo jumbo2">1.7 mins</h1>
+                <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1>
+                <!-- <h1 class="jumbo jumbo2">1.7 mins</h1> -->
               </div>
             </div>
           </div>
           <div class="row">
             <div class="metricsblocks">
               <div class="rowbox-sm">
-                <h2>Trip Planning Buffer</h2>
+                <h2>Excess Journey Time</h2>
               </div>
               <div class="row row-sm">
-                <!-- <h1 id= "route-rbt" class="jumbo jumbo2">-- mph</h1> -->
-                <h1 class="jumbo jumbo2">9.7%</h1>
+                <h1 id= "route-rbt" class="jumbo jumbo2">-- %</h1>
+                <!-- <h1 class="jumbo jumbo2">9.7%</h1> -->
               </div>
             </div>
           </div>
@@ -147,8 +148,8 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <!-- <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1> -->
-                <h1 class="jumbo jumbo2">7.5 mph</h1>
+                <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1>
+                <!-- <h1 class="jumbo jumbo2">7.5 mph</h1> -->
               </div>
             </div>
           </div>
@@ -157,9 +158,9 @@
 
         <div class="col-sm-5 pleft30"> <!-- chart -->
           <div class="row">
-            <div class="col-sm-2">
+            <!-- <div class="col-sm-2">
               <h2>Trend</h2>
-            </div>
+            </div> -->
             <div class="col-sm-8">
               <div class="btn-group" data-toggle="buttons" id="metricSelect">
                 <label class="btn btn-primary active">
@@ -177,17 +178,18 @@
           </div>
           <div class="row">
             <ul class="nav nav-tabs">
-              <li class="active"><a data-toggle="tab" data-target="#month-chart">Past Month</a></li>
+              <li class="active"><a data-toggle="tab" data-target="#stop-chart">By Stops</a></li>
+              <li><a data-toggle="tab" data-target="#long-chart" id="#long-chart-tab">Past Month</a></li>
               <li><a data-toggle="tab" data-target="#week-chart">Past 7 days</a></li>
-              <li><a data-toggle="tab" data-target="#stop-chart">By Stops</a></li>
             </ul>
             <div class="tab-contents blocks">
-              <div id="month-chart" class="tab-pane fade in active">
+              <div id="stop-chart" class="tab-pane fade in active">
+              </div>
+              <div id="long-chart" class="tab-pane fade">
               </div>
               <div id="week-chart" class="tab-pane fade">
               </div>
-              <div id="stop-chart" class="tab-pane fade">
-              </div>
+              
             </div>
           </div>
         </div> <!-- chart -->

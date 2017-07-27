@@ -8,7 +8,7 @@
             direction: null, // ...
             dayBin: null, // ...
             hourBin: null, // ...
-            date: null, // ...
+            dateRange: null, // ...
             stop: null //controlled by map
         },
 
@@ -48,7 +48,7 @@
 			mode: 'lines',
 			line: {
 				color: 'rgb(87, 6, 140)',
-				width: 3
+				width: 2
 			}
 		},
 
@@ -95,16 +95,15 @@
 
 			// dynamically insert date select options
 			// TODO - KILL THIS AFTER LINECHART/DATEPICKER IS IN
-			Object.keys(data["directions"]["0"]["daybins"]["0"]["hourbins"]["0"]["dates"]).reverse().forEach(function(day){
-				var option_elem = `<option name="date" value="${day}">${day}</option>`
-				$("#dateSelect").append(option_elem);
-			});
+			// Object.keys(data["directions"]["0"]["daybins"]["1"]["hourbins"]["0"]["dates"]).reverse().forEach(function(day){
+			// 	var option_elem = `<option name="date" value="${day}">${day}</option>`
+			// 	$("#dateSelect").append(option_elem);
+			// });
 
 			// setting up dashboard environment on first load
 			if (first==true) {
 				console.log('first map load...')
 				tc.initializeMap();
-				//gr.initializeCharts();
 				tc.registerSelectionHandlers();
 				tc.registerRouteChangeHandler();
 			};
@@ -282,10 +281,10 @@
 		registerSelectionHandlers: function() {
 			console.log("registering selection handlers...");
 
-			$("#dateSelect, #metricSelect").change(function() {
+			$("#metricSelect, #daySelect").change(function() {
 				tc.updateController("light");
 			});
-			$("#daySelect, #hourSelect").change(function() {
+			$("#hourSelect, #dateSelect").change(function() {
 				tc.updateController("medium");
 			});
 			$("#dirSelect").change(function() {
@@ -323,9 +322,9 @@
 			$("#journey-week-chart div").remove();
 			$("#journey-bar-chart div").remove();
 
-			// revert to default selections on new route (day=0, hour=0, dir=2)
-			$("input[value=0]", "#hourSelect").prop('checked', true);
-			$("input[value=0]", "#daySelect").prop('checked', true);
+			// revert to default selections on new route (day=1, hour=1, dir=2)
+			$("input[value=1]", "#hourSelect").prop('checked', true);
+			$("input[value=1]", "#daySelect").prop('checked', true);
 			$("input[value=ewt]", "#metricSelect").prop('checked', true);
 			$("option[value=2]", "#dirSelect").prop('selected', true);
 
@@ -355,23 +354,24 @@
 
 		updateController: function(level) {
 
-			// light --> stop/date/metric --> (metrics/graphs)
-			// medium --> daybin/hourbin --> (rebuild data, metrics/graphs)
-			// heavy --> direction/route --> (map, rebuild data, metrics/graphs)
+			// light --> stop/metric/daybin --> (recompute metrics/graphs)
+			// medium --> hourbin/dateRange --> (rebuild data object, recompute metrics/graphs)
+			// heavy --> direction/route --> (redraw map, rebuild data object, recompute metrics/graphs)
 
 			switch (level) {
 				case "light":
 					console.log("updateController: level LIGHT");
 					//console.log("original selection:", tc.selection);
 					// if this is a stop change, stop selection already changed at click event
-					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
 					tc.updateMetricDisplay();
 					break;
 				case "medium":
 					console.log("updateController: level MEDIUM");
 					//console.log("original selection:", tc.selection);
-					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
 					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
@@ -381,7 +381,7 @@
 				case "heavy":
 					console.log("updateController: level HEAVY");
 					//console.log("original selection:", tc.selection);
-					tc.selection.date = $("option[name=date]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
 					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
@@ -389,7 +389,7 @@
 					tc.selection.route = tc.rawData["route_id"];
 					tc.buildDataObject();
 					tc.redrawMap();
-					//tc.updateMetricDisplay();
+					// redrawMap() calls updateMetricsDisplay internally
 					break;
 			};
 			//console.log("new selection:", tc.selection);
@@ -399,42 +399,97 @@
 		buildDataObject: function(){
 			console.log("building data object...");
 			// get all historical data for given (direction, daybin, hourbin) selection
-			var allDates = tc.rawData["directions"][tc.selection.direction]
-				   				  ["daybins"][tc.selection.dayBin]
+			var allWkday = tc.rawData["directions"][tc.selection.direction]
+				   				  ["daybins"][1]
 				   				  ["hourbins"][tc.selection.hourBin]
 				   				  ["dates"];
+			console.log('allWkday', allWkday);
+			wkdayObj = tc.objectifyData(allWkday, '1');
+
+			var allWknd = tc.rawData["directions"][tc.selection.direction]
+				   				  ["daybins"][2]
+				   				  ["hourbins"][tc.selection.hourBin]
+				   				  ["dates"];
+			wkndObj = tc.objectifyData(allWknd, '2');
+			
+			// note that even if a user is filtering for wknds or wkdays, we need ALL observations in
+			// the window to draw the time series charts
+			var allData = Object.assign(wkdayObj, wkndObj);
+			console.log("allData", allData);
+
+			// filter our data for only those observations within the desired window (dateRange + wkday/wkend)
+			var allDates = Object.keys(allData).map(function(dateStr){ return new Date(dateStr) });
+			var latest = allDates.reduce(function (a, b) { return a > b ? a : b });
+
+			switch (tc.selection.dateRange) {
+				case "1":
+					// last month
+					var timeFrame = 30;
+					break;
+				case "2":
+					// last year
+					var timeFrame = 365;
+					break;
+				case "3":
+					// all time
+					var timeFrame = 3650;
+					break;
+			};
+
+			var windowStart = new Date(latest.setDate(latest.getDate() - timeFrame));
+			console.log(`timeframe: ${timeFrame}, windowstart: ${windowStart}`);
+
 			var selectionData = {};
-			// transform allDates into object-style structure
-			Object.keys(allDates).forEach(function (date) {
+			Object.keys(allData).forEach(function(date) { 
+				if (new Date(date) >= windowStart) {
+					selectionData[date] = allData[date];
+				};
+			});
+			console.log("selectionData", selectionData);
+			tc.selectionData = selectionData;
+		},
+
+
+		objectifyData: function(rawData, dayBin) {
+			console.log(`objectifying data for daybin: ${dayBin}`);
+			// transform rawData into object-style structure, given selections for direction, daybin, and hourbin
+			var objectData = {};
+			Object.keys(rawData).forEach(function (date) {
+				// object level for a single date
 				var oneDay = {"route": null, "stops": {}};
 
-				// get a single day's stop-level data, in object format
-				allDates[date]["stops"].forEach(function(stop) {
-					var stopValues = {};
-					for (var metricName in tc.stopMetricMap) {
-						if (metricName != 'stop') {
-							stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
+				// build stop-level data for a single day
+				rawData[date]["stops"].forEach(function(stop) {
+
+					// only include data for stop_ids that are found in the corresponding geo_profile
+					if (Object.keys(tc.stopLookup[tc.selection.direction]).includes(stop[tc.stopMetricMap['stop']].toString())) {
+						var stopValues = {};
+						for (var metricName in tc.stopMetricMap) {
+							if (metricName != 'stop') {
+								stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
+							};
 						};
+						oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
 					};
-					oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
 				});
 
-				// get a single day's route-level data, in object format
-				var routeData = allDates[date]["route"]["0"];
+				// build route-level data for a single day
+				var routeData = rawData[date]["route"];
 				var routeValues = {};
 				for (var metricName in tc.routeMetricMap) {
 					if (metricName != 'stop') {
 						routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
 					};
 				};
-
 				oneDay["route"] = routeValues;
-				selectionData[date] = oneDay;
-			});
-			tc.selectionData = selectionData;
-			console.log("selectionData", selectionData);
-		},
 
+				// tag the observation's daybin
+				oneDay["dayBin"] = dayBin;
+				objectData[date] = oneDay;
+			});
+			return objectData;
+		},
+		
 
 		redrawMap: function() {
 			console.log("redrawing map...");
@@ -464,9 +519,6 @@
 			tc.lineGroup = L.layerGroup();
 			tc.mapLayer.addData(tc.rawData["directions"][dir]["geo"]);
 
-			// console.log("adding data to map:", tc.rawData["directions"][dir]["geo"]);
-
-
 			// set a default journey to display
 			var oneFifth = Math.floor((stops.length) / 5);
 			var startSeq = 2 * oneFifth;
@@ -475,37 +527,233 @@
 			var startId = stops.filter(function(stop) {
 				return stop.properties.stop_sequence == startSeq;
 			})[0].properties.stop_id;
-			console.log("startId", startId);
+			console.log("default startId", startId);
 
 			var endId = stops.filter(function(stop) {
 				return stop.properties.stop_sequence == endSeq;
 			})[0].properties.stop_id;
-			console.log("endId", endId);
+			console.log("default endId", endId);
 
-			// emulate 'click' events on a sample journey through middle fifth of route
+			// emulate 'click' events for a sample journey through middle fifth of route
 			tc.selection.stop = 0;
 			var startMarker = tc.mapLayer.getLayer(startId)
 			startMarker.fireEvent('click');
 			var endMarker = tc.mapLayer.getLayer(endId)
 			endMarker.fireEvent('click');
+		},
 
+
+		computeTimeAveragedMetrics: function(filteredData) {
+
+			// route-level (pre-computed) metrics for grey box summary EWT + SPEED
+			var ewtAverager = {sum: 0, count: 0};
+			var speedAverager = {sum: 0, count: 0};
+
+			// route-level (all stops) for grey box summary % OVER
+			var mTripAverager = {sum: 0, count: 0};
+			var sTripAverager = {sum: 0, count: 0};
+			var awtAverager = {sum: 0, count: 0};
+			var swtAverager = {sum: 0, count: 0};
+
+			// stop-level EWT for use in bar chart
+			var stopEwtAverager = {};
+			// stop-level sTrip + mTrip + trip95 (for cumulative chart and journey metrics)
+			var stopTripAverager = {};
+			// stop-level SWT, AWT, 95WT (for journey metrics)
+			var stopWaitAverager = {};
+
+			// iterate through all DAYS in scope
+			Object.keys(filteredData).forEach(function(date) {
+
+				// using the provided route-level EWT
+				if (filteredData[date].route.ewt) { 
+					ewtAverager.sum += filteredData[date].route.ewt; 
+					ewtAverager.count += 1; 
+				};
+				// using the provided route-level SPEED
+				if (filteredData[date].route.speed) { 
+					speedAverager.sum += filteredData[date].route.speed; 
+					speedAverager.count += 1; 
+				};
+
+				// route-level averagers for mTrip and sTrip sums on a given day
+				var routeMTripAverager = {sum: 0, count: 0};
+				var routeSTripAverager = {sum: 0, count: 0};
+
+				// iterate through all STOPS per day
+				Object.keys(filteredData[date].stops).forEach(function(stop) {
+
+					var stopData = filteredData[date].stops[stop];
+
+					if (stopData['m_trip'] && 
+						stopData['s_trip'] && 
+						stopData['trip_95'] && 
+						stopData['awt'] &&
+						stopData['swt'] &&
+						stopData['ewt_95'] &&
+						stopData['count']) {
+
+						// add a single stop's SWT and AVG to overall averager
+						swtAverager.sum += stopData['swt'] * stopData['count'];
+						swtAverager.count += stopData['count'];
+						awtAverager.sum += stopData['awt'] * stopData['count'];
+						awtAverager.count += stopData['count'];
+
+						// add a single stop's mTrip and sTrip to the route level sums
+						routeMTripAverager.sum += stopData['m_trip'];
+						routeMTripAverager.count += stopData['count'];
+						routeSTripAverager.sum += stopData['s_trip'];
+						routeSTripAverager.count += stopData['count'];;
+
+						// record a single stop's mTrip, sTrip. trip95 into the cumulative averager
+						stopTripAverager[stop] = {m_trip: {sum: (stopTripAverager.stop ? 
+															  stopTripAverager.stop.m_trip.sum += stopData['m_trip'] * stopData['count'] :
+															  stopData['m_trip'] * stopData['count']),
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.m_trip.count += stopData['count'] :
+															  stopData['count'])},
+												s_trip: {sum: (stopTripAverager.stop ? 
+															  stopTripAverager.stop.s_trip.sum += stopData['s_trip'] * stopData['count'] :
+															  stopData['s_trip'] * stopData['count']),
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.s_trip.count += stopData['count'] :
+															  stopData['count'])},
+												trip_95: {sum: (stopTripAverager.stop ? 
+															  stopTripAverager.stop.trip_95.sum += stopData['trip_95'] * stopData['count'] :
+															  stopData['trip_95'] * stopData['count']),
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.trip_95.count += stopData['count'] :
+															  stopData['count'])}}
+
+						// record a single stop's AWT, SWT, WT95 into the cumulative averager
+						stopWaitAverager[stop] = {awt: {sum: (stopWaitAverager.stop ? 
+															  stopWaitAverager.stop.awt.sum += stopData['awt'] * stopData['count'] :
+															  stopData['awt'] * stopData['count']),
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.awt.count += stopData['count'] :
+															  stopData['count'])},
+												swt: {sum: (stopWaitAverager.stop ? 
+															  stopWaitAverager.stop.swt.sum += stopData['swt'] * stopData['count'] :
+															  stopData['swt'] * stopData['count']),
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.swt.count += stopData['count'] :
+															  stopData['count'])},
+												ewt_95: {sum: (stopWaitAverager.stop ? 
+															  stopWaitAverager.stop.ewt_95.sum += stopData['ewt_95'] * stopData['count'] :
+															  stopData['ewt_95'] * stopData['count']),
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.ewt_95.count += stopData['count'] :
+															  stopData['count'])}}
+					
+						// add a single stop's EWT to averager, and preserve the stop_id for use in bar chart
+						stopEwtAverager[stop] = {sum: (stopEwtAverager.stop ?
+													   stopEwtAverager.stop.sum += (stopData['awt'] - stopData['swt']) * stopData['count'] :
+													   (stopData['awt'] - stopData['swt']) * stopData['count']),
+												count: (stopEwtAverager.stop ?
+														stopEwtAverager.stop.count += stopData['count'] :
+														stopData['count'])};
+					};
+				});
+
+				// console.log("mtrip strip", routeMTripAverager, routeSTripAverager)
+
+				// add a single day's mTrip and sTrip route sums to the overall averager
+				if (routeMTripAverager.sum != 0) { 
+					mTripAverager.sum += routeMTripAverager.sum * routeMTripAverager.count; 
+					mTripAverager.count += routeMTripAverager.count; 
+				};
+				if (routeSTripAverager.sum != 0) { 
+					sTripAverager.sum += routeSTripAverager.sum * routeSTripAverager.count; 
+					sTripAverager.count += routeSTripAverager.count; 
+				};
+
+			});
+
+			// for grey box summary EWT + SPEED
+			var avgEwt = (ewtAverager.count == 0 ? "--" : (ewtAverager.sum / ewtAverager.count).toFixed(1));
+			var avgSpeed = (speedAverager.count == 0 ? "--" : (speedAverager.sum / speedAverager.count).toFixed(1));
+
+			// for grey box summary % OVER
+			var avgSwt = (swtAverager.count == 0 ? null : swtAverager.sum / swtAverager.count);
+			var avgAwt = (awtAverager.count == 0 ? null : awtAverager.sum / awtAverager.count);
+			var avgMTripSum = (mTripAverager.count == 0 ? null : (mTripAverager.sum / mTripAverager.count));
+			var avgSTripSum = (sTripAverager.count == 0 ? null : (sTripAverager.sum / sTripAverager.count));
+
+			if (Boolean(avgAwt && avgSwt && avgMTripSum && avgSTripSum)) {
+				var percentOver = ((((avgAwt + avgMTripSum) / (avgSwt + avgSTripSum)) - 1) * 100).toFixed(1);
+			} else {
+				var percentOver = "--";
+			};
+
+			// data structure for EWT-by-stop bar chart
+			var stopEwt = {};
+			Object.keys(stopEwtAverager).forEach(function(stop) {
+				stopEwt[stop] = stopEwtAverager[stop].sum / stopEwtAverager[stop].count;
+			});
+
+			// data structure for stop-level trip times 
+			var stopTrips = {};
+			Object.keys(stopTripAverager).forEach(function(stop) {
+				stopTrips[stop] = {m_trip: (stopTripAverager[stop] ?
+										   stopTripAverager[stop].m_trip.sum / stopTripAverager[stop].m_trip.count :
+										   null),
+								  s_trip:  (stopTripAverager[stop] ?
+										   stopTripAverager[stop].s_trip.sum / stopTripAverager[stop].s_trip.count :
+										   null),
+								  trip_95:  (stopTripAverager[stop] ?
+										   stopTripAverager[stop].trip_95.sum / stopTripAverager[stop].trip_95.count :
+										   null)}
+			});
+
+			// data structure for stop-level wait times 
+			var stopWaits = {};
+			Object.keys(stopWaitAverager).forEach(function(stop) {
+				stopWaits[stop] = {awt: (stopWaitAverager[stop] ?
+										   stopWaitAverager[stop].awt.sum / stopWaitAverager[stop].awt.count :
+										   null),
+								  swt:  (stopWaitAverager[stop] ?
+										   stopWaitAverager[stop].swt.sum / stopWaitAverager[stop].swt.count :
+										   null),
+								  ewt_95:  (stopWaitAverager[stop] ?
+										   stopWaitAverager[stop].ewt_95.sum / stopWaitAverager[stop].ewt_95.count :
+										   null)}
+			});
+
+			// console.log("stopTripAverager", stopTripAverager);
+
+			return {avgEwt: avgEwt, avgSpeed: avgSpeed, percentOver: percentOver, stopEwt: stopEwt, stopTrips: stopTrips, stopWaits: stopWaits};
 		},
 
 
 		updateMetricDisplay: function() {
 			console.log("updating metric display...");
 
+			// filter data for only observations that match the weekday/weekend/all selection
+			var filteredData = {};
+			Object.keys(tc.selectionData).forEach(function(date) { 
+				if ((tc.selectionData[date].dayBin == tc.selection.dayBin) || (tc.selection.dayBin == "0")) {
+					filteredData[date] = tc.selectionData[date];
+				};
+			});
+
 			// update route-level summary
-			$("#route-ewt").text(`${tc.selectionData[tc.selection.date]["route"]["ewt"]} mins`);
-			$("#route-rbt").text(`${tc.selectionData[tc.selection.date]["route"]["rbt"]} mins`);
-			$("#route-speed").text(`${tc.selectionData[tc.selection.date]["route"]["speed"]} mph`);
+			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
+			// average EWT, route-level, all within-scope days
+			$("#route-ewt").text(`${timeAveraged.avgEwt} mins`);
+			// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
+			$("#route-rbt").text(`${timeAveraged.percentOver} %`);
+			// average speed, route-level, all within-scope days
+			$("#route-speed").text(`${timeAveraged.avgSpeed} mph`);
 
 			// draw route-level charts
+			console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateSelect")[0].innerText}`);
+			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateSelect")[0].innerText);
 			tc.drawRouteLineCharts();
-			tc.drawCumulativeLineCharts();
-			//tc.drawRouteBarCharts();
+			tc.drawRouteEwtChart(timeAveraged.stopEwt);
+			tc.drawCumulativeLineChart(timeAveraged.stopTrips);
+			
 
-			// update journey metrics
+			// update journey metrics (only if a journey is selected on map)
 			if (tc.selection.stop.constructor == Array && tc.selection.stop.length == 2) {
 
 				var startId = tc.selection.stop[0].feature.properties.stop_id;
@@ -514,7 +762,15 @@
 				var endName = tc.stopLookup[tc.selection.direction][endId]["name"]
 				$("#stopNamePair").text(`${startName} to ${endName}`);
 
-				var computed = tc.computeJourneyMetrics();
+				var computed = tc.computeJourneyMetrics(startId,
+														endId,
+														timeAveraged.stopWaits,
+														timeAveraged.stopTrips,
+														filteredData);
+
+
+
+
 				var count = computed[tc.selection.date]["count"];
 				console.log("computed journey:", computed);
 
@@ -541,13 +797,11 @@
 				$("#journey-month-chart div").remove();
 				$("#journey-week-chart div").remove();
 				$("#journey-bar-chart div").remove();
-
 			};
-
 		},
 
 
-		computeJourneyMetrics: function() {
+		computeJourneyMetrics: function(startId, endId, stopWaits, stopTrips, allData) {
 			console.log("computing journey metrics...");
 
 			var stopLookup = tc.stopLookup[tc.selection.direction];
@@ -591,57 +845,18 @@
 		drawRouteLineCharts: function() {
 			console.log("drawing route line charts...");
 
-			// MONA - UNCOMMENT FOR BX39 MOCKUP PURPOSE
-			// var time_x = [];
-			// var time_y = [];
-			// Object.keys(tc.selectionData).forEach(function(date) {
-			// 	time_x.push(date);
-			// 	time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
-			// });
+			var time_x = [];
+			var time_y = [];
+			Object.keys(tc.selectionData).sort().forEach(function(date) {
+				time_x.push(date);
+				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
+			});
+			// console.log("time series data:", time_x, time_y);
 
-
-			var time_x = ['2016-05-29 00:00:00',
- '2016-05-31 00:00:00',
- '2016-06-01 00:00:00',
- '2016-06-02 00:00:00',
- '2016-06-03 00:00:00',
- '2016-06-04 00:00:00',
- '2016-06-05 00:00:00',
- '2016-06-06 00:00:00',
- '2016-06-07 00:00:00',
- '2016-06-08 00:00:00',
- '2016-06-10 00:00:00',
- '2016-06-11 00:00:00',
- '2016-06-12 00:00:00',
- '2016-06-13 00:00:00',
- '2016-06-14 00:00:00',
- '2016-06-15 00:00:00',
- '2016-06-16 00:00:00',
- '2016-06-17 00:00:00',
- '2016-06-18 00:00:00',
- '2016-06-19 00:00:00',
- '2016-06-20 00:00:00',
- '2016-06-21 00:00:00',
- '2016-06-22 00:00:00',
- '2016-06-23 00:00:00',
- '2016-06-24 00:00:00',
- '2016-06-25 00:00:00',
- '2016-06-26 00:00:00',
- '2016-06-27 00:00:00'];
-			var time_y = [ 1.216,  2.488,  1.894,  2.116,  1.95 ,  1.454,  0.566,  1.906,
-        1.958,  1.786,  2.306,  1.424,  1.322,  2.17 ,  1.808,  1.74 ,
-        1.312,  1.69 ,  2.174,  1.864,  1.412,  1.238,  1.742,  1.758,
-        1.84 ,  1.598,  0.974,  1.932];
-
-			var monthLine = Object.create(tc.graphLineConfig);
-			monthLine["x"] = time_x;
-			monthLine["y"] = time_y;
-			monthLine["line"] = {
-				shape: 'spline',
-				color: "#57068c",
-				weight: 1.5
-			};
-			monthLine["name"] = tc.metricHovers[tc.selection.metric];
+			var longLine = Object.create(tc.graphLineConfig);
+			longLine["x"] = time_x;
+			longLine["y"] = time_y;
+			longLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var weekLine = Object.create(tc.graphLineConfig);
 			weekLine["x"] = time_x.slice(-7);
@@ -661,116 +876,160 @@
 			timeLayout["width"] = 640;
 			timeLayout["height"] = 250;
 
-			Plotly.newPlot("month-chart", [monthLine], timeLayout, {displayModeBar: false});
+			Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
 			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
+		},
 
-			//only draw stop-by-stop chart for ewt and rbt (not speed)
-			if (["ewt", "rbt"].includes(tc.selection.metric)) {
 
-				// remove the "No stop-level chart for speed" warning if it's there
+		drawRouteEwtChart: function (stopEwtMap) {
+			console.log("drawing route EWT bar chart...");
+			if (tc.selection.metric == 'ewt') {
 				$("#stop-chart div").remove();
 
-				var stopNames = [];
-				var stops_y = [];
-				var stopEnum = [];
-				var conversionMap = {"ewt": "awt", "rbt": "ewt_95"};
-				Object.keys(tc.selectionData[tc.selection.date]["stops"]).forEach(function(stop){
-					stopNames.push(tc.stopLookup[tc.selection.direction][stop]["name"]);
-					stops_y.push(tc.selectionData[tc.selection.date]["stops"][stop][conversionMap[tc.selection.metric]]);
-				});
+				// master data list for bar chart
+				// items in form [ewt, stop_name, stop_sequence]
+				var master = [];
 
-				for (var i = 1; i <= stops_y.length; i++) {
-				    stopEnum.push(i);
+				Object.keys(stopEwtMap).forEach(function(stop){
+					master.push([
+						stopEwtMap[stop],
+						tc.stopLookup[tc.selection.direction][stop]["name"],
+						tc.stopLookup[tc.selection.direction][stop]["sequence"]
+					]);
+				});
+				//console.log(`presort: ${master.map(function(oneBar) {return oneBar[3]})}`);
+
+				// ensure stops are sorted by sequence
+				master.sort(function(a, b) {
+					return a[2] - b[2];
+				});
+				//console.log(`postsort: ${master.map(function(oneBar) {return oneBar[3]})}`);
+
+				// generate x axis 
+				var x_count = [];
+				for (i=0; i < master.length; i++) {
+					x_count[i] = i+1;
 				};
 
-				var stopLine = Object.create(tc.graphLineConfig);
-				stopLine["x"] = stopEnum;
-				stopLine["y"] = stops_y;
-				stopLine["text"] = stopNames;
-				stopLine["name"] = tc.metricHovers[tc.selection.metric];
+				var stopsLine = {
+					x: x_count,
+					y: master.map(function(oneBar) {return oneBar[0]}),
+					type: "bar",
+					text: master.map(function(oneBar) {return oneBar[1]}),
+					name: tc.metricHovers[tc.selection.metric],
+					marker: {
+						color: 'rgb(87, 6, 140)'
+					}
+				};
 
 				var stopsLayout = Object.create(tc.graphLayout);
-				stopsLayout["xaxis"] = {range: [1, stopEnum.length + 1], zeroline: false};
+				stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
 				stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
-				stopsLayout["margin"] = timeLayout["margin"];
+				stopsLayout["margin"] = {
+					"l": 40,
+					"r": 20,
+					"b": 30,
+					"t": 0,
+					"pad": 0
+				};
 				stopsLayout["width"] = 640;
 				stopsLayout["height"] = 250;
 
-				Plotly.newPlot("stop-chart", [stopLine], stopsLayout, {displayModeBar: false});
+				console.log(stopsLine, stopsLayout);
+
+				Plotly.newPlot("stop-chart", [stopsLine], stopsLayout, {displayModeBar: false});
 
 			} else {
-				// delete the stops chart
 				$("#stop-chart div").remove();
-				$("#stop-chart").append("<div>No stop-level chart for speed.</div>");
+				$("#stop-chart").append("<div>No stop chart for speed.</div>")
 			};
 		},
 
-		//MONA: add cumulative
-		drawCumulativeLineCharts: function(date) {
+
+		drawCumulativeLineChart: function(stopTrips) {
 			console.log("drawing accumulative line charts...");
 
-			stop_x = [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
-       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
-       34, 35, 36, 37, 38, 39, 40, 41];
+			// master data list for cumulative chart
+			// items in form [x_count, schedule_trip, actual_trip, stop_name, stop_sequence]
+			var master = [];
 
-			trip_y_actual =  [  1.4 ,   3.13,   5.12,   6.19,   7.14,   8.07,   9.54,  10.56,
-        11.89,  16.97,  24.74,  25.7 ,  27.23,  28.08,  30.23,  31.3 ,
-        31.84,  32.68,  34.37,  35.45,  36.49,  37.31,  38.85,  40.28,
-        41.6 ,  42.64,  43.79,  44.83,  46.06,  47.59,  48.87,  51.01,
-        53.1 ,  54.34,  54.34,  55.74,  56.39,  57.41,  58.08,  59.16,
-        60.28,  60.83];
+			Object.keys(stopTrips).forEach(function(stop) {
+				master.push([
+					stopTrips[stop].s_trip,
+					stopTrips[stop].m_trip,
+					tc.stopLookup[tc.selection.direction][stop]["name"],
+					tc.stopLookup[tc.selection.direction][stop]["sequence"]
+				]);
+			});
 
-			trip_y_schedule = [  1.58,   4.23,   5.36,   6.5 ,   7.58,   8.26,  10.91,  12.04,
-        14.33,  15.01,  15.01,  15.9 ,  17.18,  18.13,  20.4 ,  21.3 ,
-        22.43,  23.62,  24.68,  26.27,  27.92,  28.53,  29.74,  31.57,
-        33.04,  33.84,  35.02,  35.57,  36.29,  37.5 ,  39.64,  40.53,
-        43.43,  44.35,  44.35,  45.08,  46.02,  49.97,  51.21,  52.45,
-        53.62,  57.8 ];
+			// ensure stops are sorted by sequence
+			master.sort(function(a, b) {
+				return a[3] - b[3];
+			});
 
-			var accSchedLine = Object.create(tc.graphLineConfig);
-			accSchedLine.name = "scheduled trip time";
-			accSchedLine.x = stop_x;
-			accSchedLine.y = trip_y_schedule;
-			accSchedLine.line = {
-		    color: '#aaaaaa',
-		    width: 3,
-				shape: 'spline',
-				dash: 'dot'
-		  };
-			accSchedLine.showlegend = true;
+			// generate x axis 
+			var x_count = [];
+			for (i=0; i < master.length; i++) {
+				x_count[i] = i+1;
+			};
+
+			var sTrips = master.map(function(a) {return a[0]});
+			var mTrips = master.map(function(a) {return a[1]});
+
+			var sTripCum = [];
+			sTrips.reduce(function(a, b, i) { return sTripCum[i] = a + b; }, 0);
+			var mTripCum = [];
+			mTrips.reduce(function(a, b, i) { return mTripCum[i] = a + b; }, 0);
+
+			console.log("scheduled", sTripCum, "average", mTripCum);
+
+			var accSchedLine = {
+				name: "scheduled trip time",
+				x: x_count,
+				y: sTripCum,
+				line: {
+			    	color: '#aaaaaa',
+			    	width: 3,
+					shape: 'spline',
+					dash: 'dot'
+				},
+				showlegend: true
+			};
 			// accSchedLine.legend =  {"orientation": "h"};
 
-			var accActualLine = Object.create(tc.graphLineConfig);
-			accActualLine.name = "actual trip time";
-			accActualLine.x = stop_x;
-			accActualLine.y = trip_y_actual;
-			accActualLine.line = {
-				color: '#57068c',
-		    width: 3,
-				shape: 'spline'
+			var accActualLine = {
+				name: "actual trip time",
+				x: x_count,
+				y: mTripCum,
+				line: {
+			    	color: '#57068c',
+		    		width: 3,
+					shape: 'spline'
+				},
+				showlegend: true
 			};
-			accActualLine.showlegend = true;
-			// accActualLine.legend =  {"orientation": "h"};
 
 			var stackedAccData = [
 				accSchedLine,
 				accActualLine
 			];
 
-			var timeLayout = Object.create(tc.graphLayout);
-		  timeLayout["yaxis"] = {title: "Accumulative Trip Time"};
-		  timeLayout["margin"] = {
-		    "l": 40,
-		    "r": 20,
-		    "b": 0,
-		    "t": 30,
-		    "pad": 0
-		  };
-		  timeLayout["width"] = 600;
-		  timeLayout["height"] = 380;
-			timeLayout["xaxis"] = {zeroline: false};
-			timeLayout["showlegend"] = true;
-			timeLayout["legend"]= {"orientation": "h"};
+			var timeLayout = {
+
+				yaxis: {title: "Accumulative Trip Time"},
+				margin: {
+			    	"l": 40,
+			    	"r": 20,
+			    	"b": 0,
+			    	"t": 30,
+			    	"pad": 0
+			  	},
+				width: 600,
+				height: 380,
+				xaxis: {zeroline: false},
+				showlegend: true,
+				legend: {"orientation": "h"}
+			};
 
 			Plotly.newPlot("accumulative-chart", stackedAccData, timeLayout, {displayModeBar: false});
 		},
@@ -782,77 +1041,15 @@
 
 			// MONA AGAIN
 			// just draw time series of two lines: awt + m_trip
-			// var time_x = [];
-			// var time_y_wait = [];
-			// var time_y_trip = [];
-			// Object.keys(data).forEach(function(date) {
-			// 	time_x.push(date);
-			// 	time_y_wait.push(data[date]["awt"]);
-			// 	time_y_trip.push(data[date]["m_trip"]);
-			// });
+			var time_x = [];
+			var time_y_wait = [];
+			var time_y_trip = [];
+			Object.keys(data).forEach(function(date) {
+				time_x.push(date);
+				time_y_wait.push(data[date]["awt"]);
+				time_y_trip.push(data[date]["m_trip"]);
+			});
 
-			time_x = ['2016-05-29 00:00:00',
-							 '2016-05-31 00:00:00',
-							 '2016-06-01 00:00:00',
-							 '2016-06-02 00:00:00',
-							 '2016-06-03 00:00:00',
-							 '2016-06-04 00:00:00',
-							 '2016-06-05 00:00:00',
-							 '2016-06-06 00:00:00',
-							 '2016-06-07 00:00:00',
-							 '2016-06-08 00:00:00',
-							 '2016-06-10 00:00:00',
-							 '2016-06-11 00:00:00',
-							 '2016-06-12 00:00:00',
-							 '2016-06-13 00:00:00',
-							 '2016-06-14 00:00:00',
-							 '2016-06-15 00:00:00',
-							 '2016-06-16 00:00:00',
-							 '2016-06-17 00:00:00',
-							 '2016-06-18 00:00:00',
-							 '2016-06-19 00:00:00',
-							 '2016-06-20 00:00:00',
-							 '2016-06-21 00:00:00',
-							 '2016-06-22 00:00:00',
-							 '2016-06-23 00:00:00',
-							 '2016-06-24 00:00:00',
-							 '2016-06-25 00:00:00',
-							 '2016-06-26 00:00:00',
-							 '2016-06-27 00:00:00',
-							 '2016-06-28 00:00:00'];
- 			time_y_wait = [7.88,
-										 6.12,
-										 5.49,
-										 6.64,
-										 7.02,
-										 7.7,
-										 6.66,
-										 5.42,
-										 5.97,
-										 5.52,
-										 5.52,
-										 6.82,
-										 7.19,
-										 5.83,
-										 4.94,
-										 5.39,
-										 4.81,
-										 5.36,
-										 7.94,
-										 6.51,
-										 5.57,
-										 4.91,
-										 5.44,
-										 5.61,
-										 5.7,
-										 7.32,
-										 7.28,
-										 5.34,
-										 5.47];
-			time_y_trip = [ 13.54,  14.3 ,  15.4 ,  20.21,  15.  ,  12.88,  12.95,  15.68,
-        15.28,  15.79,  14.81,  12.65,  14.13,  14.77,  15.18,  14.84,
-        14.96,  15.61,  14.  ,  12.27,  14.9 ,  14.33,  14.84,  14.22,
-        15.52,  13.07,  13.64,  13.79,  14.32];
 
 			var monthWaitLine = Object.create(tc.graphLineConfig);
 			monthWaitLine.name = "avg. wait time";
@@ -943,10 +1140,10 @@
 
 			var waitData = {
 				// MONA
-				// x: ["Scheduled", "Average", "Planning"],
-				// y: [d.swt, d.awt, d.ewt_95],
 				x: ["Scheduled", "Average", "Planning"],
-				y: [6.1, 7.88, 3.23],
+				y: [d.swt, d.awt, d.ewt_95],
+				// x: ["Scheduled", "Average", "Planning"],
+				// y: [6.1, 7.88, 3.23],
 				name: 'Wait Time',
 				type: 'bar',
 				marker: {
@@ -963,8 +1160,8 @@
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
 				// MONA
-				// y: [d.s_trip, d.m_trip, d.trip_95],
-				y: [13.02, 14.56, 20.31],
+				y: [d.s_trip, d.m_trip, d.trip_95],
+				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
 				marker: {
@@ -981,7 +1178,6 @@
 			var data = [waitData, onboardData];
 
 			var barLayout = Object.create(tc.graphLayout);
-			// var layout = {barmode: 'stack'};
 			barLayout["barmode"] = "stack";
 			barLayout["autosize"] = true;
 			barLayout["bargap"] = 0.5;
