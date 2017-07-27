@@ -79,7 +79,7 @@
 			if (data["status"]=="error") {
 				var current = $(location).attr('href');
 				window.location.replace(current + "/404");
-			}
+			};
 
 			// set headline text
 			$("#busLongName").text(data["long_name"]);
@@ -92,13 +92,6 @@
 			// set direction headsign selection options
 			$("#dir0").text(data["directions"]["0"]["headsign"]);
 			$("#dir1").text(data["directions"]["1"]["headsign"]);
-
-			// dynamically insert date select options
-			// TODO - KILL THIS AFTER LINECHART/DATEPICKER IS IN
-			// Object.keys(data["directions"]["0"]["daybins"]["1"]["hourbins"]["0"]["dates"]).reverse().forEach(function(day){
-			// 	var option_elem = `<option name="date" value="${day}">${day}</option>`
-			// 	$("#dateSelect").append(option_elem);
-			// });
 
 			// setting up dashboard environment on first load
 			if (first==true) {
@@ -193,6 +186,7 @@
 						console.log('2nd stop selection:', justClicked.feature.properties.stop_id);
 						tc.selection.stop.push(justClicked);
 						justClicked.setStyle(endMarkerStyle);
+						justClicked.closePopup();
 						paintJourney();
 						tc.updateController("light");
 					} else {
@@ -242,12 +236,7 @@
 			function onEachFeature(feature, layer) {
 			    if (feature.geometry.type == 'Point') {
 			    	// bind a popup to markers
-			        layer.bindPopup("<dl><dt>stop_name</dt>"
-						           + "<dd>" + feature.properties.stop_name + "</dd>"
-			        			   + "<dl><dt>stop_id</dt>"
-						           + "<dd>" + feature.properties.stop_id + "</dd>"
-						           + "<dt>stop_seq</dt>"
-						           + "<dd>" + feature.properties.stop_sequence + "</dd>");
+			        layer.bindPopup("<dd>" + feature.properties.stop_name + "</dd>");
 
 			        // bind a click event to markers, and control popup behaviour on mouseover
 			        layer.on({
@@ -361,7 +350,6 @@
 			switch (level) {
 				case "light":
 					console.log("updateController: level LIGHT");
-					//console.log("original selection:", tc.selection);
 					// if this is a stop change, stop selection already changed at click event
 					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
@@ -370,7 +358,6 @@
 					break;
 				case "medium":
 					console.log("updateController: level MEDIUM");
-					//console.log("original selection:", tc.selection);
 					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
@@ -380,7 +367,6 @@
 					break;
 				case "heavy":
 					console.log("updateController: level HEAVY");
-					//console.log("original selection:", tc.selection);
 					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
 					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
@@ -392,7 +378,6 @@
 					// redrawMap() calls updateMetricsDisplay internally
 					break;
 			};
-			//console.log("new selection:", tc.selection);
 		},
 
 
@@ -544,6 +529,9 @@
 
 
 		computeTimeAveragedMetrics: function(filteredData) {
+			console.log("computing time averaged metreics...");
+
+			// TODO - could make this function A LOT NICER... ugly af right now.
 
 			// route-level (pre-computed) metrics for grey box summary EWT + SPEED
 			var ewtAverager = {sum: 0, count: 0};
@@ -751,7 +739,6 @@
 			tc.drawRouteLineCharts();
 			tc.drawRouteEwtChart(timeAveraged.stopEwt);
 			tc.drawCumulativeLineChart(timeAveraged.stopTrips);
-			
 
 			// update journey metrics (only if a journey is selected on map)
 			if (tc.selection.stop.constructor == Array && tc.selection.stop.length == 2) {
@@ -768,26 +755,9 @@
 														timeAveraged.stopTrips,
 														filteredData);
 
-
-
-
-				var count = computed[tc.selection.date]["count"];
-				console.log("computed journey:", computed);
-
-				$(".journey-swt").text(`${computed[tc.selection.date]["swt"].toFixed(1)}`);
-				$(".journey-s-trip").text(`${computed[tc.selection.date]["s_trip"].toFixed(1)}`);
-				$(".journey-awt").text(`${computed[tc.selection.date]["awt"].toFixed(1)}`);
-				$(".journey-m-trip").text(`${computed[tc.selection.date]["m_trip"].toFixed(1)}`);
-				$(".journey-ewt-95").text(`${computed[tc.selection.date]["ewt_95"].toFixed(1)}`);
-				$(".journey-trip-95").text(`${computed[tc.selection.date]["trip_95"].toFixed(1)}`);
-
-				if (count < tc.countMin) {
-					$("#countWarning").text(`BEWARE: metrics for this journey were computed w/ low sample size (n < ${tc.countMin})`);
-				};
-
 				// draw journey-level charts
-				tc.drawJourneyLineCharts(computed);
-				tc.drawJourneyBarCharts(computed);
+				tc.drawJourneyLineCharts(computed.timeSeries);
+				tc.drawJourneyBarChart(computed.timeAveraged);
 
 			} else if (tc.selection.stop == 0) {
 				// clear the journey-level metrics and graphs
@@ -806,16 +776,16 @@
 
 			var stopLookup = tc.stopLookup[tc.selection.direction];
 
-			var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
-			var endSeq = tc.selection.stop[1].feature.properties.stop_sequence;
+			var startSeq = stopLookup[startId].sequence;
+			var endSeq = stopLookup[endId].sequence;
 
-			var computed = {};
-			Object.keys(tc.selectionData).forEach(function(date) {
+			var timeSeries = {};
+			Object.keys(allData).forEach(function(date) {
 
 				var oneDay = {};
-				Object.keys(tc.selectionData[date]["stops"]).forEach(function(stop_id) {
+				Object.keys(allData[date]["stops"]).forEach(function(stop_id) {
 
-					var seq = stopLookup[stop_id]["sequence"];
+					var seq = stopLookup[stop_id].sequence;
 					[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
 
 						var waitTimeName = metricNames[0];
@@ -823,22 +793,47 @@
 
 						if (seq == startSeq) {
 							// originating bus stop; take wait time at this stop
-							oneDay[waitTimeName] = tc.selectionData[date]["stops"][stop_id][waitTimeName];
-							oneDay["count"] = tc.selectionData[date]["stops"][stop_id]["count"];
+							oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
+							oneDay["count"] = allData[date]["stops"][stop_id].count;
 						};
 						if ((seq >= startSeq) && (seq < endSeq)) {
 							// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
 							if (oneDay[onboardTimeName]) {
-								oneDay[onboardTimeName] += tc.selectionData[date]["stops"][stop_id][onboardTimeName];
+								oneDay[onboardTimeName] += allData[date]["stops"][stop_id][onboardTimeName];
 							} else {
-								oneDay[onboardTimeName] = tc.selectionData[date]["stops"][stop_id][onboardTimeName];
-							}
+								oneDay[onboardTimeName] = allData[date]["stops"][stop_id][onboardTimeName];
+							};
 						};
 					});
 				});
-				computed[date] = oneDay;
+				timeSeries[date] = oneDay;
 			});
-			return computed;
+
+			var timeAveraged = {};
+			Object.keys(stopWaits).forEach(function(stop_id) {
+				var seq = stopLookup[stop_id].sequence;
+				["swt", "awt", "ewt_95"].forEach(function(waitTimeName) {
+					if (seq == startSeq) {
+						// originating bus stop; take wait time at this stop
+						timeAveraged[waitTimeName] = stopWaits[stop_id][waitTimeName];
+					};			
+				});
+			});
+
+			Object.keys(stopTrips).forEach(function(stop_id) {
+				var seq = stopLookup[stop_id].sequence;
+				["s_trip", "m_trip", "trip_95"].forEach(function(onboardTimeName) {
+					if ((seq >= startSeq) && (seq < endSeq)) {
+						// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
+						if (timeAveraged[onboardTimeName]) {
+							timeAveraged[onboardTimeName] += stopTrips[stop_id][onboardTimeName];
+						} else {
+							timeAveraged[onboardTimeName] = stopTrips[stop_id][onboardTimeName];
+						};
+					};
+				});
+			});
+			return {timeSeries: timeSeries, timeAveraged: timeAveraged};
 		},
 
 
@@ -847,12 +842,14 @@
 
 			var time_x = [];
 			var time_y = [];
+
+			// build time series arrays
 			Object.keys(tc.selectionData).sort().forEach(function(date) {
 				time_x.push(date);
 				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
 			});
-			// console.log("time series data:", time_x, time_y);
 
+			// this will dynamically be one of: month, year, all-time
 			var longLine = Object.create(tc.graphLineConfig);
 			longLine["x"] = time_x;
 			longLine["y"] = time_y;
@@ -897,13 +894,11 @@
 						tc.stopLookup[tc.selection.direction][stop]["sequence"]
 					]);
 				});
-				//console.log(`presort: ${master.map(function(oneBar) {return oneBar[3]})}`);
 
 				// ensure stops are sorted by sequence
 				master.sort(function(a, b) {
 					return a[2] - b[2];
 				});
-				//console.log(`postsort: ${master.map(function(oneBar) {return oneBar[3]})}`);
 
 				// generate x axis 
 				var x_count = [];
@@ -1039,8 +1034,6 @@
 			console.log("drawing journey line charts...");
 			console.log(data);
 
-			// MONA AGAIN
-			// just draw time series of two lines: awt + m_trip
 			var time_x = [];
 			var time_y_wait = [];
 			var time_y_trip = [];
@@ -1049,7 +1042,6 @@
 				time_y_wait.push(data[date]["awt"]);
 				time_y_trip.push(data[date]["m_trip"]);
 			});
-
 
 			var monthWaitLine = Object.create(tc.graphLineConfig);
 			monthWaitLine.name = "avg. wait time";
@@ -1114,34 +1106,15 @@
 		},
 
 
-		drawJourneyBarCharts: function(data) {
+		drawJourneyBarChart: function(data) {
 			console.log("drawing journey bar charts...");
-			console.log(data);
 
 			// draw three stacked bars for selected date: (swt + s_trip), (awt + m_trip), and (ewt_95 + trip_95)
-			// var d3 = Plotly.d3;
-			//
-			// var WIDTH_IN_PERCENT_OF_PARENT = 90,
-    	// 		HEIGHT_IN_PERCENT_OF_PARENT = 90;
-			//
-		  // var gd3 = d3.select("div[id='journey-bar-chart']")
-			//     .append('div')
-		  //     .style({
-		  //       width: WIDTH_IN_PERCENT_OF_PARENT + '%',
-		  //       'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
-		  //       height: HEIGHT_IN_PERCENT_OF_PARENT + '%',
-		  //       'margin-top': 0
-		  //     });
-			//
-		  // var journeyBarChart = gd3.node()
-
-
-			var d = data[tc.selection.date];
 
 			var waitData = {
 				// MONA
 				x: ["Scheduled", "Average", "Planning"],
-				y: [d.swt, d.awt, d.ewt_95],
+				y: [data.swt, data.awt, data.ewt_95 + data.swt],
 				// x: ["Scheduled", "Average", "Planning"],
 				// y: [6.1, 7.88, 3.23],
 				name: 'Wait Time',
@@ -1160,7 +1133,7 @@
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
 				// MONA
-				y: [d.s_trip, d.m_trip, d.trip_95],
+				y: [data.s_trip, data.m_trip, data.trip_95],
 				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
@@ -1175,7 +1148,7 @@
 				opacity: 0.5
 			};
 
-			var data = [waitData, onboardData];
+			var barData = [waitData, onboardData];
 
 			var barLayout = Object.create(tc.graphLayout);
 			barLayout["barmode"] = "stack";
@@ -1193,7 +1166,7 @@
 			barLayout["width"] = 500;
 			barLayout["height"] = 360;
 
-			Plotly.newPlot("journey-bar-chart", data, barLayout, {displayModeBar: false});
+			Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
 		},
 
 	};
