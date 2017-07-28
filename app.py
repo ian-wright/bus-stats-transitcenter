@@ -19,9 +19,9 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -239,7 +239,7 @@ def get_metrics_dfs(route, window_start):
 # def build_data_series(dfs, direc, dbin, hbin):
 #     """
 #     given a direction, daybin, and hourbin, this function produces a dictionary object
-#     of {date: {route-level: data, stop-level: data}}, where 
+#     of {date: {route-level: data, stop-level: data}}, where
 #     representing stop-level metric data for each day
 #     FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value_1, metric_value_2)]
 #     """
@@ -263,7 +263,7 @@ def get_metrics_dfs(route, window_start):
 #             return one_day.apply(lambda row: [clean_nan(row['stop'])] +
 #                                              [clean_nan(row[metric]) for metric in metric_list],
 #                                              axis=1).tolist()
-#         else 
+#         else
 #             return
 
 #     stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
@@ -282,7 +282,7 @@ def package_metrics(row, mode):
         # mode = 'stop'
         metric_list = stop_metric_list
         return [[clean_nan(row['stop'])] + [clean_nan(row[metric]) for metric in metric_list]]
-    
+
 
 
 def build_response(profile, dfs):
@@ -346,7 +346,7 @@ def build_response(profile, dfs):
 
 
 
-        
+
 
         return response
 
