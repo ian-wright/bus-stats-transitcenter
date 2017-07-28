@@ -1892,7 +1892,7 @@ div.underline{
 
 #map {
     height: 400px;
-    z-index: -1;
+    z-index: 0;
 }
 
 #maphomesection {

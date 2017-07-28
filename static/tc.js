@@ -1164,7 +1164,7 @@
 				"t": 10,
 				"pad": 0
 			};
-			barLayout["width"] = 400;
+			barLayout["width"] = 300;
 			barLayout["height"] = 360;
 
 			Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
