@@ -29,7 +29,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
 db = SQLAlchemy(app)
 
-DAYSBACK = 30
+ROUTE_DAYSBACK = 730
+BORO_DAYSBACK = 30
 
 
 ########## SQLALCHEMY MODELS ###########
@@ -236,43 +237,6 @@ def get_metrics_dfs(route, window_start):
         return {'stop_df': stop_metrics_df, 'route_df': route_metrics_df}
 
 
-# def build_data_series(dfs, direc, dbin, hbin):
-#     """
-#     given a direction, daybin, and hourbin, this function produces a dictionary object
-#     of {date: {route-level: data, stop-level: data}}, where 
-#     representing stop-level metric data for each day
-#     FORMAT: [(date, [DATA])], where DATA is [(stop_id, metric_value_1, metric_value_2)]
-#     """
-#     direc = int(direc)
-#     dbin = int(dbin)
-#     hbin = int(hbin)
-
-#     def filter_df(df, metric_list, direc, dbin, hbin):
-#         return df.loc[(df['daybin'] == dbin) &
-#                       (df['hourbin'] == hbin) &
-#                       (df['direction'] == direc),
-#                       ['date', 'stop'] + metric_list]
-
-#     def package_metrics(day, df, metric_list):
-#         """
-#         generates a list of stop-level data tuples corresponding to a single calendar day
-#         """
-#         # all data records for a given date (one record per bus stop)
-#         one_day = df.loc[df.date == day, :]
-#         if len(one_day) != 0:
-#             return one_day.apply(lambda row: [clean_nan(row['stop'])] +
-#                                              [clean_nan(row[metric]) for metric in metric_list],
-#                                              axis=1).tolist()
-#         else 
-#             return
-
-#     stop_filtered = filter_df(dfs['stop_df'], stop_metric_list, direc, dbin, hbin)
-#     route_filtered = filter_df(dfs['route_df'], route_metric_list, direc, dbin, hbin)
-
-#     return {"dates": {str(day): {"route": package_metrics(day, route_filtered, route_metric_list),
-#                                  "stops": package_metrics(day, stop_filtered, stop_metric_list)} \
-#         for day in route_filtered.date.unique()}}
-
 def package_metrics(row, mode):
 
     if mode == 'route':
@@ -284,21 +248,10 @@ def package_metrics(row, mode):
         return [[clean_nan(row['stop'])] + [clean_nan(row[metric]) for metric in metric_list]]
     
 
-
 def build_response(profile, dfs):
     print 'server: building response object'
 
     response = InterDict()
-
-    # hourbins = set(list(dfs["stop_df"].hourbin.unique()) + list(dfs["route_df"].hourbin.unique()))
-    # daybins = set(list(dfs["stop_df"].daybin.unique()) + list(dfs["route_df"].daybin.unique()))
-    # directions = set(list(dfs["stop_df"].direction.unique()) + list(dfs["route_df"].direction.unique()))
-
-    # print ("hourbins, daybins, directions", hourbins, daybins, directions)
-
-    # hourbins = ['0', '1', '2', '3', '4']
-    # daybins = ['0', '1', '2']
-    # directions = ['0', '1', '2']
 
     if (profile is None) or (dfs is None):
         return {'status': 'error'}
@@ -314,14 +267,6 @@ def build_response(profile, dfs):
             if profile['directions'][direction]:
                 response['directions'][direction]['headsign'] = profile['directions'][direction]['headsign']
                 response['directions'][direction]['geo'] = profile['directions'][direction]['geo']
-
-        # now we can iterate through all hourbin/daybin/direction combination
-        # and populate response object with data
-        # for direction in directions:
-        #     for dbin in daybins:
-        #         for hbin in hourbins:
-        #             response['directions'][direction]['daybins'][dbin]['hourbins'][hbin] = \
-        #             build_data_series(dfs, direction, dbin, hbin)
 
         for i, row in dfs['route_df'].iterrows():
             direction = str(row['direction'])
@@ -344,11 +289,21 @@ def build_response(profile, dfs):
                 response['directions'][direction]['daybins'][dbin]['hourbins'][hbin]['dates'][date]['stops'] = \
                 package_metrics(row, mode='stop')
 
-
-
-        
-
         return response
+
+
+def getBoroMetrics(window_start):
+    df = pd.read_sql(db.session.query(RouteMetric)
+            .filter(RouteMetric.rds_index.startswith('BX_') or
+                    RouteMetric.rds_index.startswith('B_') or
+                    RouteMetric.rds_index.startswith('M_') or
+                    RouteMetric.rds_index.startswith('S_') or
+                    RouteMetric.rds_index.startswith('Q_'))
+            .filter(RouteMetric.date >= window_start).statement,
+            db.session.bind)
+
+    print df.groupby('rds_index').mean()
+
 
 
 ########## FLASK ROUTES ###########
@@ -359,7 +314,7 @@ def get_data(route):
     start = timeit.timeit()
     print 'server: handling data request for: {}'.format(route)
 
-    window_start = str(get_last_update() + datetime.timedelta(days=-(DAYSBACK)))
+    window_start = str(get_last_update() + datetime.timedelta(days=-(ROUTE_DAYSBACK)))
     print 'window_start:', window_start
 
     response = build_response(get_profile(route),
@@ -381,8 +336,14 @@ def dashboard(route):
 @app.route('/')
 @app.route('/home')
 def home():
+    print 'server: loading template for home page'
+
+    window_start = str(get_last_update() + datetime.timedelta(days=-(BORO_DAYSBACK)))
+
+    
+
     # system_data = get_system_data();
-    return render_template('homev2.html')
+    return render_template('homev2.html', data=)
 
 
 @app.errorhandler(404)

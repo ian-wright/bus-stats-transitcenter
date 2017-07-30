@@ -707,8 +707,6 @@
 										   null)}
 			});
 
-			// console.log("stopTripAverager", stopTripAverager);
-
 			return {avgEwt: avgEwt, avgSpeed: avgSpeed, percentOver: percentOver, stopEwt: stopEwt, stopTrips: stopTrips, stopWaits: stopWaits};
 		},
 
