@@ -82,24 +82,24 @@
       </div><!--row-->
 
       <div class="row" id="topfilter">
-        <div class="col-sm-2">
+        <div class="col-sm-3">
           <h4>DATE RANGE</h4>
-          <select id="dateSelect" size="1">
+          <select id="dateSelect" size="1" class="filterSelect">
             <option name= "dateRange" value="1" selected="selected">Past Month</option>
             <option name= "dateRange" value="2">Past Year</option>
             <option name= "dateRange" value="3">All Time</option>
           </select>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-4">
           <h4>TIME FILTERS</h4>
-          <select id="daySelect" size="1">
+          <select id="daySelect" size="1" class="filterSelect">
             <option name= "daybin" value="0">All</option>
             <option name= "daybin" value="1" selected="selected">Weekday</option>
             <option name= "daybin" value="2">Weekend</option>
           </select>
-          <select id="hourSelect" size="1">
-            <option name= "hourbin" value="0">All</option>
-            <option name= "hourbin" value="1" selected="selected">7am-10am</option>
+          <select id="hourSelect" size="1" class="filterSelect">
+            <option name= "hourbin" value="0" selected="selected">All</option>
+            <option name= "hourbin" value="1">7am-10am</option>
             <option name= "hourbin" value="2">10am-4pm</option>
             <option name= "hourbin" value="3">4pm-7pm</option>
             <option name= "hourbin" value="4">7pm-10pm</option>
@@ -107,9 +107,9 @@
         </div>
         <div class="col-sm-5">
           <h4>DIRECTION</h4>
-          <select id="dirSelect" size="1" style="width:200px;">
-            <option name= "direction" id="dir0" value="0" selected="selected">Dir0</option>
-            <option name= "direction" id="dir1" value="1">Dir1</option>
+          <select id="dirSelect" size="1" class="filterSelect" style="width:400px;">
+            <option name= "direction" id="dir0" value="0" selected="selected">--</option>
+            <option name= "direction" id="dir1" value="1">--</option>
           </select>
         </div>
       </div>
@@ -121,18 +121,19 @@
         <h3>Route Summary</h3>
         <div class="col-sm-2">
           <div class="row">
-            <div class="metricsblocks">
+            <div class="metricsblocks" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
               <div class="rowbox-sm">
-                <h2>Avg. Delay at Stops</h2>
+                <h2>
+                  Avg. Delay at Stops</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-ewt" class="jumbo jumbo2">-- mins</h1>
+                <h1 id= "route-ewt" class="jumbo jumbo2">-- </h1><h4> mins</h4>
                 <!-- <h1 class="jumbo jumbo2">1.7 mins</h1> -->
               </div>
             </div>
           </div>
           <div class="row">
-            <div class="metricsblocks">
+            <div class="metricsblocks" data-toggle="tooltip" title="dunno how to title it yet">
               <div class="rowbox-sm">
                 <h2>Excess Journey Time</h2>
               </div>
@@ -148,7 +149,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-speed" class="jumbo jumbo2">-- mins</h1>
+                <h1 id= "route-speed" class="jumbo jumbo2">-- </h1><h4> mph</h4>
                 <!-- <h1 class="jumbo jumbo2">7.5 mph</h1> -->
               </div>
             </div>
@@ -189,7 +190,7 @@
               </div>
               <div id="week-chart" class="tab-pane fade">
               </div>
-              
+
             </div>
           </div>
         </div> <!-- chart -->
@@ -217,17 +218,17 @@
           </div>
         </div>
         <div class="col-sm-8 pleft30">
-          <h3 id="stopNamePair" class="h3-route"> X to Y </h3>
+          <h3 id="stopNamePair" class="h3-route"> X TO Y </h3>
           <div class="row mtop0">
             <div class="col-sm-12">
 
               <div class="row mleft0">
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                   <h4>Your Journey Performance</h4>
                   <div id="journey-bar-chart" class="responsive-plot">
                   </div>
                 </div>
-                <div class="col-sm-6 pleft30">
+                <div class="col-sm-8 pleft30">
                   <h4>Your journey trendline</h4>
                   <div class="row">
                     <ul class="nav nav-tabs">
@@ -298,5 +299,8 @@
     $.getJSON(dataURL, function(data) {
           tc.initializeDashboard(data, first=true);
       });
+  $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();
+  });
 </script>
 </html>

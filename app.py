@@ -246,7 +246,6 @@ def package_metrics(row, mode):
         # mode = 'stop'
         metric_list = stop_metric_list
         return [[clean_nan(row['stop'])] + [clean_nan(row[metric]) for metric in metric_list]]
-    
 
 def build_response(profile, dfs):
     print 'server: building response object'
@@ -303,7 +302,6 @@ def getBoroMetrics(window_start):
             db.session.bind)
 
     print df.groupby('rds_index').mean()
-
 
 
 ########## FLASK ROUTES ###########

@@ -89,7 +89,7 @@ def convert_null(val):
 def prod_mode(stop_infile, route_infile, stop_columns, route_columns, engine):
   # READ DATA FROM CSV FILE, AND WRITE TO POSTGRES
   print 'reading data file...'
-  
+
   stop_df = pd.read_csv(stop_infile)
   # temporary: remove the speed col from stop data
   stop_df.drop(['speed'], axis=1, inplace=True)
