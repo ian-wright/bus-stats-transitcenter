@@ -25,6 +25,13 @@
         // for low-n warning message
         countMin: 30,
 
+        // for cleaning the accumulative charts - how many of the first trips in the route to ignore
+        accumCutoff: 3,
+
+        // for tempering the 95 percentile numbers; this fraction represents how much of a journey would
+        // actually see 95th percentile stop-to-stop trip times
+        fractionIs95: 0.2,
+
         routeMetricMap: {
 	        stop: 0,
 	        ewt: 1,
@@ -270,10 +277,10 @@
 		registerSelectionHandlers: function() {
 			console.log("registering selection handlers...");
 
-			$("#metricSelect, #daySelect").change(function() {
+			$("#metricSelect, #dayBinSelect").change(function() {
 				tc.updateController("light");
 			});
-			$("#hourSelect, #dateSelect").change(function() {
+			$("#hourBinSelect, #dateRangeSelect").change(function() {
 				tc.updateController("medium");
 			});
 			$("#dirSelect").change(function() {
@@ -312,8 +319,8 @@
 			$("#journey-bar-chart div").remove();
 
 			// revert to default selections on new route (day=1, hour=1, dir=2)
-			$("input[value=1]", "#hourSelect").prop('checked', true);
-			$("input[value=1]", "#daySelect").prop('checked', true);
+			$("input[value=1]", "#hourBinSelect").prop('checked', true);
+			$("input[value=1]", "#dayBinSelect").prop('checked', true);
 			$("input[value=ewt]", "#metricSelect").prop('checked', true);
 			$("option[value=2]", "#dirSelect").prop('selected', true);
 
@@ -351,26 +358,26 @@
 				case "light":
 					console.log("updateController: level LIGHT");
 					// if this is a stop change, stop selection already changed at click event
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
 					tc.updateMetricDisplay();
 					break;
 				case "medium":
 					console.log("updateController: level MEDIUM");
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
-					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourBinSelect").val();
 					tc.buildDataObject();
 					tc.updateMetricDisplay();
 					break;
 				case "heavy":
 					console.log("updateController: level HEAVY");
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
-					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourBinSelect").val();
 					tc.selection.direction = $("option[name=direction]:selected", "#dirSelect").val();
 					tc.selection.route = tc.rawData["route_id"];
 					tc.buildDataObject();
@@ -382,6 +389,10 @@
 
 
 		buildDataObject: function(){
+			// we rebuild our main data object any time the DIRECTION, DATE RANGE or HOURBIN changes
+			// any time we rebuild this data object, we include daybins for both weekday and weekends.
+			// (this is because we need both wkday and wknds to draw complete time series)
+
 			console.log("building data object...");
 			// get all historical data for given (direction, daybin, hourbin) selection
 			var allWkday = tc.rawData["directions"][tc.selection.direction]
@@ -402,7 +413,7 @@
 			var allData = Object.assign(wkdayObj, wkndObj);
 			console.log("allData", allData);
 
-			// filter our data for only those observations within the desired window (dateRange + wkday/wkend)
+			// filter our data for only those observations within the desired window (dateRange)
 			var allDates = Object.keys(allData).map(function(dateStr){ return new Date(dateStr) });
 			var latest = allDates.reduce(function (a, b) { return a > b ? a : b });
 
@@ -430,13 +441,13 @@
 					selectionData[date] = allData[date];
 				};
 			});
-			console.log("selectionData", selectionData);
+			console.log("selectionData length", Object.keys(selectionData).length);
 			tc.selectionData = selectionData;
 		},
 
 
 		objectifyData: function(rawData, dayBin) {
-			console.log(`objectifying data for daybin: ${dayBin}`);
+			console.log(`objectifying data ${rawData} for daybin: ${dayBin}`);
 			// transform rawData into object-style structure, given selections for direction, daybin, and hourbin
 			var objectData = {};
 			Object.keys(rawData).forEach(function (date) {
@@ -444,29 +455,32 @@
 				var oneDay = {"route": null, "stops": {}};
 
 				// build stop-level data for a single day
-				rawData[date]["stops"].forEach(function(stop) {
-
-					// only include data for stop_ids that are found in the corresponding geo_profile
-					if (Object.keys(tc.stopLookup[tc.selection.direction]).includes(stop[tc.stopMetricMap['stop']].toString())) {
-						var stopValues = {};
-						for (var metricName in tc.stopMetricMap) {
-							if (metricName != 'stop') {
-								stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
+				if (rawData[date]["stops"]) {
+					rawData[date]["stops"].forEach(function(stop) {
+						// only include data for stop_ids that are found in the corresponding geo_profile
+						if (Object.keys(tc.stopLookup[tc.selection.direction]).includes(stop[tc.stopMetricMap['stop']].toString())) {
+							var stopValues = {};
+							for (var metricName in tc.stopMetricMap) {
+								if (metricName != 'stop') {
+									stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
+								};
 							};
+							oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
 						};
-						oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
-					};
-				});
+					});
+				};
 
 				// build route-level data for a single day
-				var routeData = rawData[date]["route"];
-				var routeValues = {};
-				for (var metricName in tc.routeMetricMap) {
-					if (metricName != 'stop') {
-						routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
+				if (rawData[date]["route"]) {
+					var routeData = rawData[date]["route"];
+					var routeValues = {};
+					for (var metricName in tc.routeMetricMap) {
+						if (metricName != 'stop') {
+							routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
+						};
 					};
+					oneDay["route"] = routeValues;
 				};
-				oneDay["route"] = routeValues;
 
 				// tag the observation's daybin
 				oneDay["dayBin"] = dayBin;
@@ -529,9 +543,15 @@
 
 
 		computeTimeAveragedMetrics: function(filteredData) {
-			console.log("computing time averaged metreics...");
-
+			console.log("computing time averaged metrics...");
 			// TODO - could make this function A LOT NICER... ugly af right now.
+
+			// maybe use this to clean up the repetitive code below
+			// function stopAvg(stop, metric, field, accumulator, value, weight) {
+			// 	return (accumulator[stop] ?
+			// 			accumulator[stop][metric][field] += value * weight :
+			// 			value * weight)
+			// };
 
 			// route-level (pre-computed) metrics for grey box summary EWT + SPEED
 			var ewtAverager = {sum: 0, count: 0};
@@ -543,26 +563,28 @@
 			var awtAverager = {sum: 0, count: 0};
 			var swtAverager = {sum: 0, count: 0};
 
-			// stop-level EWT for use in bar chart
+			// stop-by-stop EWT for use in route-level bar chart
 			var stopEwtAverager = {};
 			// stop-level sTrip + mTrip + trip95 (for cumulative chart and journey metrics)
 			var stopTripAverager = {};
-			// stop-level SWT, AWT, 95WT (for journey metrics)
+			// stop-level SWT + AWT + 95WT (for journey metrics)
 			var stopWaitAverager = {};
 
 			// iterate through all DAYS in scope
 			Object.keys(filteredData).forEach(function(date) {
 
-				// using the provided route-level EWT
-				if (filteredData[date].route.ewt) {
-					ewtAverager.sum += filteredData[date].route.ewt;
-					ewtAverager.count += 1;
-				};
-				// using the provided route-level SPEED
-				if (filteredData[date].route.speed) {
-					speedAverager.sum += filteredData[date].route.speed;
-					speedAverager.count += 1;
-				};
+				if (filteredData[date].route) {
+					// using the provided route-level EWT
+					if (filteredData[date].route.ewt) {
+						ewtAverager.sum += filteredData[date].route.ewt;
+						ewtAverager.count += 1;
+					};
+					// using the provided route-level SPEED
+					if (filteredData[date].route.speed) {
+						speedAverager.sum += filteredData[date].route.speed;
+						speedAverager.count += 1;
+					};
+				}
 
 				// route-level averagers for mTrip and sTrip sums on a given day
 				var routeMTripAverager = {sum: 0, count: 0};
@@ -594,56 +616,59 @@
 						routeSTripAverager.count += stopData['count'];;
 
 						// record a single stop's mTrip, sTrip. trip95 into the cumulative averager
-						stopTripAverager[stop] = {m_trip: {sum: (stopTripAverager.stop ?
-															  stopTripAverager.stop.m_trip.sum += stopData['m_trip'] * stopData['count'] :
+						stopTripAverager[stop] = {m_trip: {sum: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].m_trip.sum += stopData['m_trip'] * stopData['count'] :
 															  stopData['m_trip'] * stopData['count']),
-													  count: (stopTripAverager.stop ?
-															  stopTripAverager.stop.m_trip.count += stopData['count'] :
+													  count: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].m_trip.count += stopData['count'] :
 															  stopData['count'])},
-												s_trip: {sum: (stopTripAverager.stop ?
-															  stopTripAverager.stop.s_trip.sum += stopData['s_trip'] * stopData['count'] :
+												s_trip: {sum: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].s_trip.sum += stopData['s_trip'] * stopData['count'] :
 															  stopData['s_trip'] * stopData['count']),
-													  count: (stopTripAverager.stop ?
-															  stopTripAverager.stop.s_trip.count += stopData['count'] :
+													  count: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].s_trip.count += stopData['count'] :
 															  stopData['count'])},
-												trip_95: {sum: (stopTripAverager.stop ?
-															  stopTripAverager.stop.trip_95.sum += stopData['trip_95'] * stopData['count'] :
+												trip_95: {sum: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].trip_95.sum += stopData['trip_95'] * stopData['count'] :
 															  stopData['trip_95'] * stopData['count']),
-													  count: (stopTripAverager.stop ?
-															  stopTripAverager.stop.trip_95.count += stopData['count'] :
+													  count: (stopTripAverager[stop] ?
+															  stopTripAverager[stop].trip_95.count += stopData['count'] :
 															  stopData['count'])}}
 
 						// record a single stop's AWT, SWT, WT95 into the cumulative averager
-						stopWaitAverager[stop] = {awt: {sum: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.awt.sum += stopData['awt'] * stopData['count'] :
+						stopWaitAverager[stop] = {awt: {sum: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].awt.sum += stopData['awt'] * stopData['count'] :
 															  stopData['awt'] * stopData['count']),
-													  count: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.awt.count += stopData['count'] :
+													  count: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].awt.count += stopData['count'] :
 															  stopData['count'])},
-												swt: {sum: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.swt.sum += stopData['swt'] * stopData['count'] :
+												swt: {sum: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].swt.sum += stopData['swt'] * stopData['count'] :
 															  stopData['swt'] * stopData['count']),
-													  count: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.swt.count += stopData['count'] :
+													  count: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].swt.count += stopData['count'] :
 															  stopData['count'])},
-												ewt_95: {sum: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.ewt_95.sum += stopData['ewt_95'] * stopData['count'] :
+												ewt_95: {sum: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].ewt_95.sum += stopData['ewt_95'] * stopData['count'] :
 															  stopData['ewt_95'] * stopData['count']),
-													  count: (stopWaitAverager.stop ?
-															  stopWaitAverager.stop.ewt_95.count += stopData['count'] :
+													  count: (stopWaitAverager[stop] ?
+															  stopWaitAverager[stop].ewt_95.count += stopData['count'] :
 															  stopData['count'])}}
 
 						// add a single stop's EWT to averager, and preserve the stop_id for use in bar chart
-						stopEwtAverager[stop] = {sum: (stopEwtAverager.stop ?
-													   stopEwtAverager.stop.sum += (stopData['awt'] - stopData['swt']) * stopData['count'] :
+						stopEwtAverager[stop] = {sum: (stopEwtAverager[stop] ?
+													   stopEwtAverager[stop].sum + ((stopData['awt'] - stopData['swt']) * stopData['count']) :
 													   (stopData['awt'] - stopData['swt']) * stopData['count']),
-												count: (stopEwtAverager.stop ?
-														stopEwtAverager.stop.count += stopData['count'] :
+												count: (stopEwtAverager[stop] ?
+														stopEwtAverager[stop].count += stopData['count'] :
 														stopData['count'])};
+						// testing.
+						if (stop == 103333) {
+							console.log(`after ${date}: ewt sum - ${stopEwtAverager[stop].sum}, ewt count - ${stopEwtAverager[stop].count}`);
+						};
+
 					};
 				});
-
-				// console.log("mtrip strip", routeMTripAverager, routeSTripAverager)
 
 				// add a single day's mTrip and sTrip route sums to the overall averager
 				if (routeMTripAverager.sum != 0) {
@@ -707,7 +732,14 @@
 										   null)}
 			});
 
-			return {avgEwt: avgEwt, avgSpeed: avgSpeed, percentOver: percentOver, stopEwt: stopEwt, stopTrips: stopTrips, stopWaits: stopWaits};
+			return {
+				avgEwt: avgEwt,
+				avgSpeed: avgSpeed,
+				percentOver: percentOver,
+				stopEwt: stopEwt,
+				stopTrips: stopTrips,
+				stopWaits: stopWaits
+			};
 		},
 
 
@@ -722,8 +754,11 @@
 				};
 			});
 
+			console.log("filteredData legnth", Object.keys(filteredData).length);
+
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
+			console.log("timeAveraged:", timeAveraged);
 			// average EWT, route-level, all within-scope days
 			$("#route-ewt").text(`${timeAveraged.avgEwt}`);
 			// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
@@ -732,8 +767,8 @@
 			$("#route-speed").text(`${timeAveraged.avgSpeed}`);
 
 			// draw route-level charts
-			console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateSelect")[0].innerText}`);
-			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateSelect")[0].innerText);
+			// console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText}`);
+			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
 			tc.drawRouteLineCharts();
 			tc.drawRouteEwtChart(timeAveraged.stopEwt);
 			tc.drawCumulativeLineChart(timeAveraged.stopTrips);
@@ -781,30 +816,32 @@
 			Object.keys(allData).forEach(function(date) {
 
 				var oneDay = {};
-				Object.keys(allData[date]["stops"]).forEach(function(stop_id) {
+				if (allData[date]["stops"]) {
+					Object.keys(allData[date]["stops"]).forEach(function(stop_id) {
 
-					var seq = stopLookup[stop_id].sequence;
-					[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
+						var seq = stopLookup[stop_id].sequence;
+						[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
 
-						var waitTimeName = metricNames[0];
-						var onboardTimeName = metricNames[1];
+							var waitTimeName = metricNames[0];
+							var onboardTimeName = metricNames[1];
 
-						if (seq == startSeq) {
-							// originating bus stop; take wait time at this stop
-							oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
-							oneDay["count"] = allData[date]["stops"][stop_id].count;
-						};
-						if ((seq >= startSeq) && (seq < endSeq)) {
-							// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
-							if (oneDay[onboardTimeName]) {
-								oneDay[onboardTimeName] += allData[date]["stops"][stop_id][onboardTimeName];
-							} else {
-								oneDay[onboardTimeName] = allData[date]["stops"][stop_id][onboardTimeName];
+							if (seq == startSeq) {
+								// originating bus stop; take wait time at this stop
+								oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
+								oneDay["count"] = allData[date]["stops"][stop_id].count;
 							};
-						};
+							if ((seq >= startSeq) && (seq < endSeq)) {
+								// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
+								if (oneDay[onboardTimeName]) {
+									oneDay[onboardTimeName] += allData[date]["stops"][stop_id][onboardTimeName];
+								} else {
+									oneDay[onboardTimeName] = allData[date]["stops"][stop_id][onboardTimeName];
+								};
+							};
+						});
 					});
-				});
-				timeSeries[date] = oneDay;
+					timeSeries[date] = oneDay;
+				};
 			});
 
 			var timeAveraged = {};
@@ -831,6 +868,7 @@
 					};
 				});
 			});
+
 			return {timeSeries: timeSeries, timeAveraged: timeAveraged};
 		},
 
@@ -843,8 +881,10 @@
 
 			// build time series arrays
 			Object.keys(tc.selectionData).sort().forEach(function(date) {
-				time_x.push(date);
-				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
+				if (tc.selectionData[date]["route"]) {
+					time_x.push(date);
+					time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
+				};
 			});
 
 			// this will dynamically be one of: month, year, all-time
@@ -878,6 +918,7 @@
 
 		drawRouteEwtChart: function (stopEwtMap) {
 			console.log("drawing route EWT bar chart...");
+			console.log(stopEwtMap);
 			if (tc.selection.metric == 'ewt') {
 				$("#stop-chart div").remove();
 
@@ -915,18 +956,38 @@
 					}
 				};
 
-				var stopsLayout = Object.create(tc.graphLayout);
-				stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
-				stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
-				stopsLayout["margin"] = {
-					"l": 40,
-					"r": 20,
-					"b": 30,
-					"t": 0,
-					"pad": 0
+				var stopsLayout = {
+					xaxis: {range: [1, master.length + 1], zeroline: false},
+					yaxis: {title: tc.axisNames[tc.selection.metric]},
+					margin: {
+						"l": 40,
+						"r": 20,
+						"b": 30,
+						"t": 0,
+						"pad": 0
+					},
+					showlegend: false,
+					width: 640,
+					height: 250,
+					bargap: 0.1
 				};
-				stopsLayout["width"] = 640;
-				stopsLayout["height"] = 250;
+				// Object.create(tc.graphLayout);
+			// 	stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
+			// 	stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+			// 	stopsLayout["margin"] = {
+			// 		"l": 40,
+			// 		"r": 20,
+			// 		"b": 30,
+			// 		"t": 0,
+			// 		"pad": 0
+			// 	};
+			// 	stopsLayout["width"] = 640;
+			// 	stopsLayout["height"] = 250;
+
+
+			// 	width: "100%",
+			// height: "100%",
+			// showlegend: false
 
 				console.log(stopsLine, stopsLayout);
 
@@ -940,14 +1001,16 @@
 
 
 		drawCumulativeLineChart: function(stopTrips) {
-			console.log("drawing accumulative line charts...");
+			console.log("drawing cumulative line charts...");
+
+			console.log("stopTrips:", stopTrips);
 
 			// master data list for cumulative chart
 			// items in form [x_count, schedule_trip, actual_trip, stop_name, stop_sequence]
-			var master = [];
+			var preMaster = [];
 
 			Object.keys(stopTrips).forEach(function(stop) {
-				master.push([
+				preMaster.push([
 					stopTrips[stop].s_trip,
 					stopTrips[stop].m_trip,
 					tc.stopLookup[tc.selection.direction][stop]["name"],
@@ -956,9 +1019,12 @@
 			});
 
 			// ensure stops are sorted by sequence
-			master.sort(function(a, b) {
+			preMaster.sort(function(a, b) {
 				return a[3] - b[3];
 			});
+
+			// have the option here to cut off the first few trips, to clean up accumulative charts
+			var master = preMaster.slice(tc.accumCutoff);
 
 			// generate x axis
 			var x_count = [];
@@ -1131,8 +1197,8 @@
 
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
-				// MONA
-				y: [data.s_trip, data.m_trip, data.trip_95],
+				// here, we temper our 95th percentile trip time, by mixing it with our average trip time at the specified fraction
+				y: [data.s_trip, data.m_trip, (tc.fractionIs95 * data.trip_95) + ((1 - tc.fractionIs95) * data.m_trip)],
 				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',

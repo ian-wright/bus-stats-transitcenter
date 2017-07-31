@@ -336,12 +336,12 @@ def dashboard(route):
 def home():
     print 'server: loading template for home page'
 
-    window_start = str(get_last_update() + datetime.timedelta(days=-(BORO_DAYSBACK)))
+    #window_start = str(get_last_update() + datetime.timedelta(days=-(BORO_DAYSBACK)))
 
     
 
     # system_data = get_system_data();
-    return render_template('homev2.html', data=)
+    return render_template('homev2.html')
 
 
 @app.errorhandler(404)
