@@ -124,10 +124,10 @@
             <div class="metricsblocks" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
               <div class="rowbox-sm">
                 <h2>
-                  Avg. Delay at Stops</h2>
+                  Excess Wait Time</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-ewt" class="jumbo jumbo2">-- </h1><h4> mins</h4>
+                <h1 id= "route-ewt" class="jumbo jumbo2">-- </h1><h4 id="mins"> mins</h4>
                 <!-- <h1 class="jumbo jumbo2">1.7 mins</h1> -->
               </div>
             </div>
@@ -135,7 +135,7 @@
           <div class="row">
             <div class="metricsblocks" data-toggle="tooltip" title="dunno how to title it yet">
               <div class="rowbox-sm">
-                <h2>Excess Journey Time</h2>
+                <h2>Route Lateness Factor</h2>
               </div>
               <div class="row row-sm">
                 <h1 id= "route-rbt" class="jumbo jumbo2">-- %</h1>
@@ -149,7 +149,7 @@
                 <h2>Average Speed</h2>
               </div>
               <div class="row row-sm">
-                <h1 id= "route-speed" class="jumbo jumbo2">-- </h1><h4> mph</h4>
+                <h1 id= "route-speed" class="jumbo jumbo2">-- </h1><h4 id="mph"> mph</h4>
                 <!-- <h1 class="jumbo jumbo2">7.5 mph</h1> -->
               </div>
             </div>
@@ -165,7 +165,7 @@
             <div class="col-sm-8">
               <div class="btn-group" data-toggle="buttons" id="metricSelect">
                 <label class="btn btn-primary active">
-                  <input type="radio" name="metric" value="ewt" checked> Avg. Delay
+                  <input type="radio" name="metric" value="ewt" checked> Exc. Wait Time
                 </label>
                 <!-- <label class="btn btn-primary">
                   <input type="radio" name="metric" value="rbt"> Planning Buffer
@@ -199,6 +199,8 @@
           <div class="row">
             <h2>Accumulative Travel Time Across Stops</h2>
             <div id="accumulative-chart">
+              <div id="try">
+              </div>
             </div>
           </div>
         </div>
@@ -218,7 +220,18 @@
           </div>
         </div>
         <div class="col-sm-8 pleft30">
-          <h3 id="stopNamePair" class="h3-route"> X TO Y </h3>
+          <div class="pair-container">
+            <div>
+              <span>from</span><h3 id="startName" class="h3-route">--</h3>
+            </div>
+            <div>
+            <hr>
+            </div>
+            <div>
+              <span>to</span><h3 id="stopName" class="h3-route">--</h3>
+            </div>
+          </div>
+
           <div class="row mtop0">
             <div class="col-sm-12">
 
@@ -229,7 +242,7 @@
                   </div>
                 </div>
                 <div class="col-sm-8 pleft30">
-                  <h4>Your journey trendline</h4>
+                  <h4>Your Average Journey Trendline</h4>
                   <div class="row">
                     <ul class="nav nav-tabs">
                       <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>

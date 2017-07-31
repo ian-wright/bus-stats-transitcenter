@@ -425,7 +425,7 @@ h1{
   display: inline;
   text-transform: lowercase !important;
   font-size: 2em;
-  font-weight: normal;;
+  font-weight:
 }
 
 h2{
@@ -446,7 +446,10 @@ h3.h3-route {
   font-size: 1.6em;
   margin-top: 0;
   padding-left: 10px;
+  display: inline;
 }
+
+
 
 .metricboxsm {
   background-color: #eee;
@@ -1470,8 +1473,12 @@ input.form-control, select.form-control, textarea.form-control{
   font-weight: normal;
 }
 
-
+#stopNamePair {
+  text-transform: lowercase;
+}
 /* Datepicker Styling */
+
+
 .datepicker{
 	background-color: #eff1f0;
 	max-width: 13.75em; /* 220px equiv */
@@ -1891,7 +1898,7 @@ div.underline{
 }
 
 #map {
-    height: 400px;
+    height: 515px;
     z-index: 0;
 }
 
@@ -1950,6 +1957,29 @@ div.underline{
 
 .font20 {
   font-size: 70px;
+}
+
+.pair-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px 15px;
+  min-width: 100px;
+  display: inline-block;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.pair-container > div > span {
+  font-size: 1em;
+  font-style: italic;
+  font-weight: bold;
+  color: #777;
+
+}
+
+hr {
+  border-top: 1px solid #ccc;
+  margin: 5px 0;
 }
 
 /* center modal */
