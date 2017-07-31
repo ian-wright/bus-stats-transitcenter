@@ -391,6 +391,14 @@ def not_found(route):
     print 'server: rendering a 404'
     return render_template('404.html'), 404
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/methodologies')
+def methodologies():
+    return render_template('methodologies.html')
+
 
 if __name__ == '__main__':
     app.debug = True

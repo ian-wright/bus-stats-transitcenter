@@ -125,8 +125,8 @@ def main():
     engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
 
   # CLEAR EXISTING TABLES AND REBUILD SCHEMA
-  db.drop_all()
-  db.create_all()
+  # db.drop_all()
+  # db.create_all()
 
   stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95',
                'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']

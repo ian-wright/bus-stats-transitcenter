@@ -1,5 +1,4 @@
 (function(){
-
 	var tc = {
 
 		selection: {
@@ -299,12 +298,11 @@
 			$("#route-ewt").text(`-- `);
 			$("#route-rbt").text(`-- `);
 			$("#route-speed").text(`-- `);
-			$("#mins h4").text(` mins`);
-			$("#mph").text(` mph`);
 			$("#stop-chart div").remove();
 			$("#month-chart div").remove();
 			$("#week-chart div").remove();
 			$("#accumulative-chart div").remove();
+
 
 			// reset journey-level summary
 			// $("#stopNamePair").text("-- TO --");
@@ -418,7 +416,7 @@
 					break;
 				case "2":
 					// last year
-					var timeFrame = 10;
+					var timeFrame = 365;
 					break;
 				case "3":
 					// all time
@@ -731,49 +729,12 @@
 
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
-
 			// average EWT, route-level, all within-scope days
-			if (timeAveraged.avgEwt < 2.8)
-       {
-				 ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
-				 var mintext = ` mins`.fontcolor('red');
-       }
-      else
-      {
-				ewttext = `${timeAveraged.avgEwt}`.fontcolor('green');
-				var mintext = ` mins`.fontcolor('green');
-			}
-			// $("#route-ewt").text(`${timeAveraged.avgEwt}`);
-			$("#route-ewt").html(ewttext);
-			$("#mins").html(mintext);
-
+			$("#route-ewt").text(`${timeAveraged.avgEwt}`);
 			// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
-			if (timeAveraged.percentOver < 15)
-       {
-				 perctext = `${timeAveraged.percentOver} %`.fontcolor('red');
-       }
-      else
-      {
-				perctext = `${timeAveraged.percentOver} %`.fontcolor('green');
-			}
-			$("#route-rbt").html(perctext);
-
-			// $("#route-rbt").text(`${timeAveraged.percentOver} %`);
-
-			// // average speed, route-level, all within-scope days
-			if (timeAveraged.avgSpeed < 4)
-       {
-				 speedtext = `${timeAveraged.avgSpeed}`.fontcolor('red');
-				 var mphtext = ` mph`.fontcolor('red');
-       }
-      else
-      {
-				speedtext = `${timeAveraged.avgSpeed}`.fontcolor('green');
-				var mphtext = ` mph`.fontcolor('green');
-			}
-			$("#route-speed").html(speedtext);
-			$("#mph").html(mphtext);
-			// $("#route-speed").text(`${timeAveraged.avgSpeed}`);
+			$("#route-rbt").text(`${timeAveraged.percentOver} %`);
+			// average speed, route-level, all within-scope days
+			$("#route-speed").text(`${timeAveraged.avgSpeed}`);
 
 			// draw route-level charts
 			console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateSelect")[0].innerText}`);
@@ -792,7 +753,6 @@
 				// $("#stopNamePair").text(`${startName} TO ${endName}`);
 				$("#startName").text(`${startName}`);
 				$("#stopName").text(`${endName}`);
-
 
 				var computed = tc.computeJourneyMetrics(startId,
 														endId,
@@ -908,20 +868,61 @@
 			weekLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var timeLayout = Object.create(tc.graphLayout);
-			timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
-			timeLayout["xaxis"] = {zeroline: false};
-			timeLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 0,
-				"pad": 0
-			};
-			timeLayout["width"] = 640;
-			timeLayout["height"] = 250;
+			// timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+			// timeLayout["xaxis"] = {zeroline: false};
+			// timeLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 0,
+			// 	"pad": 0
+			// };
+			// timeLayout["width"] = 640;
+			// timeLayout["height"] = 250;
 
-			Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
-			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
+			var timeLayout = {
+				xaxis:{zeroline: false},
+				yaxis: {title: tc.axisNames[tc.selection.metric]},
+				margin: {
+			    	"l": 40,
+			    	"r": 0,
+			    	"b": 35,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			  	autosize: true,
+			};
+
+			var d3_long_chart = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 100,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3_1 = d3_long_chart.select("div[id='long-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-bottom': 10 + 'vh'
+			});
+
+			var my_Div1_1 = gd3_1.node();
+			Plotly.plot(my_Div1_1, [longLine], timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1_1); });
+
+			var d3_week_chart = Plotly.d3;
+			var gd3_2 = d3_week_chart.select("div[id='week-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-bottom': 10 + 'vh'
+			});
+
+			var my_Div1_2 = gd3_2.node();
+			Plotly.plot(my_Div1_2, [weekLine], timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1_2); });
+
+
+			// Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
+			// Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
 		},
 
 
@@ -965,21 +966,56 @@
 				};
 
 				var stopsLayout = Object.create(tc.graphLayout);
-				stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
-				stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
-				stopsLayout["margin"] = {
-					"l": 40,
-					"r": 20,
-					"b": 30,
-					"t": 0,
-					"pad": 0
-				};
-				stopsLayout["width"] = 640;
-				stopsLayout["height"] = 250;
+				// stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
+				// stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+				// stopsLayout["margin"] = {
+				// 	"l": 40,
+				// 	"r": 20,
+				// 	"b": 30,
+				// 	"t": 0,
+				// 	"pad": 0
+				// };
+				// stopsLayout["width"] = 640;
+				// stopsLayout["height"] = 250;
 
 				console.log(stopsLine, stopsLayout);
 
-				Plotly.newPlot("stop-chart", [stopsLine], stopsLayout, {displayModeBar: false});
+
+				var stopsLayout = {
+
+					yaxis: {title: tc.axisNames[tc.selection.metric]},
+					margin: {
+				    	"l": 40,
+				    	"r": 0,
+				    	"b": 20,
+				    	"t": 10,
+				    	"pad": 0
+				  	},
+					xaxis: {range: [1, master.length + 1], zeroline: false},
+					showlegend: true,
+					legend: {"orientation": "h"},
+					autosize:true,
+				};
+
+				var d3_stop_chart = Plotly.d3;
+				var WIDTH_IN_PERCENT_OF_PARENT = 90,
+				    HEIGHT_IN_PERCENT_OF_PARENT = 50;
+
+				var gd3 = d3_stop_chart.select("div[id='stop-chart']")
+				  .style({
+				    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+				    // 'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+				    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+				    // 'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+				});
+
+				var my_Div1 = gd3.node();
+				Plotly.plot(my_Div1, [stopsLine], stopsLayout, {displayModeBar: false});
+				window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1); });
+				// Plotly.newPlot("stop-chart", [stopsLine], stopsLayout, {displayModeBar: false});
+
+
+
 
 			} else {
 				$("#stop-chart div").remove();
@@ -1059,22 +1095,35 @@
 
 			var timeLayout = {
 
-				yaxis: {title: "(minutes)"},
+				yaxis: {title: "Accumulative Trip Time"},
 				margin: {
 			    	"l": 40,
-			    	"r": 20,
-			    	"b": 0,
-			    	"t": 30,
+			    	"r": 0,
+			    	"b": 10,
+			    	"t": 0,
 			    	"pad": 0
 			  	},
-				width: 600,
-				height: 380,
+			  	autosize: true,
 				xaxis: {zeroline: false},
 				showlegend: true,
-				legend: {"orientation": "h"}
+				legend: {"orientation": "h"},
 			};
 
-			Plotly.newPlot("accumulative-chart", stackedAccData, timeLayout, {displayModeBar: false});
+			var d3_accumulative_chart = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 80,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 50;
+
+			var gd3 = d3_accumulative_chart.select("div[id='try']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-top': 10 + 'vh'
+			});
+
+			var my_Div2 = gd3.node();
+			Plotly.plot(my_Div2, stackedAccData, timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div2); })
 		},
 
 
@@ -1128,16 +1177,16 @@
 			];
 
 			var timeLayout = Object.create(tc.graphLayout);
-			timeLayout["yaxis"] = {title: "Journey Time (mins)"};
-			timeLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 20,
-				"pad": 0
-			};
-			timeLayout["width"] = 600;
-			timeLayout["height"] = 300;
+			// timeLayout["yaxis"] = {title: "Journey Time (mins)"};
+			// timeLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 20,
+			// 	"pad": 0
+			// };
+			// timeLayout["width"] = 600;
+			// timeLayout["height"] = 300;
 
 			function stackedArea(stackedData) {
 				for(var i=1; i<stackedData.length; i++) {
@@ -1149,8 +1198,47 @@
 				return stackedData;
 			};
 
-			Plotly.newPlot("journey-month-chart", stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
-			Plotly.newPlot("journey-week-chart", stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
+			var timeLayout = {
+				yaxis: {title: "Journey Time (mins)"},
+				margin: {
+			    	"l": 40,
+			    	"r": 0,
+			    	"b": 50,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			  	autosize: true,
+			};
+
+			var d3_journey_month = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 100,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3_1 = d3_journey_month.select("div[id='journey-month-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div4_1 = gd3_1.node();
+			Plotly.plot(my_Div4_1, stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div4_1); });
+
+			$('#journey-week-chart').remove();
+
+			var d3_journey_week = Plotly.d3;
+			var gd3_2 = d3_journey_week.select("div[id='journey-week-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div4_2 = gd3_2.node();
+			Plotly.plot(my_Div4_2, stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div4_2); });
+
+			// Plotly.newPlot("journey-month-chart", stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
+			// Plotly.newPlot("journey-week-chart", stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
 		},
 
 
@@ -1181,7 +1269,7 @@
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
 				// MONA
-				y: [data.s_trip, data.m_trip, data.trip_95*0.5],
+				y: [data.s_trip, data.m_trip, data.trip_95],
 				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
@@ -1199,27 +1287,58 @@
 			var barData = [waitData, onboardData];
 
 			var barLayout = Object.create(tc.graphLayout);
-			barLayout["barmode"] = "stack";
-			barLayout["autosize"] = true;
-			barLayout["bargap"] = 0.3;
-			barLayout["bargroupgap"] = 0.02;
-			barLayout["yaxis"] = {title: "Journey Time (mins"};
-			barLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 10,
-				"pad": 0
-			};
-			barLayout["width"] = 300;
-			barLayout["height"] = 360;
+			// barLayout["barmode"] = "stack";
+			// barLayout["autosize"] = true;
+			// barLayout["bargap"] = 0.3;
+			// barLayout["bargroupgap"] = 0.02;
+			// barLayout["yaxis"] = {title: "Journey Time (mins"};
+			// barLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 10,
+			// 	"pad": 0
+			// };
+			// barLayout["width"] = 300;
+			// barLayout["height"] = 360;
 
-			Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
+			var barLayout = {
+
+				yaxis: {title: "Journey Time (mins)"},
+				bargroupgap:0.02,
+				bargap:0.3,
+				barmode:"stack",
+				margin: {
+			    	"l": 40,
+			    	"r": 17,
+			    	"b": 50,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			};
+
+			var d3_journey_bar = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 80,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3 = d3_journey_bar.select("dihnadlerv[id='journey-bar-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    // 'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div3 = gd3.node();
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div3); });
+			Plotly.plot(my_Div3, barData, barLayout, {displayModeBar: false});
+			// Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
 		},
 
 	};
 
 	// add our tc object to global window scope
 	this.tc = tc;
+
 	console.log('running tc.js');
+
 })();
