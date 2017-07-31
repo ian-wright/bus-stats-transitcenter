@@ -98,8 +98,8 @@
             <option name= "daybin" value="2">Weekend</option>
           </select>
           <select id="hourBinSelect" size="1" class="filterSelect">
-            <option name= "hourbin" value="0">All</option>
-            <option name= "hourbin" value="1" selected="selected">7am-10am</option>
+            <option name= "hourbin" value="0" selected="selected">All</option>
+            <option name= "hourbin" value="1">7am-10am</option>
             <option name= "hourbin" value="2">10am-4pm</option>
             <option name= "hourbin" value="3">4pm-7pm</option>
             <option name= "hourbin" value="4">7pm-10pm</option>
@@ -133,7 +133,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="metricsblocks" data-toggle="tooltip" title="dunno how to title it yet">
+            <div class="metricsblocks" data-toggle="tooltip" title="The difference between actual route's end to end journey time and scheduled journey time, relative to the journey time.">
               <div class="rowbox-sm">
                 <h2>Route Lateness Factor</h2>
               </div>
@@ -180,7 +180,7 @@
           <div class="row">
             <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" data-target="#stop-chart">By Stops</a></li>
-              <li><a data-toggle="tab" data-target="#long-chart" id="long-chart-tab">Past Month</a></li>
+              <li><a data-toggle="tab" data-target="#long-chart" class="long-chart-tab">Past Month</a></li>
               <li><a data-toggle="tab" data-target="#week-chart">Past 7 days</a></li>
             </ul>
             <div class="tab-contents blocks">
@@ -222,13 +222,13 @@
         <div class="col-sm-8 pleft30">
           <div class="pair-container">
             <div>
-              <span>from</span><h3 id="startName" class="h3-route">--</h3>
+              <span class="good">from</span><h3 id="startName" class="h3-route">--</h3>
             </div>
             <div>
             <hr>
             </div>
             <div>
-              <span>to</span><h3 id="stopName" class="h3-route">--</h3>
+              <span class="bad">to</span><h3 id="stopName" class="h3-route">--</h3>
             </div>
           </div>
 
@@ -245,7 +245,7 @@
                   <h4>Your Average Journey Trendline</h4>
                   <div class="row">
                     <ul class="nav nav-tabs">
-                      <li class="active"><a data-toggle="tab" data-target="#journey-month-chart">Past Month</a></li>
+                      <li class="active"><a data-toggle="tab" data-target="#journey-month-chart" class="long-chart-tab">Past Month</a></li>
                       <li><a data-toggle="tab" data-target="#journey-week-chart">Past 7 days</a></li>
                     </ul>
                     <div class="tab-contents">
