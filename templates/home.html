@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="NYC Bus Profiles">
+    <meta name="author" content="NYU CUSP">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+    <title>NYC Bus Profile Dashboard</title>
+    <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-default" id="navBars">
+      <div id="navbarContainer">
+    	  <div class="container-fluid">
+    		<!-- Brand and toggle get grouped for better mobile display -->
+    		<div id="#navbarHeader" class="navbar-header">
+    		  <button type="button" id="menuCollapseButton" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false" style="padding-top: 21px;">
+    			<span class="sr-only">Toggle navigation</span>
+    			<span class="icon-bar"></span>
+    			<span class="icon-bar"></span>
+    			<span class="icon-bar"></span>
+    		  </button>
+    		  <a id="mainLogo" class="navbar-brand" href="#" style="padding-top: 23px;">
+
+    			<span class="text">NYC Bus Profile</span>
+    		  </a>
+    		</div>
+
+    		<div id="sidebar" class="navbar-collapse collapse collapsed" aria-expanded="false" style="height: 0px;">
+    			<div class="sidebar">
+    				<ul class="nav navbar-nav sidebar-nav">
+    					<li>
+    						<div class="underline active" ng-class="{active: $state.includes('detail') || $state.includes('home') }">
+    							<a ui-sref="home" href="{{ url_for('home') }}">
+    								Dashboard
+    							</a>
+    						</div>
+
+    						<ul class="sidebarSubLinks">
+    							<!-- ngRepeat: mc in metricCategories --><li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									On-Time Performance
+    								</a>
+    							</li><!-- end ngRepeat: mc in metricCategories -->
+                  <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									Excess Wait Time
+    								</a>
+    							</li>
+                  <li class="underline ng-scope" ng-repeat="mc in metricCategories">
+    								<a ui-sref="detail({ metricCategory:mc.slug })" ui-sref-opts="{ inherit: false }" ui-sref-active="active" class="ng-binding" href="#/detail/reliability///">
+    									Reliability Buffer Time
+    								</a>
+    							</li>
+    						</ul>
+
+    					</li>
+              <li>
+    						<div class="underline" ui-sref-active="active">
+    							<a href="/routes/Bx39">
+    								Route Level Metrics
+    							</a>
+    						</div>
+    					</li>
+
+    					<li>
+    						<div class="underline" ui-sref-active="active">
+    							<a href="/glossary">
+    								Glossary
+    							</a>
+    						</div>
+    					</li>
+
+    				</ul>
+    			</div> <!-- Side bar end -->
+    		</div> <!-- Side bar collapse end -->
+
+    		<div id="topbarCollapse" class="navbar-collapse collapse" aria-expanded="false" style="height: 0px;">
+    		  <ul id="topbar" class="nav navbar-nav navbar-right collapsed">
+    			<li class="mtop10">
+    				<a ui-sref="about" ui-sref-active="active" href="#/about">About</a>
+    			</li>
+    			<li class="mtop10">
+    				<a ui-sref="contact" ui-sref-active="active" href="#/contact">Contact</a>
+    			</li>
+          <li>
+            <img src="{{ url_for('static', filename='img/CentralAdmin_Logoart/nyu_stacked_white.png') }}" width="27" height="37" alt="T" style="display:inline-block;vertical-align:middle">
+          </li>
+    		  </ul>
+    		</div> <!-- Navbar collapse end -->
+
+    	  </div><!-- /.container-fluid -->
+      </div>
+    </nav>
+
+    <div id='contentWrapper'>
+
+      <div id="container">
+        <div class="row mtop50 mleft0">
+            <div id="maphome" style="position:absolute ;width:80%; height:100%">
+          </div>
+        </div>
+
+        <div class="row mtop40 mleft20">
+          <div class="row">
+            <div class="col-sm-12">
+              <h1>Summary</h1>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-5">
+              <div class="rowbox">
+                <p class="span-date">31 May 2017</p>
+              </div>
+              <div class="rowbox">
+                <h2>Excess Wait Time</h2>
+                <p>Short Explanation<p>
+              </div>
+              <div class="row">
+                <h1 class="jumbo">3.5 min</h1>
+              </div>
+              <div class="row">
+                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mtop0">
+            <div class="col-sm-5">
+              <div class="rowbox">
+                <p class="span-date">31 May 2017</p>
+              </div>
+              <div class="rowbox">
+                <h2>Average Speed</h2>
+                <p>Short Explanation<p>
+              </div>
+              <div class="row">
+                <h1 class="jumbo">4.6 mph</h1>
+              </div>
+              <div class="row">
+                <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      <div id="footerInner">
+
+        <div id="rightFooter">
+          <a href="http://www.massdot.state.ma.us/" target="_blank">
+            <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+          </a>
+          <a href="http://www.mbta.com/" target="_blank">
+            <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+          </a>
+        </div>
+      </div>
+    </div> <!-- End Footer -->
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+            integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+            crossorigin=""></script>
+
+    <!-- map home script goes here -->
+    <script>
+    $( document ).ready(function() {
+        var maphome = L.map('maphome',{ zoomControl:false }).setView([40.71597, -74.05367], 12);
+        new L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+      			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+      			maxZoom: 12,
+      			accessToken: 'pk.eyJ1IjoiaWZ3cmlnaHQiLCJhIjoiY2o0ZnJrbXdmMWJqcTMzcHNzdnV4bXd3cyJ9.1G8ErVmk7jP7PDuFp8KHpQ'
+  			}).addTo(maphome);
+        L.marker(new L.LatLng(40.78222, -73.96528), {icon:createLabelIcon("mapHomeBoro","<span>Manhattan</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.77522, -73.96528), {icon:createLabelIcon("boroMetricsGood","<span>1.2min</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.77022, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>3.7mph</span>")}).addTo(maphome);
+
+
+        L.marker(new L.LatLng(40.69245, -73.99036), {icon:createLabelIcon("mapHomeBoro","<span>Brooklyn</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.68545, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.68045, -73.99036), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
+
+        L.marker(new L.LatLng(40.75072, -73.94103), {icon:createLabelIcon("mapHomeBoro","<span>Queens</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.74372, -73.94103), {icon:createLabelIcon("boroMetricsGood","<span>1.7min</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.73872, -73.94103), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
+
+        L.marker(new L.LatLng(40.82037, -73.91164), {icon:createLabelIcon("mapHomeBoro","<span>Bronx</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.81337, -73.91164), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.80837, -73.91164), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
+
+        L.marker(new L.LatLng(40.6427, -74.0799), {icon:createLabelIcon("mapHomeBoro","<span>StatenIsland</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.6357, -74.0799), {icon:createLabelIcon("boroMetricsBad","<span>2.7min</span>")}).addTo(maphome);
+        L.marker(new L.LatLng(40.6307, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>7.5mph</span>")}).addTo(maphome);
+
+      })
+
+      var createLabelIcon = function(labelClass,labelText){
+        return L.divIcon({
+          className: labelClass,
+          html: labelText
+        })
+      }
+    </script>
+
+
+  </body>
+  </html>

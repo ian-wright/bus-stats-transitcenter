@@ -1,6 +1,6 @@
 #map {
-    width: 100%;
-    height: 500px;
+    width: 60%;
+    height: 400px;
 }
 
 #projectBrand {
@@ -180,8 +180,4 @@ body {
 
 .badge.busShape {
     background-color: #df8a13;
-}
-
-.mapHomeBoro {
-  color: yellow;
 }

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
+          <li class="">
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/routes/B17">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li>
+            <a href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+<div class="container-fluid"  style = 'min-height: 95vh'>
+    <div class="row">
+        <div class="col-sm-2">
+        </div>
+        <div class="col-sm-8">
+            <h3 class = 'abouttitle' style = 'padding-top: 5vh;'>Sorry...this page is not in service.</h3>
+            <img class = 'noservice' src="{{ url_for('static', filename='img/no-service.png') }}" alt="">
+            <button class ='btn pull-right'>
+                <a href="/home" class = 'abouttitle'>
+                    Back to the Home Page
+                </button>
+            </a>
+        </div><!-- /.col-sm-8 -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+
+</body>
+
+<div id="footer"><!-- footer -->
+  <div id="footerInner">
+
+    <div id="rightFooter">
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+      </a>
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+      </a>
+    </div>
+  </div>
+</div> <!-- End Footer -->
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+<script src="{{ url_for('static', filename='homecharts.js') }}"></script>
+
+<!-- map home script goes here -->
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
+          <li class="active">
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/routes/BX39">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li>
+            <a href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+  <!-- content -->
+  <div id="container">
+    <section id="maphomesection">
+      <!-- map -->
+      <div class="row" id="maphomediv">
+        <div id="maphome"></div>
+      </div>
+
+      <!-- the boxes -->
+      <div class="row mtop80 mleft32">
+        <div class="col-sm-12">
+          <h1>Summary</h1>
+          <span class="span-date">31 May 2017</span>
+        </div>
+      </div>
+
+      <div class="row mleft32">
+        <div class="col-sm-3 metric-box-home" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
+          <div class="rowbox">
+            <h2>Excess Wait Time</h2>
+          </div>
+          <div class="row">
+            <h1 class="jumbo">1.76 min</h1>
+          </div>
+          <div class="row">
+            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+          </div>
+        </div>
+      </div>
+      <div class="row mtop0 mleft32">
+        <div class="col-sm-3 metric-box-home">
+          <div class="rowbox">
+            <h2>Average Speed</h2>
+          </div>
+          <div class="row">
+            <h1 class="jumbo">7.4 mph</h1>
+          </div>
+          <div class="row">
+            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- section charts here -->
+    <section id="charthome">
+      <div class="section-container">
+         <div id="section-header">
+           <h1 class="light">The Metrics</h1>
+         </div>
+         <div id="section-content">
+           <div class="row">
+             <div class="col-sm-4">
+              <div class="exp">
+               <h3 class="light">Excess Wait Time</h3>
+               <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
+              </div>
+             </div>
+             <div class="col-sm-4">
+               <div class="exp">
+               <h3 class="light">Route Lateness Factor</h3>
+               <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
+              </div>
+             </div>
+             <div class="col-sm-4">
+               <div class="exp">
+               <h3 class="light">Average Speed</h3>
+               <p class="lead">The average speed of the buses.</p>
+               </div>
+             </div>
+           </div>
+           <div class="row">
+             <div class="col-sm-3 col-sm-offset-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">route level performance</a>
+             </div>
+             </div>
+             <div class="col-sm-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">how we calculate the metrics</a>
+             </div>
+             </div>
+           </div>
+         </div>
+
+      </div>
+    </section>
+  </div>
+</body>
+
+<div id="footer"><!-- footer -->
+  <div id="footerInner">
+
+    <div id="rightFooter">
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+      </a>
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+      </a>
+    </div>
+  </div>
+</div> <!-- End Footer -->
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+<script src="{{ url_for('static', filename='homecharts.js') }}"></script>
+
+<!-- map home script goes here -->
+<script>
+$( document ).ready(function() {
+    var maphome = L.map('maphome',{ zoomControl:false }).setView([40.71597, -74.05367], 11);
+    new L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 11,
+        minZoom: 11,
+        accessToken: 'pk.eyJ1IjoiaWZ3cmlnaHQiLCJhIjoiY2o0ZnJrbXdmMWJqcTMzcHNzdnV4bXd3cyJ9.1G8ErVmk7jP7PDuFp8KHpQ'
+    }).addTo(maphome);
+    L.marker(new L.LatLng(40.78222, -73.96528), {icon:createLabelIcon("mapHomeBoro","<span>Manhattan</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.76922, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>1.93min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.76022, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>5.62mph</span>")}).addTo(maphome);
+
+
+    L.marker(new L.LatLng(40.69245, -73.99036), {icon:createLabelIcon("mapHomeBoro","<span>Brooklyn</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.67945, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>1.82min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.67045, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>6.05mph</span>")}).addTo(maphome);
+
+    L.marker(new L.LatLng(40.75072, -73.91103), {icon:createLabelIcon("mapHomeBoro","<span>Queens</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.73772, -73.91103), {icon:createLabelIcon("boroMetricsBad","<span>1.84min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.72972, -73.91103), {icon:createLabelIcon("boroMetricsBad","<span>6.12mph</span>")}).addTo(maphome);
+
+    L.marker(new L.LatLng(40.83037, -73.91164), {icon:createLabelIcon("mapHomeBoro","<span>Bronx</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.81737, -73.91164), {icon:createLabelIcon("boroMetricsGood","<span>1.63min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.80837, -73.91164), {icon:createLabelIcon("boroMetricsBad","<span>5.86mph</span>")}).addTo(maphome);
+
+    L.marker(new L.LatLng(40.6427, -74.0799), {icon:createLabelIcon("mapHomeBoro","<span>StatenIsland</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.6297, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>1.57min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.6207, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>8.38mph</span>")}).addTo(maphome);
+
+  })
+
+  var createLabelIcon = function(labelClass,labelText){
+    return L.divIcon({
+      className: labelClass,
+      html: labelText
+    })
+  }
+</script>
+</html>

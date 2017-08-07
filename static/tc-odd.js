@@ -1,5 +1,4 @@
 (function(){
-
 	var tc = {
 
 		selection: {
@@ -24,13 +23,6 @@
 
         // for low-n warning message
         countMin: 30,
-
-        // for cleaning the accumulative charts - how many of the first trips in the route to ignore
-        accumCutoff: 3,
-
-        // for tempering the 95 percentile numbers; this fraction represents how much of a journey would
-        // actually see 95th percentile stop-to-stop trip times
-        fractionIs95: 0.2,
 
         routeMetricMap: {
 	        stop: 0,
@@ -278,10 +270,10 @@
 		registerSelectionHandlers: function() {
 			console.log("registering selection handlers...");
 
-			$("#metricSelect, #dayBinSelect").change(function() {
+			$("#metricSelect, #daySelect").change(function() {
 				tc.updateController("light");
 			});
-			$("#hourBinSelect, #dateRangeSelect").change(function() {
+			$("#hourSelect, #dateSelect").change(function() {
 				tc.updateController("medium");
 			});
 			$("#dirSelect").change(function() {
@@ -306,12 +298,11 @@
 			$("#route-ewt").text(`-- `);
 			$("#route-rbt").text(`-- `);
 			$("#route-speed").text(`-- `);
-			$("#mins h4").text(` mins`);
-			$("#mph").text(` mph`);
 			$("#stop-chart div").remove();
 			$("#month-chart div").remove();
 			$("#week-chart div").remove();
 			$("#accumulative-chart div").remove();
+
 
 			// reset journey-level summary
 			// $("#stopNamePair").text("-- TO --");
@@ -324,8 +315,8 @@
 			$("#journey-bar-chart div").remove();
 
 			// revert to default selections on new route (day=1, hour=1, dir=2)
-			$("input[value=1]", "#hourBinSelect").prop('checked', true);
-			$("input[value=1]", "#dayBinSelect").prop('checked', true);
+			$("input[value=1]", "#hourSelect").prop('checked', true);
+			$("input[value=1]", "#daySelect").prop('checked', true);
 			$("input[value=ewt]", "#metricSelect").prop('checked', true);
 			$("option[value=2]", "#dirSelect").prop('selected', true);
 
@@ -363,26 +354,26 @@
 				case "light":
 					console.log("updateController: level LIGHT");
 					// if this is a stop change, stop selection already changed at click event
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
 					tc.updateMetricDisplay();
 					break;
 				case "medium":
 					console.log("updateController: level MEDIUM");
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
-					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourBinSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
 					tc.buildDataObject();
 					tc.updateMetricDisplay();
 					break;
 				case "heavy":
 					console.log("updateController: level HEAVY");
-					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateRangeSelect").val();
+					tc.selection.dateRange = $("option[name=dateRange]:selected", "#dateSelect").val();
 					tc.selection.metric = $("input[name=metric]:checked", "#metricSelect").val();
-					tc.selection.dayBin = $("option[name=daybin]:selected", "#dayBinSelect").val();
-					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourBinSelect").val();
+					tc.selection.dayBin = $("option[name=daybin]:selected", "#daySelect").val();
+					tc.selection.hourBin = $("option[name=hourbin]:selected", "#hourSelect").val();
 					tc.selection.direction = $("option[name=direction]:selected", "#dirSelect").val();
 					tc.selection.route = tc.rawData["route_id"];
 					tc.buildDataObject();
@@ -394,10 +385,6 @@
 
 
 		buildDataObject: function(){
-			// we rebuild our main data object any time the DIRECTION, DATE RANGE or HOURBIN changes
-			// any time we rebuild this data object, we include daybins for both weekday and weekends.
-			// (this is because we need both wkday and wknds to draw complete time series)
-
 			console.log("building data object...");
 			// get all historical data for given (direction, daybin, hourbin) selection
 			var allWkday = tc.rawData["directions"][tc.selection.direction]
@@ -418,7 +405,7 @@
 			var allData = Object.assign(wkdayObj, wkndObj);
 			console.log("allData", allData);
 
-			// filter our data for only those observations within the desired window (dateRange)
+			// filter our data for only those observations within the desired window (dateRange + wkday/wkend)
 			var allDates = Object.keys(allData).map(function(dateStr){ return new Date(dateStr) });
 			var latest = allDates.reduce(function (a, b) { return a > b ? a : b });
 
@@ -446,13 +433,13 @@
 					selectionData[date] = allData[date];
 				};
 			});
-			console.log("selectionData length", Object.keys(selectionData).length);
+			console.log("selectionData", selectionData);
 			tc.selectionData = selectionData;
 		},
 
 
 		objectifyData: function(rawData, dayBin) {
-			console.log(`objectifying data ${rawData} for daybin: ${dayBin}`);
+			console.log(`objectifying data for daybin: ${dayBin}`);
 			// transform rawData into object-style structure, given selections for direction, daybin, and hourbin
 			var objectData = {};
 			Object.keys(rawData).forEach(function (date) {
@@ -460,32 +447,29 @@
 				var oneDay = {"route": null, "stops": {}};
 
 				// build stop-level data for a single day
-				if (rawData[date]["stops"]) {
-					rawData[date]["stops"].forEach(function(stop) {
-						// only include data for stop_ids that are found in the corresponding geo_profile
-						if (Object.keys(tc.stopLookup[tc.selection.direction]).includes(stop[tc.stopMetricMap['stop']].toString())) {
-							var stopValues = {};
-							for (var metricName in tc.stopMetricMap) {
-								if (metricName != 'stop') {
-									stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
-								};
+				rawData[date]["stops"].forEach(function(stop) {
+
+					// only include data for stop_ids that are found in the corresponding geo_profile
+					if (Object.keys(tc.stopLookup[tc.selection.direction]).includes(stop[tc.stopMetricMap['stop']].toString())) {
+						var stopValues = {};
+						for (var metricName in tc.stopMetricMap) {
+							if (metricName != 'stop') {
+								stopValues[metricName] = stop[tc.stopMetricMap[metricName]];
 							};
-							oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
 						};
-					});
-				};
+						oneDay["stops"][stop[tc.stopMetricMap['stop']]] = stopValues;
+					};
+				});
 
 				// build route-level data for a single day
-				if (rawData[date]["route"]) {
-					var routeData = rawData[date]["route"];
-					var routeValues = {};
-					for (var metricName in tc.routeMetricMap) {
-						if (metricName != 'stop') {
-							routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
-						};
+				var routeData = rawData[date]["route"];
+				var routeValues = {};
+				for (var metricName in tc.routeMetricMap) {
+					if (metricName != 'stop') {
+						routeValues[metricName] = routeData[tc.routeMetricMap[metricName]];
 					};
-					oneDay["route"] = routeValues;
 				};
+				oneDay["route"] = routeValues;
 
 				// tag the observation's daybin
 				oneDay["dayBin"] = dayBin;
@@ -548,15 +532,9 @@
 
 
 		computeTimeAveragedMetrics: function(filteredData) {
-			console.log("computing time averaged metrics...");
-			// TODO - could make this function A LOT NICER... ugly af right now.
+			console.log("computing time averaged metreics...");
 
-			// maybe use this to clean up the repetitive code below
-			// function stopAvg(stop, metric, field, accumulator, value, weight) {
-			// 	return (accumulator[stop] ?
-			// 			accumulator[stop][metric][field] += value * weight :
-			// 			value * weight)
-			// };
+			// TODO - could make this function A LOT NICER... ugly af right now.
 
 			// route-level (pre-computed) metrics for grey box summary EWT + SPEED
 			var ewtAverager = {sum: 0, count: 0};
@@ -568,28 +546,26 @@
 			var awtAverager = {sum: 0, count: 0};
 			var swtAverager = {sum: 0, count: 0};
 
-			// stop-by-stop EWT for use in route-level bar chart
+			// stop-level EWT for use in bar chart
 			var stopEwtAverager = {};
 			// stop-level sTrip + mTrip + trip95 (for cumulative chart and journey metrics)
 			var stopTripAverager = {};
-			// stop-level SWT + AWT + 95WT (for journey metrics)
+			// stop-level SWT, AWT, 95WT (for journey metrics)
 			var stopWaitAverager = {};
 
 			// iterate through all DAYS in scope
 			Object.keys(filteredData).forEach(function(date) {
 
-				if (filteredData[date].route) {
-					// using the provided route-level EWT
-					if (filteredData[date].route.ewt) {
-						ewtAverager.sum += filteredData[date].route.ewt;
-						ewtAverager.count += 1;
-					};
-					// using the provided route-level SPEED
-					if (filteredData[date].route.speed) {
-						speedAverager.sum += filteredData[date].route.speed;
-						speedAverager.count += 1;
-					};
-				}
+				// using the provided route-level EWT
+				if (filteredData[date].route.ewt) {
+					ewtAverager.sum += filteredData[date].route.ewt;
+					ewtAverager.count += 1;
+				};
+				// using the provided route-level SPEED
+				if (filteredData[date].route.speed) {
+					speedAverager.sum += filteredData[date].route.speed;
+					speedAverager.count += 1;
+				};
 
 				// route-level averagers for mTrip and sTrip sums on a given day
 				var routeMTripAverager = {sum: 0, count: 0};
@@ -621,59 +597,56 @@
 						routeSTripAverager.count += stopData['count'];;
 
 						// record a single stop's mTrip, sTrip. trip95 into the cumulative averager
-						stopTripAverager[stop] = {m_trip: {sum: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].m_trip.sum += stopData['m_trip'] * stopData['count'] :
+						stopTripAverager[stop] = {m_trip: {sum: (stopTripAverager.stop ?
+															  stopTripAverager.stop.m_trip.sum += stopData['m_trip'] * stopData['count'] :
 															  stopData['m_trip'] * stopData['count']),
-													  count: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].m_trip.count += stopData['count'] :
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.m_trip.count += stopData['count'] :
 															  stopData['count'])},
-												s_trip: {sum: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].s_trip.sum += stopData['s_trip'] * stopData['count'] :
+												s_trip: {sum: (stopTripAverager.stop ?
+															  stopTripAverager.stop.s_trip.sum += stopData['s_trip'] * stopData['count'] :
 															  stopData['s_trip'] * stopData['count']),
-													  count: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].s_trip.count += stopData['count'] :
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.s_trip.count += stopData['count'] :
 															  stopData['count'])},
-												trip_95: {sum: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].trip_95.sum += stopData['trip_95'] * stopData['count'] :
+												trip_95: {sum: (stopTripAverager.stop ?
+															  stopTripAverager.stop.trip_95.sum += stopData['trip_95'] * stopData['count'] :
 															  stopData['trip_95'] * stopData['count']),
-													  count: (stopTripAverager[stop] ?
-															  stopTripAverager[stop].trip_95.count += stopData['count'] :
+													  count: (stopTripAverager.stop ?
+															  stopTripAverager.stop.trip_95.count += stopData['count'] :
 															  stopData['count'])}}
 
 						// record a single stop's AWT, SWT, WT95 into the cumulative averager
-						stopWaitAverager[stop] = {awt: {sum: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].awt.sum += stopData['awt'] * stopData['count'] :
+						stopWaitAverager[stop] = {awt: {sum: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.awt.sum += stopData['awt'] * stopData['count'] :
 															  stopData['awt'] * stopData['count']),
-													  count: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].awt.count += stopData['count'] :
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.awt.count += stopData['count'] :
 															  stopData['count'])},
-												swt: {sum: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].swt.sum += stopData['swt'] * stopData['count'] :
+												swt: {sum: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.swt.sum += stopData['swt'] * stopData['count'] :
 															  stopData['swt'] * stopData['count']),
-													  count: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].swt.count += stopData['count'] :
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.swt.count += stopData['count'] :
 															  stopData['count'])},
-												ewt_95: {sum: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].ewt_95.sum += stopData['ewt_95'] * stopData['count'] :
+												ewt_95: {sum: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.ewt_95.sum += stopData['ewt_95'] * stopData['count'] :
 															  stopData['ewt_95'] * stopData['count']),
-													  count: (stopWaitAverager[stop] ?
-															  stopWaitAverager[stop].ewt_95.count += stopData['count'] :
+													  count: (stopWaitAverager.stop ?
+															  stopWaitAverager.stop.ewt_95.count += stopData['count'] :
 															  stopData['count'])}}
 
 						// add a single stop's EWT to averager, and preserve the stop_id for use in bar chart
-						stopEwtAverager[stop] = {sum: (stopEwtAverager[stop] ?
-													   stopEwtAverager[stop].sum + ((stopData['awt'] - stopData['swt']) * stopData['count']) :
+						stopEwtAverager[stop] = {sum: (stopEwtAverager.stop ?
+													   stopEwtAverager.stop.sum += (stopData['awt'] - stopData['swt']) * stopData['count'] :
 													   (stopData['awt'] - stopData['swt']) * stopData['count']),
-												count: (stopEwtAverager[stop] ?
-														stopEwtAverager[stop].count += stopData['count'] :
+												count: (stopEwtAverager.stop ?
+														stopEwtAverager.stop.count += stopData['count'] :
 														stopData['count'])};
-						// testing.
-						if (stop == 103333) {
-							console.log(`after ${date}: ewt sum - ${stopEwtAverager[stop].sum}, ewt count - ${stopEwtAverager[stop].count}`);
-						};
-
 					};
 				});
+
+				// console.log("mtrip strip", routeMTripAverager, routeSTripAverager)
 
 				// add a single day's mTrip and sTrip route sums to the overall averager
 				if (routeMTripAverager.sum != 0) {
@@ -737,14 +710,9 @@
 										   null)}
 			});
 
-			return {
-				avgEwt: avgEwt,
-				avgSpeed: avgSpeed,
-				percentOver: percentOver,
-				stopEwt: stopEwt,
-				stopTrips: stopTrips,
-				stopWaits: stopWaits
-			};
+			// console.log("stopTripAverager", stopTripAverager);
+
+			return {avgEwt: avgEwt, avgSpeed: avgSpeed, percentOver: percentOver, stopEwt: stopEwt, stopTrips: stopTrips, stopWaits: stopWaits};
 		},
 
 
@@ -759,56 +727,18 @@
 				};
 			});
 
-			console.log("filteredData legnth", Object.keys(filteredData).length);
-
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
-			console.log("timeAveraged:", timeAveraged);
 			// average EWT, route-level, all within-scope days
-			if (timeAveraged.avgEwt > 2.7) {
-						 ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
-						 var mintext = ` mins`.fontcolor('red');
-		       }
-		      else
-		      {
-						ewttext = `${timeAveraged.avgEwt}`.fontcolor('green');
-						var mintext = ` mins`.fontcolor('green');
-					}
-					// $("#route-ewt").text(`${timeAveraged.avgEwt}`);
-					$("#route-ewt").html(ewttext);
-					$("#mins").html(mintext);
-
-					// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
-					if (timeAveraged.percentOver > 5)
-		       {
-						 perctext = `${timeAveraged.percentOver} %`.fontcolor('red');
-		       }
-		      else
-		      {
-						perctext = `${timeAveraged.percentOver} %`.fontcolor('green');
-					}
-					$("#route-rbt").html(perctext);
-
-					// $("#route-rbt").text(`${timeAveraged.percentOver} %`);
-
-					// // average speed, route-level, all within-scope days
-					if (timeAveraged.avgSpeed < 7.41)
-		       {
-						 speedtext = `${timeAveraged.avgSpeed}`.fontcolor('red');
-						 var mphtext = ` mph`.fontcolor('red');
-		       }
-		      else
-		      {
-						speedtext = `${timeAveraged.avgSpeed}`.fontcolor('green');
-						var mphtext = ` mph`.fontcolor('green');
-			}
-			$("#route-speed").html(speedtext);
-			$("#mph").html(mphtext);
-			// $("#route-speed").text(`${timeAveraged.avgSpeed}`);
+			$("#route-ewt").text(`${timeAveraged.avgEwt}`);
+			// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
+			$("#route-rbt").text(`${timeAveraged.percentOver} %`);
+			// average speed, route-level, all within-scope days
+			$("#route-speed").text(`${timeAveraged.avgSpeed}`);
 
 			// draw route-level charts
-			// console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText}`);
-			$(".long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
+			console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateSelect")[0].innerText}`);
+			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateSelect")[0].innerText);
 			tc.drawRouteLineCharts();
 			tc.drawRouteEwtChart(timeAveraged.stopEwt);
 			tc.drawCumulativeLineChart(timeAveraged.stopTrips);
@@ -860,32 +790,30 @@
 			Object.keys(allData).forEach(function(date) {
 
 				var oneDay = {};
-				if (allData[date]["stops"]) {
-					Object.keys(allData[date]["stops"]).forEach(function(stop_id) {
+				Object.keys(allData[date]["stops"]).forEach(function(stop_id) {
 
-						var seq = stopLookup[stop_id].sequence;
-						[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
+					var seq = stopLookup[stop_id].sequence;
+					[["swt", "s_trip"], ["awt", "m_trip"], ["ewt_95", "trip_95"]].forEach(function(metricNames) {
 
-							var waitTimeName = metricNames[0];
-							var onboardTimeName = metricNames[1];
+						var waitTimeName = metricNames[0];
+						var onboardTimeName = metricNames[1];
 
-							if (seq == startSeq) {
-								// originating bus stop; take wait time at this stop
-								oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
-								oneDay["count"] = allData[date]["stops"][stop_id].count;
+						if (seq == startSeq) {
+							// originating bus stop; take wait time at this stop
+							oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
+							oneDay["count"] = allData[date]["stops"][stop_id].count;
+						};
+						if ((seq >= startSeq) && (seq < endSeq)) {
+							// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
+							if (oneDay[onboardTimeName]) {
+								oneDay[onboardTimeName] += allData[date]["stops"][stop_id][onboardTimeName];
+							} else {
+								oneDay[onboardTimeName] = allData[date]["stops"][stop_id][onboardTimeName];
 							};
-							if ((seq >= startSeq) && (seq < endSeq)) {
-								// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
-								if (oneDay[onboardTimeName]) {
-									oneDay[onboardTimeName] += allData[date]["stops"][stop_id][onboardTimeName];
-								} else {
-									oneDay[onboardTimeName] = allData[date]["stops"][stop_id][onboardTimeName];
-								};
-							};
-						});
+						};
 					});
-					timeSeries[date] = oneDay;
-				};
+				});
+				timeSeries[date] = oneDay;
 			});
 
 			var timeAveraged = {};
@@ -912,7 +840,6 @@
 					};
 				});
 			});
-
 			return {timeSeries: timeSeries, timeAveraged: timeAveraged};
 		},
 
@@ -925,10 +852,8 @@
 
 			// build time series arrays
 			Object.keys(tc.selectionData).sort().forEach(function(date) {
-				if (tc.selectionData[date]["route"]) {
-					time_x.push(date);
-					time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
-				};
+				time_x.push(date);
+				time_y.push(tc.selectionData[date]["route"][tc.selection.metric]);
 			});
 
 			// this will dynamically be one of: month, year, all-time
@@ -943,29 +868,66 @@
 			weekLine["name"] = tc.metricHovers[tc.selection.metric];
 
 			var timeLayout = Object.create(tc.graphLayout);
-			timeLayout["yaxis"] = {
-				title: tc.axisNames[tc.selection.metric],
-				hoverformat: '.1f'
-			};
-			timeLayout["xaxis"] = {zeroline: false};
-			timeLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 10,
-				"pad": 0
-			};
-			timeLayout["width"] = 640;
-			timeLayout["height"] = 270;
+			// timeLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+			// timeLayout["xaxis"] = {zeroline: false};
+			// timeLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 0,
+			// 	"pad": 0
+			// };
+			// timeLayout["width"] = 640;
+			// timeLayout["height"] = 250;
 
-			Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
-			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
+			var timeLayout = {
+				xaxis:{zeroline: false},
+				yaxis: {title: tc.axisNames[tc.selection.metric]},
+				margin: {
+			    	"l": 40,
+			    	"r": 0,
+			    	"b": 35,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			  	autosize: true,
+			};
+
+			var d3_long_chart = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 100,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3_1 = d3_long_chart.select("div[id='long-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-bottom': 10 + 'vh'
+			});
+
+			var my_Div1_1 = gd3_1.node();
+			Plotly.plot(my_Div1_1, [longLine], timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1_1); });
+
+			var d3_week_chart = Plotly.d3;
+			var gd3_2 = d3_week_chart.select("div[id='week-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-bottom': 10 + 'vh'
+			});
+
+			var my_Div1_2 = gd3_2.node();
+			Plotly.plot(my_Div1_2, [weekLine], timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1_2); });
+
+
+			// Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
+			// Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
 		},
 
 
 		drawRouteEwtChart: function (stopEwtMap) {
 			console.log("drawing route EWT bar chart...");
-			console.log(stopEwtMap);
 			if (tc.selection.metric == 'ewt') {
 				$("#stop-chart div").remove();
 
@@ -1003,49 +965,57 @@
 					}
 				};
 
-				var stopsLayout = {
-					xaxis: {
-						range: [1, master.length + 1],
-						zeroline: false,
-						title: "Stop Sequence"
-					},
-					yaxis: {
-						title: tc.axisNames[tc.selection.metric],
-						hoverformat: '.1f'
-					},
-					margin: {
-						"l": 40,
-						"r": 20,
-						"b": 30,
-						"t": 15,
-						"pad": 0
-					},
-					showlegend: false,
-					width: 640,
-					height: 250,
-					bargap: 0.1
-				};
-				// Object.create(tc.graphLayout);
-			// 	stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
-			// 	stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
-			// 	stopsLayout["margin"] = {
-			// 		"l": 40,
-			// 		"r": 20,
-			// 		"b": 30,
-			// 		"t": 0,
-			// 		"pad": 0
-			// 	};
-			// 	stopsLayout["width"] = 640;
-			// 	stopsLayout["height"] = 250;
-
-
-			// 	width: "100%",
-			// height: "100%",
-			// showlegend: false
+				var stopsLayout = Object.create(tc.graphLayout);
+				// stopsLayout["xaxis"] = {range: [1, master.length + 1], zeroline: false};
+				// stopsLayout["yaxis"] = {title: tc.axisNames[tc.selection.metric]};
+				// stopsLayout["margin"] = {
+				// 	"l": 40,
+				// 	"r": 20,
+				// 	"b": 30,
+				// 	"t": 0,
+				// 	"pad": 0
+				// };
+				// stopsLayout["width"] = 640;
+				// stopsLayout["height"] = 250;
 
 				console.log(stopsLine, stopsLayout);
 
-				Plotly.newPlot("stop-chart", [stopsLine], stopsLayout, {displayModeBar: false});
+
+				var stopsLayout = {
+
+					yaxis: {title: tc.axisNames[tc.selection.metric]},
+					margin: {
+				    	"l": 40,
+				    	"r": 0,
+				    	"b": 20,
+				    	"t": 10,
+				    	"pad": 0
+				  	},
+					xaxis: {range: [1, master.length + 1], zeroline: false},
+					showlegend: true,
+					legend: {"orientation": "h"},
+					autosize:true,
+				};
+
+				var d3_stop_chart = Plotly.d3;
+				var WIDTH_IN_PERCENT_OF_PARENT = 90,
+				    HEIGHT_IN_PERCENT_OF_PARENT = 50;
+
+				var gd3 = d3_stop_chart.select("div[id='stop-chart']")
+				  .style({
+				    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+				    // 'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+				    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+				    // 'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+				});
+
+				var my_Div1 = gd3.node();
+				Plotly.plot(my_Div1, [stopsLine], stopsLayout, {displayModeBar: false});
+				window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div1); });
+				// Plotly.newPlot("stop-chart", [stopsLine], stopsLayout, {displayModeBar: false});
+
+
+
 
 			} else {
 				$("#stop-chart div").remove();
@@ -1055,16 +1025,14 @@
 
 
 		drawCumulativeLineChart: function(stopTrips) {
-			console.log("drawing cumulative line charts...");
-
-			console.log("stopTrips:", stopTrips);
+			console.log("drawing accumulative line charts...");
 
 			// master data list for cumulative chart
 			// items in form [x_count, schedule_trip, actual_trip, stop_name, stop_sequence]
-			var preMaster = [];
+			var master = [];
 
 			Object.keys(stopTrips).forEach(function(stop) {
-				preMaster.push([
+				master.push([
 					stopTrips[stop].s_trip,
 					stopTrips[stop].m_trip,
 					tc.stopLookup[tc.selection.direction][stop]["name"],
@@ -1073,12 +1041,9 @@
 			});
 
 			// ensure stops are sorted by sequence
-			preMaster.sort(function(a, b) {
+			master.sort(function(a, b) {
 				return a[3] - b[3];
 			});
-
-			// have the option here to cut off the first few trips, to clean up accumulative charts
-			var master = preMaster.slice(tc.accumCutoff);
 
 			// generate x axis
 			var x_count = [];
@@ -1130,27 +1095,35 @@
 
 			var timeLayout = {
 
-				yaxis: {
-					title: "(minutes)",
-					hoverformat: '.1f'
-				},
+				yaxis: {title: "Accumulative Trip Time"},
 				margin: {
 			    	"l": 40,
-			    	"r": 20,
-			    	"b": 0,
-			    	"t": 40,
+			    	"r": 0,
+			    	"b": 10,
+			    	"t": 0,
 			    	"pad": 0
 			  	},
-				width: 600,
-				height: 380,
-				xaxis: {
-					zeroline: false
-				},
+			  	autosize: true,
+				xaxis: {zeroline: false},
 				showlegend: true,
-				legend: {"orientation": "h"}
+				legend: {"orientation": "h"},
 			};
 
-			Plotly.newPlot("accumulative-chart", stackedAccData, timeLayout, {displayModeBar: false});
+			var d3_accumulative_chart = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 80,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 50;
+
+			var gd3 = d3_accumulative_chart.select("div[id='try']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+			    'margin-top': 10 + 'vh'
+			});
+
+			var my_Div2 = gd3.node();
+			Plotly.plot(my_Div2, stackedAccData, timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div2); })
 		},
 
 
@@ -1204,19 +1177,16 @@
 			];
 
 			var timeLayout = Object.create(tc.graphLayout);
-			timeLayout["yaxis"] = {
-				title: "Journey Time (mins)",
-				hoverformat: '.1f'
-			};
-			timeLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 20,
-				"pad": 0
-			};
-			timeLayout["width"] = 600;
-			timeLayout["height"] = 300;
+			// timeLayout["yaxis"] = {title: "Journey Time (mins)"};
+			// timeLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 20,
+			// 	"pad": 0
+			// };
+			// timeLayout["width"] = 600;
+			// timeLayout["height"] = 300;
 
 			function stackedArea(stackedData) {
 				for(var i=1; i<stackedData.length; i++) {
@@ -1228,8 +1198,47 @@
 				return stackedData;
 			};
 
-			Plotly.newPlot("journey-month-chart", stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
-			Plotly.newPlot("journey-week-chart", stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
+			var timeLayout = {
+				yaxis: {title: "Journey Time (mins)"},
+				margin: {
+			    	"l": 40,
+			    	"r": 0,
+			    	"b": 50,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			  	autosize: true,
+			};
+
+			var d3_journey_month = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 100,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3_1 = d3_journey_month.select("div[id='journey-month-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div4_1 = gd3_1.node();
+			Plotly.plot(my_Div4_1, stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div4_1); });
+
+			$('#journey-week-chart').remove();
+
+			var d3_journey_week = Plotly.d3;
+			var gd3_2 = d3_journey_week.select("div[id='journey-week-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div4_2 = gd3_2.node();
+			Plotly.plot(my_Div4_2, stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div4_2); });
+
+			// Plotly.newPlot("journey-month-chart", stackedArea(stackedMonthData), timeLayout, {displayModeBar: false});
+			// Plotly.newPlot("journey-week-chart", stackedArea(stackedWeekData), timeLayout, {displayModeBar: false});
 		},
 
 
@@ -1259,8 +1268,8 @@
 
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
-				// here, we temper our 95th percentile trip time, by mixing it with our average trip time at the specified fraction
-				y: [data.s_trip, data.m_trip, (tc.fractionIs95 * data.trip_95) + ((1 - tc.fractionIs95) * data.m_trip)],
+				// MONA
+				y: [data.s_trip, data.m_trip, data.trip_95],
 				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
@@ -1278,30 +1287,58 @@
 			var barData = [waitData, onboardData];
 
 			var barLayout = Object.create(tc.graphLayout);
-			barLayout["barmode"] = "stack";
-			barLayout["autosize"] = true;
-			barLayout["bargap"] = 0.3;
-			barLayout["bargroupgap"] = 0.02;
-			barLayout["yaxis"] = {
-				title: "Journey Time (mins",
-				hoverformat: '.1f'
-			};
-			barLayout["margin"] = {
-				"l": 40,
-				"r": 20,
-				"b": 30,
-				"t": 10,
-				"pad": 0
-			};
-			barLayout["width"] = 300;
-			barLayout["height"] = 360;
+			// barLayout["barmode"] = "stack";
+			// barLayout["autosize"] = true;
+			// barLayout["bargap"] = 0.3;
+			// barLayout["bargroupgap"] = 0.02;
+			// barLayout["yaxis"] = {title: "Journey Time (mins"};
+			// barLayout["margin"] = {
+			// 	"l": 40,
+			// 	"r": 20,
+			// 	"b": 30,
+			// 	"t": 10,
+			// 	"pad": 0
+			// };
+			// barLayout["width"] = 300;
+			// barLayout["height"] = 360;
 
-			Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
+			var barLayout = {
+
+				yaxis: {title: "Journey Time (mins)"},
+				bargroupgap:0.02,
+				bargap:0.3,
+				barmode:"stack",
+				margin: {
+			    	"l": 40,
+			    	"r": 17,
+			    	"b": 50,
+			    	"t": 10,
+			    	"pad": 0
+			  	},
+			};
+
+			var d3_journey_bar = Plotly.d3;
+			var WIDTH_IN_PERCENT_OF_PARENT = 80,
+			    HEIGHT_IN_PERCENT_OF_PARENT = 40;
+
+			var gd3 = d3_journey_bar.select("dihnadlerv[id='journey-bar-chart']")
+			  .style({
+			    width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+			    // 'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+			    height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh'
+			});
+
+			var my_Div3 = gd3.node();
+			window.addEventListener('resize', function() { Plotly.Plots.resize(my_Div3); });
+			Plotly.plot(my_Div3, barData, barLayout, {displayModeBar: false});
+			// Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
 		},
 
 	};
 
 	// add our tc object to global window scope
 	this.tc = tc;
+
 	console.log('running tc.js');
+
 })();
