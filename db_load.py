@@ -123,6 +123,8 @@ def main():
     engine = create_engine('postgresql://localhost/transit')
   elif os == "compute":
     engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
+  elif os == "heroku":
+    engine = create_engine('postgres://khhmgarehisweo:c0a26f041088be712b8a101b97580da03f0190925680887283008f8fb030f11d@ec2-50-19-105-113.compute-1.amazonaws.com:5432/def3b6t4b1et7m')
 
   # CLEAR EXISTING TABLES AND REBUILD SCHEMA
   db.drop_all()
