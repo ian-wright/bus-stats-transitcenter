@@ -160,7 +160,7 @@ def get_available_routes():
     db_distinct = set(map(lambda rec: rec.rds_index.split('_')[0], db_distinct_records))
 
     # distinct geo routes
-    geo_files = os.listdir('./data/profiles/')
+    geo_files = os.listdir('./data_/profiles/')
     geo_files_filt = filter(lambda geo: '.geojson' in geo, geo_files)
     geo_distinct = set(map(lambda geo: geo.split('_')[0], geo_files_filt))
 
@@ -176,8 +176,8 @@ def get_profile(route):
     geo = {}
     for direction in ['0','1']:
         try:
-            fname = './data/profiles/{}_{}.geojson'.format(route, direction)
-            with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
+            fname = './data_/profiles/{}_{}.geojson'.format(route, direction)
+            with open('./data_/profiles/{}_{}.geojson'.format(route, direction)) as infile:
                 geo[direction] = geojson.load(infile)
         except IOError:
             # geometry doesn't exist
