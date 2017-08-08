@@ -30,7 +30,7 @@ def test_mode(stop_columns, route_columns, engine):
   # GENERATE FAKE DATA
   stop_records = []
   route_records = []
-  print "generating fake data..."
+  print("generating fake data...")
   for route in routes:
       for stop in routes[route]:
           for direc in directions:
@@ -75,7 +75,7 @@ def test_mode(stop_columns, route_columns, engine):
   route_df = pd.DataFrame(route_records, columns=route_columns)
   stop_df.to_sql('stop_metrics', engine, if_exists='append', index=False)
   route_df.to_sql('route_metrics', engine, if_exists='append', index=False)
-  print 'successfully loaded fake data (FAKE NEWS).'
+  print('successfully loaded fake data (FAKE NEWS).')
 
 
 def convert_null(val):
