@@ -10,7 +10,7 @@
 import sys
 import pandas as pd
 from random import random
-
+from __future__ import print_function
 from sqlalchemy import create_engine
 from app import db
 
