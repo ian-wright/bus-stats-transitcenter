@@ -10,7 +10,6 @@
 import sys
 import pandas as pd
 from random import random
-from __future__ import print_function
 from sqlalchemy import create_engine
 from app import db
 
@@ -31,7 +30,7 @@ def test_mode(stop_columns, route_columns, engine):
   # GENERATE FAKE DATA
   stop_records = []
   route_records = []
-  print 'generating fake data...'
+  print "generating fake data..."
   for route in routes:
       for stop in routes[route]:
           for direc in directions:
