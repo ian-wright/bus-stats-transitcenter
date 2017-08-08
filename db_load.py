@@ -91,7 +91,8 @@ def prod_mode(stop_infile, route_infile, stop_columns, route_columns, engine):
 
   stop_df = pd.read_csv(stop_infile)
   # temporary: remove the speed col from stop data
-  stop_df.drop(['speed', 'rbt'], axis=1, inplace=True)
+  # stop_df.drop(['speed', 'rbt'], axis=1, inplace=True)
+  stop_df.drop(['speed'], axis=1, inplace=True)
   stop_df = stop_df.applymap(convert_null)
 
   route_df = pd.read_csv(route_infile)
