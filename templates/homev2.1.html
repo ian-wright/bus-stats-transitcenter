@@ -14,7 +14,6 @@
   <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
@@ -29,7 +28,7 @@
           <span class="icon-bar"></span>
         </button>
         <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
-          <span class="text">NYC Bus Profile</span><i> beta</i>
+          <span class="text">NYC Bus Profile</span>
           </a>
       </div>
 
@@ -63,118 +62,120 @@
   </nav><!-- end of the navbar -->
 
   <!-- content -->
-  <div id="container">
+  <div id="container-home">
     <section id="maphomesection">
-      <!-- map -->
-      <div class="row" id="maphomediv">
-        <div id="maphome"></div>
-      </div>
+      <div class="row">
 
-      <!-- the boxes -->
-      <div class="row mtop80 mleft32">
-        <div class="col-sm-12">
-          <h1>Summary</h1>
-          <span class="span-date">31 May 2017</span>
-        </div>
-      </div>
+        <!-- top left -->
+        <!-- summary -->
+        <div class="col-sm-6" id="summary-col">
+          <div class="row" id="summary-row">
+            <div class="row home-header">
+              <h1>Summary</h1>
+            </div>
+            <div class="row" id="numbers-row">
+              <div class="col-xs-6" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
+                <div class="rowbox">
+                  <h2>Excess Wait Time</h2>
+                </div>
+                <div class="row">
+                  <h1 class="jumbo">1.76 min</h1>
+                </div>
+              </div>
+              <div class="col-xs-6s">
+                <div class="rowbox">
+                  <h2>Average Speed</h2>
+                </div>
+                <div class="row">
+                  <h1 class="jumbo">7.4 mph</h1>
+                </div>
+              </div>
+            </div>
+          </div> <!-- end of summary -->
 
-      <div class="row mleft32">
-        <div class="col-sm-3 metric-box-home" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
-          <div class="rowbox">
-            <h2>Excess Wait Time</h2>
+          <!-- information -->
+          <div class="row" id="info-row">
+            <div class="row home-header">
+              <h1>About</h1>
+            </div>
+            <div class="row">
+              <p>this is bla bla</p>
+            </div>
           </div>
-          <div class="row">
-            <h1 class="jumbo">1.76 min</h1>
-          </div>
-          <div class="row">
-            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-ewt">DETAILS</a>
-          </div>
-        </div>
+        </div><!-- end of information -->
 
-        <div class="col-sm-3 metric-box-home">
-          <div class="rowbox">
-            <h2>Average Speed</h2>
-          </div>
-          <div class="row">
-            <h1 class="jumbo">7.4 mph</h1>
-          </div>
-          <div class="row">
-            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-speed">DETAILS</a>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="row mleft32 mtop30">
-        <div class="col-sm-12">
-          <h1>What is <b class="purple-front">busstat.nyc?</b></h1>
-        </div>
-      </div>
-
-      <div class="row mleft32">
-        <div class="col-sm-6 metric-box-home" id="home-about">
-          <p class="lead" id="home-about-p"><b class="purple-front">busstat.nyc</b> is a project to measure and show the bus performance in New York City.</p>
-          <div class="btn-home">
-            <a class="btn btn-primary btn-large btn-block responsive-width" href="/routes/BX39">explore route level performance</a>
+        <div class="col-sm-6" id="maphome-col">
+          <div class="row" id="maphomediv">
+            <div id="maphome"></div>
           </div>
         </div>
-      </div>
 
+      </div>
     </section>
-
-    <!-- section charts here -->
-    <section class="below-section">
+    <!-- info -->
+    <section id="little-info">
+      <div class="section-container">
+         <div id="section-header">
+           <h1 class="light">About</h1>
+         </div>
+       </div>
+    </section>
+    <!-- charthome -->
+    <section id="charthome">
       <div class="section-container">
          <div id="section-header">
            <h1 class="light">The Metrics</h1>
          </div>
          <div id="section-content">
            <div class="row">
-             <div class="col-sm-4 absolute">
-               <div class="exp-container">
-                <div class="exp">
-                 <h3 class="light">Excess Wait Time</h3>
-                 <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
-                </div>
+             <div class="col-sm-4">
+              <div class="exp">
+               <h3 class="light">Excess Wait Time</h3>
+               <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
               </div>
              </div>
-             <div class="col-sm-4 absolute">
-              <div class="exp-container">
-                <div class="exp">
-                 <h3 class="light">Route Lateness Factor</h3>
-                 <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
-                </div>
+             <div class="col-sm-4">
+               <div class="exp">
+               <h3 class="light">Route Lateness Factor</h3>
+               <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
               </div>
              </div>
-             <div class="col-sm-4 absolute">
-              <div class="exp-container">
+             <div class="col-sm-4">
                <div class="exp">
                <h3 class="light">Average Speed</h3>
                <p class="lead">The average speed of the buses.</p>
                </div>
-              </div>
              </div>
            </div>
            <div class="row">
-            <div class="btn-home">
-             <a class="btn btn-primary btn-large" href="/methodologies">how we calculate the metrics</a>
-            </div>
+             <div class="col-sm-3 col-sm-offset-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">route level performance</a>
+             </div>
+             </div>
+             <div class="col-sm-3">
+               <div class="btn-home">
+               <a class="btn btn-primary btn-large">how we calculate the metrics</a>
+             </div>
+             </div>
            </div>
          </div>
 
       </div>
     </section>
+
   </div>
 </body>
 
 <div id="footer"><!-- footer -->
   <div id="footerInner">
+
     <div id="rightFooter">
       <a href="" target="_blank">
-        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" height="31" class="footerLogo">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
       </a>
       <a href="" target="_blank">
-        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" height="31" class="footerLogo">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
       </a>
     </div>
   </div>
@@ -187,12 +188,11 @@
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
-<script src="{{ url_for('static', filename='homecharts.js') }}"></script>
 
 <!-- map home script goes here -->
 <script>
 $( document ).ready(function() {
-    var maphome = L.map('maphome',{ zoomControl:false }).setView([40.65597, -74.15367], 11);
+    var maphome = L.map('maphome',{ zoomControl:false }).setView([40.71597, -74.05367], 11);
     new L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 11,

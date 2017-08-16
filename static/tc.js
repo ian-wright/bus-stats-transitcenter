@@ -765,7 +765,7 @@
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
 			console.log("timeAveraged:", timeAveraged);
 			// average EWT, route-level, all within-scope days
-			if (timeAveraged.avgEwt > 2.7) {
+			if (timeAveraged.avgEwt > 1.76) {
 						 ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
 						 var mintext = ` mins`.fontcolor('red');
 		       }
