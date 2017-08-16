@@ -290,30 +290,20 @@
 
 <!--javascripts -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script> -->
-<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
-
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
         integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<!-- stacked bar -->
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script> -->
-
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
-<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
+<script type="text/javascript" src="{{ url_for('static', filename='tc_main.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc_map.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc_graphs.js') }}"></script>
 <script>
   var route = '{{ route }}';
   var dataURL = `/routes/${route}/data`;
-    $.getJSON(dataURL, function(data) {
-          tc.initializeDashboard(data, first=true);
-      });
-  $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip();
+  $.getJSON(dataURL, function(data) {
+    tc.initializeDashboard(data, first=true);
   });
 </script>
 </html>
