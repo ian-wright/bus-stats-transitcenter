@@ -765,7 +765,7 @@
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
 			console.log("timeAveraged:", timeAveraged);
 			// average EWT, route-level, all within-scope days
-			if (timeAveraged.avgEwt < 2.8) {
+			if (timeAveraged.avgEwt > 2.7) {
 						 ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
 						 var mintext = ` mins`.fontcolor('red');
 		       }
@@ -779,7 +779,7 @@
 					$("#mins").html(mintext);
 
 					// (avg EWT +  sum(m_trip))/(avg SWT + sum(s_trip)) - 1
-					if (timeAveraged.percentOver < 15)
+					if (timeAveraged.percentOver > 5)
 		       {
 						 perctext = `${timeAveraged.percentOver} %`.fontcolor('red');
 		       }
@@ -792,7 +792,7 @@
 					// $("#route-rbt").text(`${timeAveraged.percentOver} %`);
 
 					// // average speed, route-level, all within-scope days
-					if (timeAveraged.avgSpeed < 4)
+					if (timeAveraged.avgSpeed < 7.41)
 		       {
 						 speedtext = `${timeAveraged.avgSpeed}`.fontcolor('red');
 						 var mphtext = ` mph`.fontcolor('red');
@@ -800,7 +800,7 @@
 		      else
 		      {
 						speedtext = `${timeAveraged.avgSpeed}`.fontcolor('green');
-						var mphtext = ` mph`.fontcolor('green');					
+						var mphtext = ` mph`.fontcolor('green');
 			}
 			$("#route-speed").html(speedtext);
 			$("#mph").html(mphtext);
@@ -808,7 +808,7 @@
 
 			// draw route-level charts
 			// console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText}`);
-			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
+			$(".long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
 			tc.drawRouteLineCharts();
 			tc.drawRouteEwtChart(timeAveraged.stopEwt);
 			tc.drawCumulativeLineChart(timeAveraged.stopTrips);
@@ -952,11 +952,11 @@
 				"l": 40,
 				"r": 20,
 				"b": 30,
-				"t": 0,
+				"t": 10,
 				"pad": 0
 			};
 			timeLayout["width"] = 640;
-			timeLayout["height"] = 250;
+			timeLayout["height"] = 270;
 
 			Plotly.newPlot("long-chart", [longLine], timeLayout, {displayModeBar: false});
 			Plotly.newPlot("week-chart", [weekLine], timeLayout, {displayModeBar: false});
@@ -1006,7 +1006,8 @@
 				var stopsLayout = {
 					xaxis: {
 						range: [1, master.length + 1],
-						zeroline: false
+						zeroline: false,
+						title: "Stop Sequence"
 					},
 					yaxis: {
 						title: tc.axisNames[tc.selection.metric],
@@ -1016,7 +1017,7 @@
 						"l": 40,
 						"r": 20,
 						"b": 30,
-						"t": 0,
+						"t": 15,
 						"pad": 0
 					},
 					showlegend: false,
@@ -1137,12 +1138,14 @@
 			    	"l": 40,
 			    	"r": 20,
 			    	"b": 0,
-			    	"t": 30,
+			    	"t": 40,
 			    	"pad": 0
 			  	},
 				width: 600,
 				height: 380,
-				xaxis: {zeroline: false},
+				xaxis: {
+					zeroline: false
+				},
 				showlegend: true,
 				legend: {"orientation": "h"}
 			};

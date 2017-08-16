@@ -1,7 +1,144 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
+
 <body>
-methodologies goes here
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
+          <li>
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/routes/B17">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li class="active">
+            <a href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li>
+            <a href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-7">
+        	<h3 class = "" style = 'padding-top : 5vh;'>
+            Methodologies
+            </h3>
+            <h1 class = "abouttitle">
+            Data Processing
+            </h1>
+            <p class = "about">
+                TIn order to calculate our chosen metrics, we compare scheduled data with actual data. These two sources are joined on the basis of trip id and an index of our own making which concatenates route, direction and stop number. This index will be referred to as the rds index. For the schedule data, each trip has a given scheduled arrival time at all stops along the route. For the actual data, we assign each bus ping to the next stop. Since the timestamps in the original calls data is broadcast roughly every 30 seconds, it does not necessarily correspond to an actual bus stop. We therefore interpolate the actual arrival time by figuring out the relative velocity between available surrounding pings and use that to calculate the arrival time under the assumption that the bus is traveling at a constant speed. If a single bus registers multiple pings with the same next stop id, we use the ping closest to the stop itself and remove any other stops from the dataset. 
+            <p class = "about">
+                We had then hoped to simply merge cleaned calls data with scheduled data on the basis of trip id and rds index, using an outer join to ensure that every stop was accounted for both as observed and as scheduled. Unfortunately, trip id is not a unique identifier for a given bus as according to the documentation, "MTA Bus Time falls back to a trip-level assignment, where it just picks a trip from the schedule that is representative of the route and stopping pattern that the bus is likely to pursue." In practice, this means that trip id is not static as a single bus goes along its route. Trips were also often chosen from previous schedules (which update approximately every three months). We therefore extracted all the unique trip ids from the calls data and iterated back through previous schedules in order to find the corresponding schedule for that particular trip. Using schedules from April 2015 to present, we were unable to find a particular trip id-rds index combination between .5-3% of the time for most months between October 2015 and May 2017. It should be noted that in the months of July 2016-October 2016, these numbers were sometimes 30-40%. We are not sure whether this is due to an error in the GTFS data at that point or a missing schedule not available. Between 20-30% of scheduled stops did not have a corresponding record in the schedule data for a given trip id-rds index combination. This would occur when bus pings were recorded at too great a resolution to reflect intermediary stops between pings. At this point, we dropped any duplicate points where the scheduled arrival time and the rds index were the same as these did not reflect two buses scheduled to arrive at the same stop simultaneously but was a function of the malleable trip id. It should be noted that this drop would not work if a schedule had been adjusted and may have led actual wait times to be slightly understated. Lastly, we interpolated stop times for the remaining data using a simple linear interpolation using the interpolation function built into numpy and any stops without sufficient data were dropped from further calculations. It should be noted that this drop will most affect stops at the beginning or ends of trips as they would most likely not have surrounding data from which to interpolate. 
+
+            </p>
+            <p class = "about">
+            	Finally, we focused on daytime trips between the hours of 7 am and 10 pm as late night/early morning service often does not have sufficient data points to make accurate calculations. All data with scheduled stops outside of that time frame were thus removed. We also removed any data where the schedule differed by more than 40 minutes from the actual points as errors. Due to the nature of trip assignments, we occasionally found pings for a given trip id were not in order or were significantly different that other pings for that trip. Therefore, we also removed those as errors in the dataset. 
+            </p>
+
+            <h1 class = "abouttitle">
+            Wait Time Calculations  and Excess Wait Time
+            </h1>
+            <p class = "about">
+                Our first criterion for evaluation is wait time. We focused on high frequency bus routes, where riders are assumed to arrive randomly at a bus stop rather than consulting a schedule. High frequency in this case is defined as at least one bus every 15 minutes per TransitCenter's guidelines although this number is somewhat debated in the literature. Transport For London uses one bus every 12 minutes in its calculations and Trompet et al suggest 10 minutes.  Since riders are assumed to arrive randomly, we are therefore more interested in the relative time between buses than whether a bus adhered to its schedule. Ultimately, we are able to calculate wait times for a little less than 75% of routes. 
+            </p>
+            <p class = "about">
+            	On the borough and route level, we report on excess wait time as an average of the average of excess wait times at all stops. For a journey level, we report on the average actual, average schedule and a 95th percentile estimate of observed headways. The averages are more accurate when headways are of a consistent length, but should not be considered highly accurate for large timeframes given variability in scheduled headways.
+            </p>
+            <h1 class = "abouttitle">
+            Journey Time and Reliability Buffer Time
+            </h1>
+            <p class = "about">
+                Our second criterion for evaluation is journey time. To do this, we calculate the time difference between consecutive stops for the same trip id, both as scheduled and as observed.
+            </p>
+            <p class = "about">
+            	On the route level, we display percent deviation from schedule based on the calculations defined above. This is based upon the entire end to end route. On the journey level, we calculate the mean of both the actual and scheduled travel times as well as the 95th percentile of the actual time. For the 95th percentile of travel time, we assume that 20% of segments experience the 95th percentile of travel time while 80% experience the mean travel time. We do not calculate travel times on the borough level as it did not seem meaningful given the differences in route lengths and journey lengths. 
+            </p>
+            <p class = "about">
+            	This is calculated on a slightly different subset of data than EWT as we do not filter out buses where the interval between buses is greater than 15 minutes. 
+
+            </p>
+            <h1 class = "abouttitle">
+            Speed
+            </h1>
+            <p class = "about">
+            	Our third criterion for evaluation is speed. We join the data with stop distance data in order to evaluate the average speed in miles per hour over any segment, route or journey. This is reported in the same manner for all levels of granularity. Borough level statistics are the weighted average of all routes We filter out any results greater than 40 miles an hour, which is typically either an error or found on Express buses. 
+            </p>
+        </div><!-- /.col-sm-8 -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+
 </body>
+
+<div id="footer"><!-- footer -->
+  <div id="footerInner">
+
+    <div id="rightFooter">
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+      </a>
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+      </a>
+    </div>
+  </div>
+</div> <!-- End Footer -->
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+<script src="{{ url_for('static', filename='homecharts.js') }}"></script>
+
+<!-- map home script goes here -->
 </html>

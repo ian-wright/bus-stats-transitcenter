@@ -1,7 +1,242 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NYC Bus Profiles">
+  <meta name="author" content="NYU CUSP">
+  <!-- <link rel="icon" href="../../favicon.ico"> -->
+  <title>NYC Bus Profile Dashboard</title>
+  <link href="{{ url_for('static', filename='css/pace.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
+
 <body>
-about goes here
+  <nav class="navbar navbar-default" id="navBars">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div id="navbarHeader" class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse-1" aria-expanded="false" style="padding-top: 15px;">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
+          <span class="text">NYC Bus Profile</span>
+          </a>
+      </div>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-collapse-1" id="navbar-collapse-1">
+        <ul class="nav navbar-nav navbar-right topbar">
+          <li>
+            <a href="/home">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/routes/B17">
+              <span>Route Level Metrics</span>
+            </a>
+          </li>
+          <li>
+            <a href="/methodologies">
+              <span>Methodologies</span>
+            </a>
+          </li>
+          <li class="active">
+            <a href="/about" style="padding-right:40px;">
+              <span>About</span>
+            </a>
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+  </nav><!-- end of the navbar -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-6">
+            <h1 class = "abouttitle" style = 'padding-top : 7vh'>
+            About
+            </h1>
+            <p class = "about">
+                This project is a capstone project of the CUSP master program sponsered by TransitCenter.
+            <p class = "about">
+                The proposed project would serve two related objectives we have as an organization dedicated to serving the public interest. 2) Assist transit agencies and advocates to take advantage of the latest data and analytical tools to optimize planning, service delivery, and public engagement. 2) Raise the expectations for transit in NYC while providing a practical vision and popular support for achieving them.
+            </p>
+
+            <h1 class = "abouttitle">
+            NYU | Center for Urban Science and Progress
+            </h1>
+            <p class = "about">
+                New York University's Center for Urban Science & Progress (CUSP) is a university-wide center whose research and education programs are focused on urban informatics. Using NYC as its lab, and building from its home in the NYU Tandon School of Engineering, it integrates and applies NYU strengths in the natural, data, and social sciences to understand and improve cities throughout the world. CUSP offers a one-year MS degree in Applied Urban Science & Informatics.
+            </p>
+            <h1 class = "abouttitle">
+            TransitCenter
+            </h1>
+            <p class = "about">
+                TransitCenter is a New York City-based foundation committed to improving public transit nationally. We do this through a combination of strategic research, advocacy, trainings, and grant-making. TransitCenter works closely with agencies and advocates alike, imparting its expertise, while pushing a strong agenda centered around high-quality transit service for riders. As an independent foundation, we can do so without bias to any political or commercial interest, which gives us great credibility and the ability to share best practice across the country.
+            </p>
+            <h1 class = "abouttitle">
+            Team
+            </h1>
+            <div class="row">
+              <div class="column">
+                <div class="card">
+                  <img src="{{ url_for('static', filename='img/ian.jpg') }}" alt="Jane" style="width:100%">
+                  <div class="my-container">
+                    <h2>Ian Wright</h2>
+                    <p class="title">Master Student of CUSP</p>
+                    <p>iw453@nyu.edu</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="column">
+                <div class="card">
+                  <img src="{{ url_for('static', filename='img/Shay.jpg') }}" alt="Mike" style="width:100%">
+                  <div class="my-container">
+                    <h2>Shay Lehmann</h2>
+                    <p class="title">Girl living in Broolyn with Cats</p>
+                    <p>sl5335@nyu.edu</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="column">
+                <div class="card">
+                  <img src="{{ url_for('static', filename='img/Hongting.jpg') }}" alt="Jane" style="width:100%">
+                  <div class="my-container">
+                    <h2>Hongting Chen</h2>
+                    <p class="title">Master Student of CUSP</p>
+                    <p>hc1924@nyu.edu</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <div class="card">
+                      <img src="{{ url_for('static', filename='img/Mona.png') }}" alt="Mike" style="width:100%">
+                      <div class="my-container">
+                        <h2>Nurvirta Monarizqa</h2>
+                        <p class="title">Master Student of CUSP</p>
+                        <p>nm2773@nyu.edu</p>
+                      </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                      <img src="{{ url_for('static', filename='img/Francis.jpg') }}" alt="John" style="width:100%">
+                      <div class="my-container">
+                        <h2>Francis Ko</h2>
+                        <p class="title">Master Student of CUSP</p>
+                        <p>fk759@nyu.edu</p>
+                      </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                      <img src="{{ url_for('static', filename='img/zak-accuardi.jpg') }}" alt="John" style="width:100%">
+                      <div class="my-container">
+                        <h2>Zak Accuardi</h2>
+                        <p class="title">TransitCenter Senior Program Analyst</p>
+                        <p>zaccuardi@transitcenter.org</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <div class="card">
+                      <img src="{{ url_for('static', filename='img/huy.jpg') }}" alt="Mike" style="width:100%">
+                      <div class="my-container">
+                        <h2>Huy Vo</h2>
+                        <p class="title">Exchange Assistant Professor CUSP/CUNY</p>
+                        <p>ehuy.vo@nyu.edu</p>
+                      </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                      <img src="{{ url_for('static', filename='img/kaan.png') }}" alt="John" style="width:100%">
+                      <div class="my-container">
+                        <h2>Kaan Ozbay</h2>
+                        <p class="title">Professor</p>
+                        <p>ko772@nyu.edu</p>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.col-sm-8 -->
+    </div><!-- /.row -->
+    <div class="row">
+        <div class="col-sm-1">
+
+        </div>
+        <div class="col-sm-7">
+            <h1 class = 'abouttitle'>
+                Contact
+            </h1>
+            <div class="row">
+                <div class = 'col-sm-6'>
+                    <label>CUSP:</label>
+                    <p>1 MetroTech Center, 19th Floor Brooklyn, NY 11201</p>
+                    <p>T: (646) 997-0500</p>
+                    <p>F: (646) 997-0560</p>
+                    <p>E: cusp-information@nyu.edu</p>
+                </div>
+                <div class = 'col-sm-6'>
+                    <label>TransitCenter: </label>
+                    <p>
+                        1 Whitehall Street 17th floor, NY 10004
+                    </p>
+                    <p>T: (+1)646-395-9555</p>
+                    <p>F: info@transitcenter.org</p>
+                </div>
+
+            </div>
+
+        </div><!-- /.col-sm-3 -->
+
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+
 </body>
+
+<div id="footer"><!-- footer -->
+  <div id="footerInner">
+
+    <div id="rightFooter">
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+      </a>
+      <a href="" target="_blank">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+      </a>
+    </div>
+  </div>
+</div> <!-- End Footer -->
+
+<!--javascripts -->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
+        integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
+        crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/libs/pace.min.js') }}"></script>
+<script src="{{ url_for('static', filename='homecharts.js') }}"></script>
 </html>
