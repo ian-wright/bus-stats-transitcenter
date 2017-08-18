@@ -46,8 +46,8 @@
             </a>
           </li>
           <li class="active">
-            <a href="/methodologies">
-              <span>Methodologies</span>
+            <a href="/methodology">
+              <span>Methodology</span>
             </a>
           </li>
           <li>
@@ -62,14 +62,14 @@
   </nav><!-- end of the navbar -->
 
   <div class="page-header">
-    <h1 class="center">Methodologies</h1>
+    <h1 class="center">Methodology</h1>
   </div>
   <div class="container-fluid">
     <div class="col-sm-10 col-sm-offset-1 container-about">
       <div class="row mtop30">
         <h1 class="abouttitle">Data Processing</h1>
         <p class="about">
-          In order to calculate our chosen metrics, we compare <a href="http://transitfeeds.com/p/mta">scheduled data</a> with <a href="http://data.mytransit.nyc/bus_time/">actual data</a>. These two sources are joined on the basis of trip id and an index of our own making which concatenates route, direction and stop number. This index will be referred to as the rds index. For the schedule data, each trip has a given scheduled arrival time at all stops along the route. For the actual data, we assign each bus ping to the next stop. Since the timestamps in the original calls data is broadcast roughly every 30 seconds, it does not necessarily correspond to an actual bus stop. We therefore interpolate the actual arrival time by figuring out the relative velocity between available surrounding pings and use that to calculate the arrival time under the assumption that the bus is traveling at a constant speed. If a single bus registers multiple pings with the same next stop id, we use the ping closest to the stop itself and remove any other stops from the dataset. 
+          In order to calculate our chosen metrics, we compare <a href="http://transitfeeds.com/p/mta">scheduled data</a> with <a href="http://data.mytransit.nyc/bus_time/">actual data</a>. These two sources are joined on the basis of trip id and an index of our own making which concatenates route, direction and stop number. This index will be referred to as the rds index. For the schedule data, each trip has a given scheduled arrival time at all stops along the route. For the actual data, we assign each bus ping to the next stop. Since the timestamps in the original calls data are broadcast roughly every 30 seconds, they do not necessarily correspond to actual bus stops. We therefore interpolate the actual arrival time by figuring out the relative velocity between available surrounding pings and use that to calculate the arrival time under the assumption that the bus is traveling at a constant speed. If a single bus registers multiple pings with the same next stop id, we use the ping closest to the stop itself and remove any other stops from the dataset. 
         </p>
         <p class="about">
           For this beta phase, we only include data from <b>December 2016</b> to <b>May 2017</b>.
@@ -81,7 +81,7 @@
         <h4 id="exp-ewt">Excess Wait Time</h4>
         <img src="{{ url_for('static', filename='img/ewt-exp.JPG') }}" alt="ewt" style="width:100%; margin:20px 0;">
         <p class="about">
-          Our first criterion for evaluation is wait time. We focused on high frequency bus routes, where riders are assumed to arrive randomly at a bus stop rather than consulting a schedule. High frequency in this case is defined as at least one bus every 15 minutes per TransitCenter's guidelines although this number is somewhat debated in the literature. Transport For London uses one bus every 12 minutes in its calculations and Trompet et al suggest 10 minutes.  Since riders are assumed to arrive randomly, we are therefore more interested in the relative time between buses than whether a bus adhered to its schedule. Ultimately, we are able to calculate wait times for a little less than 75% of routes. 
+          Our first criterion for evaluation is wait time. We focused on high frequency bus routes, where riders are assumed to arrive randomly at a bus stop rather than consulting a schedule. High frequency in this case is defined as at least one bus every 15 minutes.  Since riders are assumed to arrive randomly, we are therefore more interested in the relative time between buses than whether a bus adhered to its schedule. Ultimately, a little less than 75% of routes can be considered high frequency and we are able to calculate wait times this subset.
         </p>
         <h4>Route Lateness Factor</h4>
         <img src="{{ url_for('static', filename='img/rlf-exp.JPG') }}" alt="rlf" style="width:100%; margin:20px 0;">
@@ -91,7 +91,7 @@
         <h4>Trip Time</h4>
         <img src="{{ url_for('static', filename='img/travel-time-exp.JPG') }}" alt="travel-time" style="width:100%; margin:20px 0;">
         <p>
-           To do this, we calculate the time difference between consecutive stops for the same trip id, both as scheduled and as observed. On the <a href="/routes/BX11">route level</a>, we display percent deviation from schedule based on the calculations defined above. This is based upon the entire end to end route. On the journey level below the route level, we calculate:
+           We calculate the time difference between consecutive stops for the same trip id, both as scheduled and as observed. On the <a href="/routes/BX11">route level</a>, we display percent deviation from schedule based on the calculations defined above. This is based upon the entire end to end route. On the journey level below the route level, we calculate:
            <ul>
              <li>the mean of scheduled travel times</li>
              <li>the mean of actual travel times</li>
@@ -109,7 +109,16 @@
       </div>
       <div class="row">
         <h1 class="abouttitle">Route Selection</h1>
-        <p class="about">As there are many routes with lots of missing data, we only show top 200 routes with highest datapoints.</p>
+        <p class="about">
+          We further limit the data to the 200 route with the most available data points. This is both affected by the relative number of buses run, i.e. a route that runs every 10 minutes will show up more often in the data than a route that runs a bus every 15 minutes, and missing data points. Since data is not necessarily collected at a bus stop, there are sometimes buses with too few observations to calculate estimated arrival time.
+        </p>
+      </div>
+      <div class="row">
+        <h1 class="abouttitle">Limitations</h1>
+        <p class="about">
+          It should be noted that adapting raw GTFS data for is suboptimal, given the fact that arrival times must be interpolated and GPS data is notoriously error-prone in cavernous cities like New York City. Transport For London, which uses Excess Wait Time as a metric to award contracts for bus operators and determine how the contracts pay out, found that they needed to use additional inputs in coordination with GPS data including a Turn Rate Sensor, odometer, definitions of the route, a map and deadreckoning to confirm the true position of the vehicle. The MTA would likely be able to improve upon data collection in the same manner.
+
+        </p>
       </div>
       <div class="row">
         <div class="btn-home">
