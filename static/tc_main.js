@@ -44,6 +44,8 @@
 	        trip_95: 7
       	},
 
+      	resizeTimer: null,
+
 
 		initializeDashboard: function(data, first) {
 			console.log("initializing dashboard...");
@@ -75,6 +77,13 @@
 			// register tooltip
 			$('[data-toggle="tooltip"]').tooltip()
 
+			// listener for window size (to adjust plot config dynamically)
+			$(window).resize(function() {
+			    clearTimeout(tc.resizeTimer);
+			    // only after settling on a window size for 0.5s do we adapt to the new size
+			    tc.resizeTimer = setTimeout(tc.adaptToResize, 500);
+			});
+
 			// setting up dashboard environment on first load
 			if (first==true) {
 				console.log('first map load...')
@@ -89,6 +98,10 @@
 			// default stop selection is placeholder "0"
 			tc.selection.stop = 0;
 			tc.updateController("heavy");
+		},
+
+		adaptToResize: function () {
+			console.log("adapting to resize...");
 		},
 
 
