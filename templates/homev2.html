@@ -46,8 +46,8 @@
             </a>
           </li>
           <li>
-            <a href="/methodologies">
-              <span>Methodologies</span>
+            <a href="/methodology">
+              <span>Methodology</span>
             </a>
           </li>
           <li>
@@ -86,7 +86,7 @@
             <h1 class="jumbo">1.76 min</h1>
           </div>
           <div class="row">
-            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-ewt">DETAILS</a>
+            <a class="btn btn-primary .pull-right btn-round" href="/methodology#exp-ewt">DETAILS</a>
           </div>
         </div>
 
@@ -98,7 +98,7 @@
             <h1 class="jumbo">7.4 mph</h1>
           </div>
           <div class="row">
-            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-speed">DETAILS</a>
+            <a class="btn btn-primary .pull-right btn-round" href="/methodology#exp-speed">DETAILS</a>
           </div>
         </div>
 
@@ -141,7 +141,7 @@
               <div class="exp-container">
                 <div class="exp">
                  <h3 class="light">Route Lateness Factor</h3>
-                 <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
+                 <p class="lead">The difference between actual journey time and scheduled journey time, relative to the scheduled journey time.</p>
                 </div>
               </div>
              </div>
@@ -156,7 +156,7 @@
            </div>
            <div class="row">
             <div class="btn-home">
-             <a class="btn btn-primary btn-large" href="/methodologies">how we calculate the metrics</a>
+             <a class="btn btn-primary btn-large" href="/methodology">how we calculate the metrics</a>
             </div>
            </div>
          </div>
@@ -199,25 +199,25 @@ $( document ).ready(function() {
         accessToken: 'pk.eyJ1IjoiaWZ3cmlnaHQiLCJhIjoiY2o0ZnJrbXdmMWJqcTMzcHNzdnV4bXd3cyJ9.1G8ErVmk7jP7PDuFp8KHpQ'
     }).addTo(maphome);
     L.marker(new L.LatLng(40.78222, -73.96528), {icon:createLabelIcon("mapHomeBoro","<span>Manhattan</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.76922, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>1.93min</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.76022, -73.96528), {icon:createLabelIcon("boroMetricsBad","<span>5.62mph</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.76922, -73.96528), {icon:createLabelIcon("boroMetrics","<span>1.93min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.76022, -73.96528), {icon:createLabelIcon("boroMetrics","<span>5.62mph</span>")}).addTo(maphome);
 
 
     L.marker(new L.LatLng(40.69245, -73.99036), {icon:createLabelIcon("mapHomeBoro","<span>Brooklyn</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.67945, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>1.82min</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.67045, -73.99036), {icon:createLabelIcon("boroMetricsBad","<span>6.05mph</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.67945, -73.99036), {icon:createLabelIcon("boroMetrics","<span>1.82min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.67045, -73.99036), {icon:createLabelIcon("boroMetrics","<span>6.05mph</span>")}).addTo(maphome);
 
     L.marker(new L.LatLng(40.75072, -73.91103), {icon:createLabelIcon("mapHomeBoro","<span>Queens</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.73772, -73.91103), {icon:createLabelIcon("boroMetricsBad","<span>1.84min</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.72972, -73.91103), {icon:createLabelIcon("boroMetricsBad","<span>6.12mph</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.73772, -73.91103), {icon:createLabelIcon("boroMetrics","<span>1.84min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.72972, -73.91103), {icon:createLabelIcon("boroMetrics","<span>6.12mph</span>")}).addTo(maphome);
 
     L.marker(new L.LatLng(40.83037, -73.91164), {icon:createLabelIcon("mapHomeBoro","<span>Bronx</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.81737, -73.91164), {icon:createLabelIcon("boroMetricsGood","<span>1.63min</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.80837, -73.91164), {icon:createLabelIcon("boroMetricsBad","<span>5.86mph</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.81737, -73.91164), {icon:createLabelIcon("boroMetrics","<span>1.63min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.80837, -73.91164), {icon:createLabelIcon("boroMetrics","<span>5.86mph</span>")}).addTo(maphome);
 
     L.marker(new L.LatLng(40.6427, -74.0799), {icon:createLabelIcon("mapHomeBoro","<span>StatenIsland</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.6297, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>1.57min</span>")}).addTo(maphome);
-    L.marker(new L.LatLng(40.6207, -74.0799), {icon:createLabelIcon("boroMetricsGood","<span>8.38mph</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.6297, -74.0799), {icon:createLabelIcon("boroMetrics","<span>1.57min</span>")}).addTo(maphome);
+    L.marker(new L.LatLng(40.6207, -74.0799), {icon:createLabelIcon("boroMetrics","<span>8.38mph</span>")}).addTo(maphome);
 
   })
 

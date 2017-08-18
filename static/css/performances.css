@@ -2020,9 +2020,9 @@ div.underline{
   padding: 2px 5px;
 }
 
-.boroMetricsBad > span {
-  color: #a94442;
-  background-color:#f2dede;
+.boroMetrics > span {
+  color: #444;
+  background-color:#f3f3f3;
   font-size:16px;
   font-weight: bold;
 }
@@ -2037,13 +2037,6 @@ div.underline{
 
 .light-purple {
   color: #E9DEFF;
-}
-
-.boroMetricsGood > span {
-  color: #3c763d;
-  background-color: #dff0d8;
-  font-size:16px;
-  font-weight: bold;
 }
 
 .font20 {

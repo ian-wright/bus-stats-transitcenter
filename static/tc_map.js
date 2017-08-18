@@ -164,7 +164,7 @@
 			// make all stops in the "wrong direction" invisible to user
 			function hideWrongDirection(startSeq) {
 				console.log("hiding wrong direction...");
-				
+
 				map.markerGroupVis.eachLayer(function(layer){
 					if (layer.feature.properties.stop_sequence < startSeq) {
 						// stash marker in the invisible group, and remove from map

@@ -19,9 +19,9 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -358,8 +358,8 @@ def not_found(route):
 def about():
     return render_template('about.html')
 
-@app.route('/methodologies')
-def methodologies():
+@app.route('/methodology')
+def methodology():
     return render_template('methodologies.html')
 
 
