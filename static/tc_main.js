@@ -55,6 +55,11 @@
 				window.location.replace(current + "/404");
 			};
 
+			// remove loader
+			$(".loader").remove();
+			//show sections
+			$(".hidden").removeClass();
+
 			// set headline text
 			$("#busLongName").text(data["long_name"]);
 			// enable select2 on route selector
@@ -112,6 +117,10 @@
 
 		resetDashboard:function(route) {
 			console.log(`resetting dashboard for ${route}...`);
+
+			$("#loader-container").append("<div class='loader'></div>");
+			$("#route-visible").addClass("hidden");
+
 			$("#busLongName").text("Loading Bus...");
 
 			// reset route-level summary
@@ -393,7 +402,7 @@
 							},
 							s_trip: {
 								sum: accumulateSum(stop, 's_trip', stopTripAverager, stopData['s_trip'], stopData['count']),
-								count: accumulateCount(stop, 's_trip', stopTripAverager, stopData['count']) 
+								count: accumulateCount(stop, 's_trip', stopTripAverager, stopData['count'])
 							},
 							trip_95: {
 								sum: accumulateSum(stop, 'trip_95', stopTripAverager, stopData['trip_95'], stopData['count']),
@@ -409,7 +418,7 @@
 							},
 							swt: {
 								sum: accumulateSum(stop, 'swt', stopWaitAverager, stopData['swt'], stopData['count']),
-								count: accumulateCount(stop, 'swt', stopWaitAverager, stopData['count']) 
+								count: accumulateCount(stop, 'swt', stopWaitAverager, stopData['count'])
 							},
 							ewt_95: {
 								sum: accumulateSum(stop, 'ewt_95', stopWaitAverager, stopData['ewt_95'], stopData['count']),
@@ -516,31 +525,31 @@
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
 			// apply conditional coloring to grey box summary numbers
-			if (timeAveraged.avgEwt < 2.8) {
+			if (timeAveraged.avgEwt > 1.76) {
 				ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
 				var mintext = ` mins`.fontcolor('red');
 		    } else {
 				ewttext = `${timeAveraged.avgEwt}`.fontcolor('green');
 				var mintext = ` mins`.fontcolor('green');
 			};
-					
+
 			$("#route-ewt").html(ewttext);
 			$("#mins").html(mintext);
 
-			if (timeAveraged.percentOver < 15) {
+			if (timeAveraged.percentOver > 5) {
 				perctext = `${timeAveraged.percentOver} %`.fontcolor('red');
 		    } else {
 				perctext = `${timeAveraged.percentOver} %`.fontcolor('green');
 			};
-			
+
 			$("#route-rbt").html(perctext);
 
-			if (timeAveraged.avgSpeed < 4) {
+			if (timeAveraged.avgSpeed < 7.41) {
 				speedtext = `${timeAveraged.avgSpeed}`.fontcolor('red');
 				var mphtext = ` mph`.fontcolor('red');
 		    } else {
 				speedtext = `${timeAveraged.avgSpeed}`.fontcolor('green');
-				var mphtext = ` mph`.fontcolor('green');					
+				var mphtext = ` mph`.fontcolor('green');
 			};
 
 			$("#route-speed").html(speedtext);
@@ -548,7 +557,7 @@
 
 			// draw route-level charts
 			// console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText}`);
-			$("#long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
+			$(".long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
 			graph.drawRouteLineCharts();
 			graph.drawRouteEwtChart(timeAveraged.stopEwt);
 			graph.drawCumulativeLineChart(timeAveraged.stopTrips);

@@ -15,7 +15,7 @@
   <!-- <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet"> -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
 </head>
 
 <body>
@@ -30,7 +30,7 @@
           <span class="icon-bar"></span>
         </button>
         <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
-          <span class="text">NYC Bus Profile</span>
+          <span class="text">NYC Bus Profile</span><i> beta</i>
           </a>
       </div>
 
@@ -43,7 +43,7 @@
             </a>
           </li>
           <li class="active">
-            <a href="/routes/BX39">
+            <a href="/routes/B41">
               <span>Route Level Metrics</span>
             </a>
           </li>
@@ -81,6 +81,7 @@
         </h1>
       </div><!--row-->
 
+
       <div class="row" id="topfilter">
         <div class="col-sm-3">
           <h4>DATE RANGE</h4>
@@ -115,9 +116,14 @@
       </div>
       <div class="sep"></div>
     </section>
+
     <!-- ewt, speed and chart -->
+    <div id="loader-container" style="display:block;">
+      <div class="loader"></div>
+    </div>
+    <div id="route-visible" class="hidden" style="display:block;">
     <section id="basicmetrics">
-      <div class="row">
+      <div class="row" id="route-summary">
         <h3>Route Summary</h3>
         <div class="col-sm-2">
           <div class="row">
@@ -208,7 +214,7 @@
       </div><!--row container-->
     </section>
 
-    <section>
+    <section id="journey-section">
       <div class="row">
         <h3>Stop-to-Stop Journey</h3>
         <span>Select two stops below to learn about your journey.</span>
@@ -270,6 +276,7 @@
 
       </div>
     </section>
+  </div><!--route visible -->
   </div> <!-- container -->
   <div id="footer"><!-- footer -->
     <div id="footerInner">

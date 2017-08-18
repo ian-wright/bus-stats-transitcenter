@@ -29,7 +29,7 @@
           <span class="icon-bar"></span>
         </button>
         <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
-          <span class="text">NYC Bus Profile</span>
+          <span class="text">NYC Bus Profile</span><i> beta</i>
           </a>
       </div>
 
@@ -42,7 +42,7 @@
             </a>
           </li>
           <li>
-            <a href="/routes/BX39">
+            <a href="/routes/B41">
               <span>Route Level Metrics</span>
             </a>
           </li>
@@ -87,11 +87,10 @@
             <h1 class="jumbo">1.76 min</h1>
           </div>
           <div class="row">
-            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-ewt">DETAILS</a>
           </div>
         </div>
-      </div>
-      <div class="row mtop0 mleft32">
+
         <div class="col-sm-3 metric-box-home">
           <div class="rowbox">
             <h2>Average Speed</h2>
@@ -100,7 +99,23 @@
             <h1 class="jumbo">7.4 mph</h1>
           </div>
           <div class="row">
-            <div class="btn btn-primary .pull-right btn-round">DETAILS</div>
+            <a class="btn btn-primary .pull-right btn-round" href="/methodologies#exp-speed">DETAILS</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row mleft32 mtop30">
+        <div class="col-sm-12">
+          <h1>What is <b class="purple-front">busstat.nyc?</b></h1>
+        </div>
+      </div>
+
+      <div class="row mleft32">
+        <div class="col-sm-6 metric-box-home" id="home-about">
+          <p class="lead" id="home-about-p"><b class="purple-front">busstat.nyc</b> is a project to measure and show the bus performance in New York City.</p>
+          <div class="btn-home">
+            <a class="btn btn-primary btn-large btn-block responsive-width" href="/routes/BX39">explore route level performance</a>
           </div>
         </div>
       </div>
@@ -108,43 +123,42 @@
     </section>
 
     <!-- section charts here -->
-    <section id="charthome">
+    <section class="below-section">
       <div class="section-container">
          <div id="section-header">
            <h1 class="light">The Metrics</h1>
          </div>
          <div id="section-content">
            <div class="row">
-             <div class="col-sm-4">
-              <div class="exp">
-               <h3 class="light">Excess Wait Time</h3>
-               <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
+             <div class="col-sm-4 absolute">
+               <div class="exp-container">
+                <div class="exp">
+                 <h3 class="light">Excess Wait Time</h3>
+                 <p class="lead">The difference between Scheduled Wait Time and Actual Wait Time.</p>
+                </div>
               </div>
              </div>
-             <div class="col-sm-4">
-               <div class="exp">
-               <h3 class="light">Route Lateness Factor</h3>
-               <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
+             <div class="col-sm-4 absolute">
+              <div class="exp-container">
+                <div class="exp">
+                 <h3 class="light">Route Lateness Factor</h3>
+                 <p class="lead">The difference between actual journey time and scheduled journey time, relative to the journey time.</p>
+                </div>
               </div>
              </div>
-             <div class="col-sm-4">
+             <div class="col-sm-4 absolute">
+              <div class="exp-container">
                <div class="exp">
                <h3 class="light">Average Speed</h3>
                <p class="lead">The average speed of the buses.</p>
                </div>
+              </div>
              </div>
            </div>
            <div class="row">
-             <div class="col-sm-3 col-sm-offset-3">
-               <div class="btn-home">
-               <a class="btn btn-primary btn-large">route level performance</a>
-             </div>
-             </div>
-             <div class="col-sm-3">
-               <div class="btn-home">
-               <a class="btn btn-primary btn-large">how we calculate the metrics</a>
-             </div>
-             </div>
+            <div class="btn-home">
+             <a class="btn btn-primary btn-large" href="/methodologies">how we calculate the metrics</a>
+            </div>
            </div>
          </div>
 
@@ -155,13 +169,12 @@
 
 <div id="footer"><!-- footer -->
   <div id="footerInner">
-
     <div id="rightFooter">
       <a href="" target="_blank">
-        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" alt="MassDOT Logo" height="31" class="footerLogo">
+        <img src="{{ url_for('static', filename='img/transitcenter.png') }}" height="31" class="footerLogo">
       </a>
       <a href="" target="_blank">
-        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" alt="MBTA Logo" height="31" class="footerLogo">
+        <img src="{{ url_for('static', filename='img/CUSP_long_color.jpg') }}" height="31" class="footerLogo">
       </a>
     </div>
   </div>
@@ -179,7 +192,7 @@
 <!-- map home script goes here -->
 <script>
 $( document ).ready(function() {
-    var maphome = L.map('maphome',{ zoomControl:false }).setView([40.71597, -74.05367], 11);
+    var maphome = L.map('maphome',{ zoomControl:false }).setView([40.65597, -74.15367], 11);
     new L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 11,

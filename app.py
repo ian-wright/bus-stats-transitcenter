@@ -130,11 +130,14 @@ def split_direc_stop(rds_index, col):
 
 
 def clean_nan(val):
-    if math.isnan(val):
-        return None
-    elif val == 'null':
-        return None
-    else:
+    try:
+        if math.isnan(val):
+            return None
+        elif val == 'null':
+            return None
+        else:
+            return val
+    except:
         return val
 
 
