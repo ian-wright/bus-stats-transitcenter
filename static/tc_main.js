@@ -225,7 +225,6 @@
 				   				  ["daybins"][1]
 				   				  ["hourbins"][tc.selection.hourBin]
 				   				  ["dates"];
-			console.log('allWkday', allWkday);
 			wkdayObj = tc.objectifyData(allWkday, '1');
 
 			var allWknd = tc.rawData["directions"][tc.selection.direction]
@@ -237,7 +236,6 @@
 			// note that even if a user is filtering for wknds or wkdays, we need ALL observations in
 			// the window to draw the time series charts
 			var allData = Object.assign(wkdayObj, wkndObj);
-			console.log("allData", allData);
 
 			// filter our data for only those observations within the desired window (dateRange)
 			var allDates = Object.keys(allData).map(function(dateStr){ return new Date(dateStr) });
@@ -336,13 +334,12 @@
 			// averager for stop-level SWT + AWT + 95WT (for journey metrics)
 			var stopWaitAverager = {};
 
-			// maybe use this to clean up the repetitive code below
+			// helper functions for accumulating averagers
 			function accumulateSum(stop, metric, accumulator, value, weight) {
 				return (accumulator[stop] ?
 						accumulator[stop][metric]['sum'] += value * weight :
 						value * weight)
 			};
-
 			function accumulateCount(stop, metric, accumulator, weight) {
 				return (accumulator[stop] ?
 						accumulator[stop][metric]['count'] += weight :
@@ -524,6 +521,7 @@
 
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
+
 			// apply conditional coloring to grey box summary numbers
 			if (timeAveraged.avgEwt > 1.76) {
 				ewttext = `${timeAveraged.avgEwt}`.fontcolor('red');
@@ -532,7 +530,6 @@
 				ewttext = `${timeAveraged.avgEwt}`.fontcolor('green');
 				var mintext = ` mins`.fontcolor('green');
 			};
-
 			$("#route-ewt").html(ewttext);
 			$("#mins").html(mintext);
 
@@ -541,7 +538,6 @@
 		    } else {
 				perctext = `${timeAveraged.percentOver} %`.fontcolor('green');
 			};
-
 			$("#route-rbt").html(perctext);
 
 			if (timeAveraged.avgSpeed < 7.41) {
@@ -551,12 +547,10 @@
 				speedtext = `${timeAveraged.avgSpeed}`.fontcolor('green');
 				var mphtext = ` mph`.fontcolor('green');
 			};
-
 			$("#route-speed").html(speedtext);
 			$("#mph").html(mphtext);
 
 			// draw route-level charts
-			// console.log(`updating tab text from ${$("#long-chart-tab").innerText} to ${$("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText}`);
 			$(".long-chart-tab").text($("option[name=dateRange]:selected", "#dateRangeSelect")[0].innerText);
 			graph.drawRouteLineCharts();
 			graph.drawRouteEwtChart(timeAveraged.stopEwt);
@@ -569,8 +563,6 @@
 				var startName = tc.stopLookup[tc.selection.direction][startId]["name"]
 				var endId = tc.selection.stop[1].feature.properties.stop_id;
 				var endName = tc.stopLookup[tc.selection.direction][endId]["name"]
-				// $("#stopNamePair").text(`${startName} TO ${endName}`);
-				$("#startName").text(`${startName}`);
 				$("#stopName").text(`${endName}`);
 
 				var computed = tc.computeJourneyMetrics(
@@ -587,7 +579,6 @@
 
 			} else if (tc.selection.stop == 0) {
 				// clear the journey-level metrics and graphs
-				// $("#stopNamePair").text("-- TO --");
 				$("#startName").text("--");
 				$("#stopName").text("--");
 				$(".journey-metrics").text("--");
@@ -625,6 +616,7 @@
 								oneDay[waitTimeName] = allData[date]["stops"][stop_id][waitTimeName];
 								oneDay["count"] = allData[date]["stops"][stop_id].count;
 							};
+
 							if ((seq >= startSeq) && (seq < endSeq)) {
 								// mid-journey bus stop; sum all stop-to-stop trip times from (start) to (end-1)
 								if (oneDay[onboardTimeName]) {

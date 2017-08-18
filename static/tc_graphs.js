@@ -147,8 +147,6 @@
 		drawCumulativeLineChart: function(stopTrips) {
 			console.log("drawing cumulative line charts...");
 
-			console.log("stopTrips:", stopTrips);
-
 			// master data list for cumulative chart
 			// items in form [x_count, schedule_trip, actual_trip, stop_name, stop_sequence]
 			var preMaster = [];
@@ -183,8 +181,6 @@
 			sTrips.reduce(function(a, b, i) { return sTripCum[i] = a + b; }, 0);
 			var mTripCum = [];
 			mTrips.reduce(function(a, b, i) { return mTripCum[i] = a + b; }, 0);
-
-			console.log("scheduled", sTripCum, "average", mTripCum);
 
 			var accSchedLine = {
 				name: "scheduled",
@@ -312,7 +308,6 @@
 						stackedData[i]['y'][j] += stackedData[i-1]['y'][j];
 					}
 				}
-				console.log("stackedData", stackedData);
 				return stackedData;
 			};
 

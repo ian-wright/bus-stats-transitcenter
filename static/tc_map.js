@@ -4,14 +4,17 @@
 
 		mapObject: L.map('map'),
         mapLayer: null,
-        markerGroup: L.layerGroup(),
-        lineGroup: L.layerGroup(),
+
+        // all markers and line segments live in this group at all times
+        markerGroupVis: L.layerGroup(),
+        lineGroupVis: L.layerGroup(),
+
+        // a temporary stash for hiding markers and line segments
+        markerGroupInvis: L.layerGroup(),
+        lineGroupInvis: L.layerGroup(),
 
         initializeMap: function() {
 			console.log("initializing map...");
-
-			// reset the map any time a user clicks in empty map space
-			map.mapObject.on({click: resetMapStyle});
 
 			// this is a basic "light" style raster map layer from mapbox
 			L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
@@ -66,7 +69,7 @@
 			    var justClicked = e.target;
 			    console.log("clicking a stop...");
 
-			    // if this is the first stop selection
+			    // case: this is the first stop selection
 			    if (tc.selection.stop == 0) {
 			    	console.log('1st stop selection:', justClicked.feature.properties.stop_id);
 				    tc.selection.stop = [justClicked];
@@ -74,12 +77,14 @@
 
 				    var startId = tc.selection.stop[0].feature.properties.stop_id;
 					var startName = tc.stopLookup[tc.selection.direction][startId]["name"]
-					// $("#stopNamePair").text(`${startName} TO --`);
+					var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
 					$("#startName").text(`${startName}`);
 
-				// if this is the endpoint of a journey selection
+					hideWrongDirection(startSeq);
+
+				// case: this is the endpoint of a journey selection
 				} else if (tc.selection.stop.length == 1){
-					// check that journey is going in the right direction
+					// check that journey is going in the right direction (redundant w/ invisible wrong direction markers)
 					if (justClicked.feature.properties.stop_sequence > tc.selection.stop[0].feature.properties.stop_sequence) {
 						console.log('2nd stop selection:', justClicked.feature.properties.stop_id);
 						tc.selection.stop.push(justClicked);
@@ -91,20 +96,38 @@
 						console.log("can't drive backwards!");
 					};
 
-				// have already selected a journey, so reset the map selection
+				// case: have already selected a journey, so reset the map selection
+				// then select start point as usual
 				} else {
 					console.log('1st stop selection:', justClicked.feature.properties.stop_id);
 					resetMapStyle();
-					tc.selection.stop = ['justClicked'];
+					tc.selection.stop = [justClicked];
 					justClicked.setStyle(startMarkerStyle);
+
+					var startId = tc.selection.stop[0].feature.properties.stop_id;
+					var startName = tc.stopLookup[tc.selection.direction][startId]["name"]
+					var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
+					$("#startName").text(`${startName}`);
+
+					hideWrongDirection(startSeq);
 				};
 			};
 
+			// reset the map any time a user clicks in empty map space
+			map.mapObject.on({click: resetMapStyle});
+
 			function resetMapStyle() {
 				console.log('resetting map style...');
+
+				// re-show the invisible layers
+				map.markerGroupInvis.addTo(map.mapObject);
+				map.lineGroupInvis.addTo(map.mapObject);
+				map.markerGroupInvis = L.layerGroup();
+				map.lineGroupInvis = L.layerGroup();
+
 				// revert marker and line styles to default values
-				map.markerGroup.eachLayer(function(layer){layer.setStyle(defaultMarkerStyle)});
-				map.lineGroup.eachLayer(function(layer){layer.setStyle(defaultLineStyle)});
+				map.markerGroupVis.eachLayer(function(layer){layer.setStyle(defaultMarkerStyle)});
+				map.lineGroupVis.eachLayer(function(layer){layer.setStyle(defaultLineStyle)});
 				// reset stop selection to NONE (0)
 				tc.selection.stop = 0;
 				tc.updateController("light");
@@ -115,18 +138,45 @@
 				var startSeq = tc.selection.stop[0].feature.properties.stop_sequence;
 				var endSeq = tc.selection.stop[1].feature.properties.stop_sequence;
 				console.log(`painting the journey from ${startSeq} to ${endSeq}...`);
+
 				// change marker style for journey markers
-				map.markerGroup.eachLayer(function(layer){
+				map.markerGroupVis.eachLayer(function(layer){
 					if ((layer.feature.properties.stop_sequence > startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyMarkerStyle);
 					};
 				});
 				// change line style for journey linestrings
-				map.lineGroup.eachLayer(function(layer){
+				map.lineGroupVis.eachLayer(function(layer){
 					if ((layer.feature.properties.stop_sequence >= startSeq) &&
 						(layer.feature.properties.stop_sequence < endSeq)) {
 						layer.setStyle(journeyLineStyle);
+					};
+				});
+
+				// re-show the invisible layers
+				map.markerGroupInvis.addTo(map.mapObject);
+				map.lineGroupInvis.addTo(map.mapObject);
+				map.markerGroupInvis = L.layerGroup();
+				map.lineGroupInvis = L.layerGroup();
+			};
+
+			// make all stops in the "wrong direction" invisible to user
+			function hideWrongDirection(startSeq) {
+				console.log("hiding wrong direction...");
+				
+				map.markerGroupVis.eachLayer(function(layer){
+					if (layer.feature.properties.stop_sequence < startSeq) {
+						// stash marker in the invisible group, and remove from map
+						map.markerGroupInvis.addLayer(layer);
+						layer.removeFrom(map.mapObject);
+					};
+				});
+				map.lineGroupVis.eachLayer(function(layer){
+					if (layer.feature.properties.stop_sequence < startSeq) {
+						// stash line segment in the invisible group, and remove from map
+						map.lineGroupInvis.addLayer(layer);
+						layer.removeFrom(map.mapObject);
 					};
 				});
 			};
@@ -142,13 +192,13 @@
 		            	mouseover: function(e){this.openPopup()},
 		            	mouseout: function(e){this.closePopup()}
 		        	});
-		        	// add marker to group of all markers
-		        	map.markerGroup.addLayer(layer);
+		        	// add all markers to visible group
+		        	map.markerGroupVis.addLayer(layer);
 		        	layer._leaflet_id = feature.properties.stop_id;
 
 			    } else if (feature.geometry.type == 'LineString') {
-		        	// add line segment to group of all line segments
-		        	map.lineGroup.addLayer(layer);
+		        	// add all line segments to visible group
+		        	map.lineGroupVis.addLayer(layer);
 			    };
 
 			};
@@ -188,8 +238,10 @@
 
 			// remove markers and reset layer groups
 			map.mapLayer.clearLayers();
-			map.markerGroup = L.layerGroup();
-			map.lineGroup = L.layerGroup();
+			map.markerGroupVis = L.layerGroup();
+			map.lineGroupVis = L.layerGroup();
+			map.markerGroupInvis = L.layerGroup();
+			map.lineGroupInvis = L.layerGroup();
 			map.mapLayer.addData(tc.rawData["directions"][dir]["geo"]);
 
 			// set a default journey to display
