@@ -377,6 +377,11 @@
 			};
 
 			Plotly.newPlot("journey-bar-chart", barData, barLayout, {displayModeBar: false});
+
+			Plotly.Fx.hover("journey-bar-chart", [
+		        {curveNumber: 0, pointNumber: 0},
+		        {curveNumber: 1, pointNumber: 0}
+		    ]);
 		},
 
 	};
