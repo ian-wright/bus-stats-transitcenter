@@ -19,9 +19,9 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
 
@@ -163,7 +163,7 @@ def get_available_routes():
     geo_files_filt = filter(lambda geo: '.geojson' in geo, geo_files)
     geo_distinct = set(map(lambda geo: geo.split('_')[0], geo_files_filt))
 
-    avail = list(db_distinct.intersection(geo_distinct))
+    avail = sorted(list(db_distinct.intersection(geo_distinct)))
     print 'available routes:', avail
     return avail
 
