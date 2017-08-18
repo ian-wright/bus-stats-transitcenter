@@ -316,10 +316,10 @@
 		},
 
 
+		// draw three stacked bars for selected date: (swt + s_trip), (awt + m_trip), and (ewt_95 + trip_95)
 		drawJourneyBarChart: function(data) {
 			console.log("drawing journey bar charts...");
-			// draw three stacked bars for selected date: (swt + s_trip), (awt + m_trip), and (ewt_95 + trip_95)
-
+			
 			var waitData = {
 				x: ["Scheduled", "Average", "Planning"],
 				y: [data.swt, data.awt, data.ewt_95 + data.swt],
@@ -333,14 +333,14 @@
 				    }
 				},
 				showlegend: false,
-				opacity: 0.5
+				opacity: 0.5,
+				hoverinfo: "name+y"
 			};
 
 			var onboardData = {
 				x: ["Scheduled", "Average", "Planning"],
 				// here, we temper our 95th percentile trip time, by mixing it with our average trip time at the specified fraction
 				y: [data.s_trip, data.m_trip, (tc.fractionIs95 * data.trip_95) + ((1 - tc.fractionIs95) * data.m_trip)],
-				// y: [13.02, 14.56, 20.31],
 				name: 'Onboard Time',
 				type: 'bar',
 				marker: {
@@ -351,7 +351,8 @@
 				    }
 				},
 				showlegend: false,
-				opacity: 0.5
+				opacity: 0.5,
+				hoverinfo: "name+y"
 			};
 
 			var barData = [waitData, onboardData];
