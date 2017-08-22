@@ -92,61 +92,6 @@ select {
   font-size: small;
 }
 
-/*.blocks path {
-  stroke: black;
-  fill: none;
-  stroke-width: 2px;
-}
-
-.blocks path.domain{
-    stroke: lightgrey;
-    stroke-opacity: 0.3;
-}
-
-.blocks g.tick{
-    stroke: lightgrey;
-    stroke-opacity: 0.2;
-}
-
-.blocks path.line {
-  stroke: #E5AB3F;
-  fill: #none;
-  stroke-width: 2px;
-}
-
-.blocks g.group0 path,
-.blocks g.group0 circle {
-  stroke: red;
-  fill: none;
-}
-
-.blocks g.hidden line,
-art  display: none;
-}
-
-.blocks g.tick text {
-  font-size: 1.1em;
-  fill: purple;
-}
-
-.blocks g text {
-  font-size: 0.8em;
-  fill: purple;
-}
-
-.blocks .grid line {
-  stroke: lightgrey;
-  stroke-opacity: 0.3;
-  shape-rendering: crispEdges;
-}
-
-.blocks .grid path {
-  stroke-width: 0;
-}
-.blocks svg {
-    background: #fff;
-}*/
-
 @media (max-width: 768px) {
   #maphomediv {
     margin-left: 0 !important;
@@ -2255,7 +2200,6 @@ img.noservice{
 	width: 100%;
 	padding-bottom: 40px;
 }
-
 .loader {
     border: 16px solid #f3f3f3; /* Light grey */
     border-top: 16px solid #57068c;
@@ -2263,10 +2207,25 @@ img.noservice{
     width: 120px;
     height: 120px;
     animation: spin 2s linear infinite;
-    position: absolute;
-    z-index: 3;
-    margin-top: 45vh;
-    left: 45vw;
+    margin-bottom: 20px;
+}
+
+.loader-group {
+  position: absolute;
+  z-index: 3;
+  top: 45vh;
+  left: 45vw;
+}
+
+#assure {
+  margin-left: -50px;
+}
+
+#assure>p {
+  margin-bottom: 0;
+  margin-top: 0;
+  padding: 0;
+  color: #999;
 }
 
 @keyframes spin {

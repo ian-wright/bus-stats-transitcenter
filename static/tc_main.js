@@ -58,7 +58,7 @@
 			};
 
 			// remove loader
-			$(".loader").remove();
+			$(".loader-group").remove();
 			//show sections
 			$(".hidden").removeClass();
 
@@ -131,7 +131,7 @@
 		resetDashboard:function(route) {
 			console.log(`resetting dashboard for ${route}...`);
 
-			$("#loader-container").append("<div class='loader'></div>");
+			$("#loader-container").append("<div class='loader-group'><div class='loader'></div><div id='assure'><p>This might take a moment,</p><p>there is a lot of data here....</p></div></div>");
 			$("#route-visible").addClass("hidden");
 
 			$("#busLongName").text("Loading Bus...");
