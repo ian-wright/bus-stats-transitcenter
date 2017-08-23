@@ -140,6 +140,8 @@
 			$("#route-ewt").text(`-- `);
 			$("#route-rbt").text(`-- `);
 			$("#route-speed").text(`-- `);
+			$("#dir0").text(`--`);
+			$("#dir1").text(`--`);
 			$("#mins h4").text(` mins`);
 			$("#mph").text(` mph`);
 			$("#stop-chart div").remove();
@@ -157,10 +159,10 @@
 			$("#journey-bar-chart div").remove();
 
 			// revert to default selections on new route (day=1, hour=1, dir=2)
-			$("input[value=1]", "#hourBinSelect").prop('checked', true);
-			$("input[value=1]", "#dayBinSelect").prop('checked', true);
+			$("option[value=0]", "#hourBinSelect").prop('selected', true);
+			$("option[value=1]", "#dayBinSelect").prop('selected', true);
 			$("input[value=ewt]", "#metricSelect").prop('checked', true);
-			$("option[value=2]", "#dirSelect").prop('selected', true);
+			$("option[value=0]", "#dirSelect").prop('selected', true);
 
 			//get new data
 			var dataURL = `/routes/${route}/data`;
