@@ -373,7 +373,7 @@ h2{
   text-transform: uppercase;
 }
 h3{
-  margin-top: 40px;
+  margin-top: 30px;
   font-size: 2.5em;
 	margin-bottom: 10px;
 	font-weight: 100;
@@ -2226,6 +2226,13 @@ img.noservice{
   margin-top: 0;
   padding: 0;
   color: #999;
+}
+
+.last-updated {
+  margin-top: -10px;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 @keyframes spin {

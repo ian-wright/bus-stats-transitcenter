@@ -29,7 +29,7 @@
           <span class="icon-bar"></span>
         </button>
         <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
-          <span class="text">NYC Bus Profile</span><i> beta</i>
+          <span class="text">NYC BUS STATS</span><i> beta</i>
           </a>
       </div>
 
@@ -85,9 +85,10 @@
         <div class="col-sm-3">
           <h4>DATE RANGE</h4>
           <select id="dateRangeSelect" size="1" class="filterSelect">
-            <option name= "dateRange" value="1" selected="selected">Past Month</option>
-            <option name= "dateRange" value="2">Past Year</option>
-            <option name= "dateRange" value="3">All Time</option>
+            <option name= "dateRange" value="1" selected="selected">1-31 May 17</option>
+            <option name= "dateRange" value="3">Dec 16 - May 17</option>
+            <option name= "dateRange" value="2" disabled>Past Year</option>
+
           </select>
         </div>
         <div class="col-sm-4">
@@ -131,6 +132,7 @@
     <section id="basicmetrics">
       <div class="row" id="route-summary">
         <h3>Route Summary</h3>
+        <p class="last-updated">Last updated &bull; May 31, 2017</p>
         <div class="col-sm-2">
           <div class="row">
             <div class="metricsblocks" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
