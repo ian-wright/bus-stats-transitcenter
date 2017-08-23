@@ -329,6 +329,7 @@
 		},
 
 
+		// calculate time-averaged, count-weighted metrics across the date range selection
 		computeTimeAveragedMetrics: function(filteredData) {
 			console.log("computing time averaged metrics...");
 
@@ -533,6 +534,7 @@
 					filteredData[date] = tc.selectionData[date];
 				};
 			});
+			console.log('filteredData', filteredData);
 
 			// update route-level summary
 			var timeAveraged = tc.computeTimeAveragedMetrics(filteredData);
@@ -585,11 +587,14 @@
 					endId,
 					timeAveraged.stopWaits,
 					timeAveraged.stopTrips,
-					filteredData
+					tc.selectionData
+					// filteredData
 				);
 
 				// draw journey-level charts
+				console.log('journey time series:', computed.timeSeries);
 				graph.drawJourneyLineCharts(computed.timeSeries);
+				console.log('journey time averaged:', computed.timeAveraged);
 				graph.drawJourneyBarChart(computed.timeAveraged);
 
 			} else if (tc.selection.stop == 0) {
@@ -647,6 +652,7 @@
 			});
 
 			var timeAveraged = {};
+
 			Object.keys(stopWaits).forEach(function(stop_id) {
 				var seq = stopLookup[stop_id].sequence;
 				["swt", "awt", "ewt_95"].forEach(function(waitTimeName) {

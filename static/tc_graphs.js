@@ -160,7 +160,7 @@
 				]);
 			});
 
-			// ensure stops are sorted by sequence
+			// ensure stops are sorted by sequence (in place)
 			preMaster.sort(function(a, b) {
 				return a[3] - b[3];
 			});
@@ -240,14 +240,26 @@
 		drawJourneyLineCharts: function(data) {
 			console.log("drawing journey line charts...");
 
-			var time_x = [];
-			var time_y_wait = [];
-			var time_y_trip = [];
+			var master = []
 			Object.keys(data).forEach(function(date) {
-				time_x.push(date);
-				time_y_wait.push(data[date]["awt"]);
-				time_y_trip.push(data[date]["m_trip"]);
+				master.push([
+					date,
+					data[date]["awt"],
+					data[date]["m_trip"]
+				]);
 			});
+
+			master.sort(function(a, b) {
+				var a = new Date(a[0]);
+				var b = new Date(b[0]);
+				return a - b;
+			});
+
+			console.log(master);
+
+			var time_x = master.map(function(el) { return el[0] });
+			var time_y_wait = master.map(function(el) { return el[1] });
+			var time_y_trip = master.map(function(el) { return el[2] });
 
 			var monthWaitLine = Object.create(graph.graphLineConfig);
 			monthWaitLine.name = "avg. wait time";
