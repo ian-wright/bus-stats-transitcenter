@@ -19,11 +19,13 @@ app = Flask(__name__)
 Compress(app)
 
 # WINDOWS setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://root:root@localhost:5432/transit'
 # MAC setup
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
+# python anywhere
+app.config['SQLALCHEMY_DATABASE_URI']= 'postgres://super:TaketheBusstat@transitcenter-488.postgres.pythonanywhere-services.com:10488/transit'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!

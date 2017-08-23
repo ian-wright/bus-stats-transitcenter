@@ -10,7 +10,6 @@
 import sys
 import pandas as pd
 from random import random
-
 from sqlalchemy import create_engine
 from app import db
 
@@ -31,7 +30,7 @@ def test_mode(stop_columns, route_columns, engine):
   # GENERATE FAKE DATA
   stop_records = []
   route_records = []
-  print 'generating fake data...'
+  print("generating fake data...")
   for route in routes:
       for stop in routes[route]:
           for direc in directions:
@@ -76,7 +75,7 @@ def test_mode(stop_columns, route_columns, engine):
   route_df = pd.DataFrame(route_records, columns=route_columns)
   stop_df.to_sql('stop_metrics', engine, if_exists='append', index=False)
   route_df.to_sql('route_metrics', engine, if_exists='append', index=False)
-  print 'successfully loaded fake data (FAKE NEWS).'
+  print('successfully loaded fake data (FAKE NEWS).')
 
 
 def convert_null(val):
@@ -92,6 +91,7 @@ def prod_mode(stop_infile, route_infile, stop_columns, route_columns, engine):
 
   stop_df = pd.read_csv(stop_infile)
   # temporary: remove the speed col from stop data
+  # stop_df.drop(['speed', 'rbt'], axis=1, inplace=True)
   stop_df.drop(['speed'], axis=1, inplace=True)
   stop_df = stop_df.applymap(convert_null)
 
@@ -110,7 +110,7 @@ def main():
   if len(sys.argv) < 3:
     print """
           USAGE:
-          python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile>
+          python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile> <reset/add>
           eg)   python db_load.py mac prod data/oct_data_stop.csv data/oct_data_route.csv
           """
     sys.exit()
@@ -123,10 +123,14 @@ def main():
     engine = create_engine('postgresql://localhost/transit')
   elif os == "compute":
     engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
+  elif os == "pythonanywhere":
+    engine = create_engine('postgres://super:TaketheBusstat@transitcenter-488.postgres.pythonanywhere-services.com:10488/transit')
 
   # CLEAR EXISTING TABLES AND REBUILD SCHEMA
-  db.drop_all()
-  db.create_all()
+  if sys.argv[5] == 'reset':
+    print "dropping data..."
+    db.drop_all()
+    db.create_all()
 
   stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95',
                'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']
