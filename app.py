@@ -24,8 +24,8 @@ Compress(app)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://localhost/transit'
 # COMPUTE setup
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://compute.cusp.nyu.edu/transitcenter_viz'
-# HEROKU
-app.config['SQLALCHEMY_DATABASE_URI'] ='postgres://khhmgarehisweo:c0a26f041088be712b8a101b97580da03f0190925680887283008f8fb030f11d@ec2-50-19-105-113.compute-1.amazonaws.com:5432/def3b6t4b1et7m'
+# python anywhere
+app.config['SQLALCHEMY_DATABASE_URI']= 'postgres://super:TaketheBusstat@transitcenter-488.postgres.pythonanywhere-services.com:10488/transit'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # change this before production!
@@ -131,11 +131,14 @@ def split_direc_stop(rds_index, col):
 
 
 def clean_nan(val):
-    if math.isnan(val):
-        return None
-    elif val == 'null':
-        return None
-    else:
+    try:
+        if math.isnan(val):
+            return None
+        elif val == 'null':
+            return None
+        else:
+            return val
+    except:
         return val
 
 
@@ -160,11 +163,11 @@ def get_available_routes():
     db_distinct = set(map(lambda rec: rec.rds_index.split('_')[0], db_distinct_records))
 
     # distinct geo routes
-    geo_files = os.listdir('./data_/profiles/')
+    geo_files = os.listdir('./data/profiles/')
     geo_files_filt = filter(lambda geo: '.geojson' in geo, geo_files)
     geo_distinct = set(map(lambda geo: geo.split('_')[0], geo_files_filt))
 
-    avail = list(db_distinct.intersection(geo_distinct))
+    avail = sorted(list(db_distinct.intersection(geo_distinct)))
     print 'available routes:', avail
     return avail
 
@@ -176,8 +179,8 @@ def get_profile(route):
     geo = {}
     for direction in ['0','1']:
         try:
-            fname = './data_/profiles/{}_{}.geojson'.format(route, direction)
-            with open('./data_/profiles/{}_{}.geojson'.format(route, direction)) as infile:
+            fname = './data/profiles/{}_{}.geojson'.format(route, direction)
+            with open('./data/profiles/{}_{}.geojson'.format(route, direction)) as infile:
                 geo[direction] = geojson.load(infile)
         except IOError:
             # geometry doesn't exist
@@ -356,7 +359,7 @@ def not_found(route):
 def about():
     return render_template('about.html')
 
-@app.route('/methodologies')
+@app.route('/methodology')
 def methodologies():
     return render_template('methodologies.html')
 

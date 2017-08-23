@@ -25,22 +25,6 @@ select {
 }
 
 
-/* New bootstrap for 5 columns */
-.col-xs-5ths,
-.col-sm-5ths,
-.col-md-5ths,
-.col-lg-5ths {
-    position: relative;
-    min-height: 1px;
-    padding-right: 10px;
-    padding-left: 10px;
-}
-
-.col-xs-5ths {
-    width: 20%;
-    float: left;
-}
-
 .blocks{
   background-color: #eee;
   margin-left: 0;
@@ -51,6 +35,16 @@ select {
   background-color: white;
   margin: 0;
   padding: 15px 0 10px 0;
+}
+
+.center {
+  text-align: center;
+}
+
+.page-header {
+  margin-top: 64px;
+  padding: 50px;
+  background-color: #eee;
 }
 
 #month-chart, #week-chart, #stop-chart {
@@ -98,82 +92,13 @@ select {
   font-size: small;
 }
 
-/*.blocks path {
-  stroke: black;
-  fill: none;
-  stroke-width: 2px;
-}
-
-.blocks path.domain{
-    stroke: lightgrey;
-    stroke-opacity: 0.3;
-}
-
-.blocks g.tick{
-    stroke: lightgrey;
-    stroke-opacity: 0.2;
-}
-
-.blocks path.line {
-  stroke: #E5AB3F;
-  fill: #none;
-  stroke-width: 2px;
-}
-
-.blocks g.group0 path,
-.blocks g.group0 circle {
-  stroke: red;
-  fill: none;
-}
-
-.blocks g.hidden line,
-art  display: none;
-}
-
-.blocks g.tick text {
-  font-size: 1.1em;
-  fill: purple;
-}
-
-.blocks g text {
-  font-size: 0.8em;
-  fill: purple;
-}
-
-.blocks .grid line {
-  stroke: lightgrey;
-  stroke-opacity: 0.3;
-  shape-rendering: crispEdges;
-}
-
-.blocks .grid path {
-  stroke-width: 0;
-}
-.blocks svg {
-    background: #fff;
-}*/
-
-@media (min-width: 768px) {
-    .col-sm-5ths {
-        width: 20%;
-        float: left;
-    }
-}
-
-@media (min-width: 992px) {
-    .col-md-5ths {
-        width: 20%;
-        float: left;
-    }
-}
-
-@media (min-width: 1200px) {
-    .col-lg-5ths {
-        width: 20%;
-        float: left;
-    }
+@media (max-width: 768px) {
+  #maphomediv {
+    margin-left: 0 !important;
+  }
 }
 /* End bootstrap 5 columns */
+
 
 html{
 }
@@ -309,6 +234,10 @@ a:hover {
   margin-top: 8px;
 }
 
+.mtop30 {
+  margin-top: 30px;
+}
+
 .mtop40 {
   margin-top: 40px;
 }
@@ -348,6 +277,12 @@ a:hover {
   margin-left: 32px;
 }
 
+@media (max-width: 450px) {
+  .mleft32 {
+    margin-left: 20px;
+  }
+}
+
 
 .mleft40 {
   margin-left: 40px;
@@ -355,6 +290,10 @@ a:hover {
 
 .mwidth100 {
   min-width: 90vh;
+}
+
+.mright0 {
+  margin-right: 0;
 }
 
 .sbs {
@@ -396,6 +335,7 @@ a:hover {
 }
 
 .purple  { background-color: #57068c; }
+.purple-front  {color: #57068c; }
 
 .purple select  { color: white; }
 
@@ -433,7 +373,7 @@ h2{
   text-transform: uppercase;
 }
 h3{
-  margin-top: 40px;
+  margin-top: 30px;
   font-size: 2.5em;
 	margin-bottom: 10px;
 	font-weight: 100;
@@ -469,12 +409,41 @@ p.warning {
   background-color:#f2dede;
 }
 
+p.about {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+p.about>a {
+  text-decoration: underline;
+  text-decoration-color: #999;
+}
+
 h4{
 	text-transform: uppercase;
 	font-weight: 600;
 	color: #57068c;
 	font-size: 1.167em;
 }
+
+#use-case {
+  text-align: center;
+}
+
+#use-case>span {
+  display: block;
+  font-size: 0.9em;
+  color: #777;
+  margin-bottom: 25px;
+
+}
+
+#metrics-explanation>h4 {
+  font-size: 1.4em;
+  color: #444;
+  padding-top: 20px;
+}
+
 h5{
 	font-size: 1.25em;
 	font-weight: 600;
@@ -507,14 +476,30 @@ span.hilite {
   margin: 40px 20px;
 }
 
+#section-header {
+  margin-left: 10px;
+}
+
 .section-container {
   margin: 52px;
+  margin-top: 32px;
   padding-top: 70px;
   padding-bottom: 50px;
 }
 
 .section-container, h3.light, .lead{
-  color: #f0f0f0 !important;
+  color: #f0f0f0;
+}
+
+@media (max-width: 450px){
+  .section-container {
+    margin-right: 32px;
+    margin-left: 32px;
+  }
+}
+
+.exp-container {
+  margin-right: 20px;
 }
 
 .exp {
@@ -522,10 +507,20 @@ span.hilite {
   border-radius: 10px;
   padding: 20px;
   padding-top: 0;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   margin-right: 20px;
   margin-top: 20px;
-  height: 300px;
+  height: auto;
+  min-height: 300px;
+  width: 100%;
+  height: auto;
+
+}
+
+@media (max-width: 769px) {
+  .exp-container {
+    margin-right: 0;
+  }
 }
 
 .lead {
@@ -538,7 +533,7 @@ span.hilite {
 
 
 
-#charthome {
+.below-section {
   margin: 0 -20px 20px -20px;
   background-color: #57068c;
   z-index: 3;
@@ -1411,16 +1406,23 @@ input.form-control, select.form-control, textarea.form-control{
   padding: 10px 20px;
   background-color: #57068c;
   width: 100%;
-
+  white-space: normal;
 }
 
 .btn-home {
   margin-right: 20px;
+  text-align: center;
+  display: inline-block;
 }
 
 .btn-primary {
   background-color: #874dad;
   border: 0px;
+}
+
+.ta-center {
+  text-align: center;
+  display: block;
 }
 
 .btn-primary.active, .btn-primary:hover {
@@ -1598,8 +1600,7 @@ input.form-control, select.form-control, textarea.form-control{
 .navbar-nav{
 	margin: 0;
 }
-/* Sidebar Styles */
-/* Main Nav Elements */
+
 #navBars {
 	background-color: #57068c;
 	border-radius: 0 !important;
@@ -1611,6 +1612,7 @@ input.form-control, select.form-control, textarea.form-control{
 	z-index: 5;
 	min-height: 5vh;
   border: 0;
+  border-bottom: solid 1px #eee;
 }
 @media(min-height: 643px) {
 	#navBars{
@@ -1627,10 +1629,20 @@ input.form-control, select.form-control, textarea.form-control{
 	height: 37px;
 	padding-left: 1em;
 }
-@media(max-width: 340px) {
+@media(max-width: 390px) {
 	#mainLogo .text{
-		font-size: 1.5em;
+		font-size: .7em;
 	  }
+  .navbar-brand {
+    padding-top: 19px !important;
+  }
+  .jumbo, h1 {
+    font-size: 2.5em;
+  }
+}
+
+#navbarHeader {
+  margin-bottom: 16px;
 }
 
 
@@ -1652,6 +1664,10 @@ input.form-control, select.form-control, textarea.form-control{
   padding-top: 9px;
 }
 
+.collapse {
+  padding-bottom: 20px;
+}
+
 .topbar.collapsed{
 	position: absolute;
 	bottom: 20%;
@@ -1660,6 +1676,14 @@ input.form-control, select.form-control, textarea.form-control{
 .topbar li{
 	padding: 0.5em 0 0 2em;
 }
+
+
+@media (max-width: 768px) {
+  .topbar li{
+  	padding: 0.5em 2em 0 1em;
+  }
+}
+
 .topbar li a {
   text-transform: uppercase;
 	margin: 0;
@@ -1903,9 +1927,9 @@ div.underline{
 }
 
 #maphomesection {
-  min-height: 70vh;
-  max-height: 70vh;
-  z-index: -1
+  height: auto;
+  min-height: 75vh;
+  z-index: -1;
 }
 
 #maphomediv {
@@ -1917,7 +1941,19 @@ div.underline{
   z-index: -1;
   position:absolute;
   width: 100%;
-  height:100%;
+  height:120%;
+}
+
+@media (max-width:500px) {
+  #maphome {height:150%;}
+}
+
+#home-about {
+  padding: 20px;
+}
+
+#home-about-p {
+  color: #444;
 }
 
 .mapHomeBoro > span {
@@ -1929,9 +1965,9 @@ div.underline{
   padding: 2px 5px;
 }
 
-.boroMetricsBad > span {
-  color: #a94442;
-  background-color:#f2dede;
+.boroMetrics > span {
+  color: #444;
+  background-color:#f3f3f3;
   font-size:16px;
   font-weight: bold;
 }
@@ -1946,13 +1982,6 @@ div.underline{
 
 .light-purple {
   color: #E9DEFF;
-}
-
-.boroMetricsGood > span {
-  color: #3c763d;
-  background-color: #dff0d8;
-  font-size:16px;
-  font-weight: bold;
 }
 
 .font20 {
@@ -2031,6 +2060,7 @@ height: 100%;
         position: relative;
         margin-right: 0;
     }
+
 }
 
 /* overriding select2 */
@@ -2071,6 +2101,7 @@ height: 100%;
     margin-bottom: 0.5em;
     font-weight: 700;
     font-style: normal;
+  margin-top: 1em;
 	color: #57068c;
 }
 
@@ -2085,27 +2116,57 @@ input.long{
 /* Three columns side by side */
 .column {
     float: left;
-    width: 33.3%;
+    width: 25%;
     margin-bottom: 16px;
-    padding: 0 8px;
+    padding: 0 20px;
 }
 
 /* Display the columns below each other instead of side by side on small screens */
-@media (max-width: 650px) {
+
+@media (min-width: 100px) {
     .column {
         width: 100%;
         display: block;
     }
 }
 
+@media (min-width:600px) {
+    .column {
+        width: 33.3%;
+        display: block;
+    }
+}
+
+@media (min-width:789px) {
+    .column {
+        width: 25%;
+        display: block;
+    }
+}
+
+#mainLogo>i {
+  text-transform: lowercase;
+  font-size: 0.6em;
+  color: #bbb;
+  letter-spacing: 1px;
+}
+
 /* Add some shadows to create a card effect */
 .card {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  min-height: 380px;
+}
+
+.card img {
+  border-radius: 500px;
 }
 
 /* Some left and right padding inside the container */
 .my-container {
     padding: 0 16px;
+}
+
+.my-container h2 {
+  margin-top: 10px;
 }
 
 /* Clear floats */
@@ -2138,4 +2199,43 @@ input.long{
 img.noservice{
 	width: 100%;
 	padding-bottom: 40px;
+}
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #57068c;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loader-group {
+  position: absolute;
+  z-index: 3;
+  top: 45vh;
+  left: 45vw;
+}
+
+#assure {
+  margin-left: -50px;
+}
+
+#assure>p {
+  margin-bottom: 0;
+  margin-top: 0;
+  padding: 0;
+  color: #999;
+}
+
+.last-updated {
+  margin-top: -10px;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

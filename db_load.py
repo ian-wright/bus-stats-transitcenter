@@ -110,7 +110,7 @@ def main():
   if len(sys.argv) < 3:
     print """
           USAGE:
-          python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile>
+          python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile> <reset/add>
           eg)   python db_load.py mac prod data/oct_data_stop.csv data/oct_data_route.csv
           """
     sys.exit()
@@ -123,12 +123,14 @@ def main():
     engine = create_engine('postgresql://localhost/transit')
   elif os == "compute":
     engine = create_engine('postgresql://compute.cusp.nyu.edu/transitcenter_viz')
-  elif os == "heroku":
-    engine = create_engine('postgres://khhmgarehisweo:c0a26f041088be712b8a101b97580da03f0190925680887283008f8fb030f11d@ec2-50-19-105-113.compute-1.amazonaws.com:5432/def3b6t4b1et7m')
+  elif os == "pythonanywhere":
+    engine = create_engine('postgres://super:TaketheBusstat@transitcenter-488.postgres.pythonanywhere-services.com:10488/transit')
 
   # CLEAR EXISTING TABLES AND REBUILD SCHEMA
-  db.drop_all()
-  db.create_all()
+  if sys.argv[5] == 'reset':
+    print "dropping data..."
+    db.drop_all()
+    db.create_all()
 
   stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95',
                'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']

@@ -12,10 +12,9 @@
   <!-- TODO - static resources: What should be downloaded vs. pulled down from CDN? -->
   <link href="{{ url_for('static', filename='css/libs/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='css/performances.css') }}" rel="stylesheet">
-  <!-- <link href="{{ url_for('static', filename='css/libs/leaflet.css') }}" rel="stylesheet"> -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.1.0/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
 </head>
 
 <body>
@@ -30,7 +29,7 @@
           <span class="icon-bar"></span>
         </button>
         <a id="mainLogo" class="navbar-brand" href="/home" style="padding-top: 23px;">
-          <span class="text">NYC Bus Profile</span>
+          <span class="text">NYC BUS STATS</span><i> beta</i>
           </a>
       </div>
 
@@ -43,13 +42,13 @@
             </a>
           </li>
           <li class="active">
-            <a href="/routes/BX39">
+            <a href="/routes/B41">
               <span>Route Level Metrics</span>
             </a>
           </li>
           <li>
-            <a href="/methodologies">
-              <span>Methodologies</span>
+            <a href="/methodology">
+              <span>Methodology</span>
             </a>
           </li>
           <li>
@@ -81,13 +80,15 @@
         </h1>
       </div><!--row-->
 
+
       <div class="row" id="topfilter">
         <div class="col-sm-3">
           <h4>DATE RANGE</h4>
           <select id="dateRangeSelect" size="1" class="filterSelect">
-            <option name= "dateRange" value="1" selected="selected">Past Month</option>
-            <option name= "dateRange" value="2">Past Year</option>
-            <option name= "dateRange" value="3">All Time</option>
+            <option name= "dateRange" value="1" selected="selected">May 17</option>
+            <option name= "dateRange" value="3">Dec 16 - May 17</option>
+            <option name= "dateRange" value="2" disabled>Past Year</option>
+
           </select>
         </div>
         <div class="col-sm-4">
@@ -115,10 +116,23 @@
       </div>
       <div class="sep"></div>
     </section>
+
     <!-- ewt, speed and chart -->
+    <div id="loader-container" style="display:block;">
+      <div class="loader-group">
+        <div class="loader">
+        </div>
+        <div id="assure">
+          <p>This might take a moment,</p>
+          <p>there is a lot of data here....</p>
+        </div>
+      </div>
+    </div>
+    <div id="route-visible" class="hidden" style="display:block;">
     <section id="basicmetrics">
-      <div class="row">
+      <div class="row" id="route-summary">
         <h3>Route Summary</h3>
+        <p class="last-updated">Last updated &bull; May 31, 2017</p>
         <div class="col-sm-2">
           <div class="row">
             <div class="metricsblocks" data-toggle="tooltip" title="The difference between Scheduled Wait Time and Actual Wait Time in average">
@@ -197,7 +211,7 @@
 
         <div class="col-sm-5 pleft30"> <!-- accumulative chart -->
           <div class="row">
-            <h2>Accumulative Travel Time Across Stops</h2>
+            <h2>Cumulative Travel Time Across Stops</h2>
             <div id="accumulative-chart">
               <div id="try">
               </div>
@@ -208,7 +222,7 @@
       </div><!--row container-->
     </section>
 
-    <section>
+    <section id="journey-section">
       <div class="row">
         <h3>Stop-to-Stop Journey</h3>
         <span>Select two stops below to learn about your journey.</span>
@@ -270,6 +284,7 @@
 
       </div>
     </section>
+  </div><!--route visible -->
   </div> <!-- container -->
   <div id="footer"><!-- footer -->
     <div id="footerInner">
@@ -290,30 +305,20 @@
 
 <!--javascripts -->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v4.js') }}"></script> -->
-<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
-
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 <script src="https://unpkg.com/leaflet@1.1.0/dist/leaflet.js"
         integrity="sha512-mNqn2Wg7tSToJhvHcqfzLMU6J4mkOImSPTxVZAdo+lcPlk+GhZmYgACEe0x35K7YzW1zJ7XyJV/TT1MrdXvMcA=="
         crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/libs/bootstrap.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-<!-- stacked bar -->
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/libs/canvasjs.min.js') }}"></script> -->
-
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='charts.js') }}"></script> -->
-<script type="text/javascript" src="{{ url_for('static', filename='tc.js') }}"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='stackedbar2.js') }}"></script> -->
+<script type="text/javascript" src="{{ url_for('static', filename='tc_main.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc_map.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='tc_graphs.js') }}"></script>
 <script>
   var route = '{{ route }}';
   var dataURL = `/routes/${route}/data`;
-    $.getJSON(dataURL, function(data) {
-          tc.initializeDashboard(data, first=true);
-      });
-  $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip();
+  $.getJSON(dataURL, function(data) {
+    tc.initializeDashboard(data, first=true);
   });
 </script>
 </html>

@@ -180,8 +180,7 @@ if __name__ == "__main__":
     # number of new profiles to generate: unique routes x 2 directions
     all_files = len(data['trips']['route_id'].unique()) * 2
     i = 1
-    # for route_id in data['trips']['route_id'].unique():
-    for route_id in ['M4']:
+    for route_id in data['trips']['route_id'].unique():
         for direction in [0, 1]:
             try:
                 shape_id = get_most_common_shape(route_id, direction)
