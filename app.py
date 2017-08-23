@@ -82,6 +82,7 @@ class StopMetric(db.Model):
             self.daybin,
             self.hourbin)
 
+
 class RouteMetric(db.Model):
     __tablename__ = 'route_metrics'
 
@@ -360,7 +361,7 @@ def about():
     return render_template('about.html')
 
 @app.route('/methodology')
-def methodologies():
+def methodology():
     return render_template('methodologies.html')
 
 
