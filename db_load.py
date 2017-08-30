@@ -1,9 +1,9 @@
 # AUTHOR: Ian Wright
 # DATE: June 16, 2017
-# LAST EDIT: July 22, 2017
+# LAST EDIT: Aug 23, 2017
 
 # USAGE:
-# python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile>
+# python db_load.py <mac, windows, compute> <prod, test> <reset, append> <if prod: stop_infile> <if prod: route_infile>
 # eg)   python db_load.py mac prod data/oct_data_stop.csv data/oct_data_route.csv
 
 
@@ -85,18 +85,15 @@ def convert_null(val):
     return val
 
 
-def prod_mode(stop_infile, route_infile, stop_columns, route_columns, engine):
+def prod_mode(stop_infile, route_infile, engine):
   # READ DATA FROM CSV FILE, AND WRITE TO POSTGRES
-  print 'reading data file...'
+  print 'loading data files...'
 
   stop_df = pd.read_csv(stop_infile)
-  # temporary: remove the speed col from stop data
-  # stop_df.drop(['speed', 'rbt'], axis=1, inplace=True)
   stop_df.drop(['speed'], axis=1, inplace=True)
   stop_df = stop_df.applymap(convert_null)
 
   route_df = pd.read_csv(route_infile)
-  # temporary: remove the count col from route data
   route_df.drop(['count'], axis=1, inplace=True)
   route_df = route_df.applymap(convert_null)
 
@@ -110,8 +107,8 @@ def main():
   if len(sys.argv) < 3:
     print """
           USAGE:
-          python db_load.py <mac, windows, compute> <prod, test> <if prod: stop_infile> <if prod: route_infile> <reset/add>
-          eg)   python db_load.py mac prod data/oct_data_stop.csv data/oct_data_route.csv
+          python db_load.py <mac, windows, compute> <prod, test> <reset, append> <if prod: stop_infile> <if prod: route_infile>
+          eg)   python db_load.py mac prod append data/oct_data_stop.csv data/oct_data_route.csv
           """
     sys.exit()
 
@@ -127,10 +124,13 @@ def main():
     engine = create_engine('postgres://super:TaketheBusstat@transitcenter-488.postgres.pythonanywhere-services.com:10488/transit')
 
   # CLEAR EXISTING TABLES AND REBUILD SCHEMA
-  if sys.argv[5] == 'reset':
-    print "dropping data..."
+  is_reset = sys.argv[3]
+  if is_reset == 'reset':
+    print 'resetting database...'
     db.drop_all()
     db.create_all()
+  else:
+    print 'appending new data...'
 
   stop_cols = ['rds_index', 'date', 'hourbin', 'daybin', 'ewt_95',
                'awt', 'swt', 'count', 's_trip', 'm_trip', 'trip_95']
@@ -139,9 +139,9 @@ def main():
 
   mode = sys.argv[2]
   if mode =="prod":
-    stop_infile = sys.argv[3]
-    route_infile = sys.argv[4]
-    prod_mode(stop_infile, route_infile, stop_cols, route_cols, engine)
+    stop_infile = sys.argv[4]
+    route_infile = sys.argv[5]
+    prod_mode(stop_infile, route_infile, engine)
   else:
     test_mode(stop_cols, route_cols, engine)
 

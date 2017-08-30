@@ -15,7 +15,7 @@
         rawData: null,
         selectionData: null,
 
-        // utility object that maps stop_ids to names and sequences
+        // utility object that maps bus stop_ids to  stop names and stop sequences
         stopLookup: {0: {}, 1: {}},
 
         // for cleaning the accumulative charts - how many of the first trips in the route to ignore
@@ -223,15 +223,15 @@
 					tc.selection.route = tc.rawData["route_id"];
 					tc.buildDataObject();
 					map.redrawMap();
-					// redrawMap() calls updateMetricsDisplay internally
+					// note that redrawMap() calls updateMetricsDisplay internally
 					break;
 			};
 		},
 
 
 		buildDataObject: function(){
-			// we rebuild our main data object any time the DIRECTION, DATE RANGE or HOURBIN changes
-			// any time we rebuild this data object, we include daybins for both weekday and weekends.
+			// we rebuild our main data object any time the DIRECTION, DATE RANGE or HOURBIN changes.
+			// Any time we rebuild this data object, we include daybins for both weekday and weekends.
 			// (this is because we need both wkday and wknds to draw complete time series)
 
 			console.log("building data object...");
@@ -285,7 +285,7 @@
 		},
 
 
-		// transform rawData into object-style structure, given selections for direction, daybin, and hourbin
+		// transform rawData into object-style structure, given a set of selections for direction, daybin, and hourbin
 		objectifyData: function(rawData, dayBin) {
 			console.log(`objectifying data ${rawData} for daybin: ${dayBin}`);
 			var objectData = {};
@@ -329,7 +329,7 @@
 		},
 
 
-		// calculate time-averaged, count-weighted metrics across the date range selection
+		// calculate time-averaged, count-weighted, metrics across the date range selection
 		computeTimeAveragedMetrics: function(filteredData) {
 			console.log("computing time averaged metrics...");
 
@@ -350,7 +350,7 @@
 			// averager for stop-level SWT + AWT + 95WT (for journey metrics)
 			var stopWaitAverager = {};
 
-			// helper functions for accumulating averagers
+			// helper functions for accumulating on the averagers
 			function accumulateSum(stop, metric, accumulator, value, weight) {
 				return (accumulator[stop] ?
 						accumulator[stop][metric]['sum'] += value * weight :

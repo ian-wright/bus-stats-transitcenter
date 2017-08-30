@@ -3,7 +3,7 @@
 	var map = {
 
 		mapObject: L.map('map'),
-        mapLayer: null,
+        geoJSON: null,
 
         // all markers and line segments live in this group at all times
         markerGroupVis: L.layerGroup(),
@@ -182,6 +182,7 @@
 			};
 
 			function onEachFeature(feature, layer) {
+				// console.log("feature", feature, "layer:", layer);
 			    if (feature.geometry.type == 'Point') {
 			    	// bind a popup to markers
 			        layer.bindPopup("<dd>" + feature.properties.stop_name + "</dd>");
@@ -205,7 +206,7 @@
 
 			// create a geojson map layer, passing a function to generate custom markers from geo points
 			// don't add any geo data to the layer at this stage (data added in refresh function)
-			map.mapLayer = L.geoJSON(false, {
+			map.geoJSON = L.geoJSON(false, {
     			pointToLayer: function (feature, latlng) {
         			return L.circleMarker(latlng, defaultMarkerStyle);
     			},
@@ -235,14 +236,38 @@
 			console.log("mapCenter:", mapCenter);
 			// setView with coordinates and zoom level
 			map.mapObject.setView(mapCenter, 13);
-
+			console.log('TEST: centered map');
+			
 			// remove markers and reset layer groups
-			map.mapLayer.clearLayers();
+			console.log('geoJSON', map.geoJSON)
+			
+			// -----------------------------------------------------------------
+			// THIS IS WHERE AN OUTSTANDING BUG IS ORIGINATING
+			
+			// If you try to load route M101, then toggle the DIRECTION selection,
+			// leaflet will crash. Somehow, leaflet isn't able to find some metadata 
+			// about a particular map layer, and when it attempts to remove that layer
+			// from the map object, it dies. This MAY be a bug in the leaflet software,
+			// but it's unclear.
+
+			map.geoJSON.clearLayers();
+
+
+			// TESTING (remove one layer at a time to see the offending layer)
+
+			// map.geoJSON.eachLayer(function(e) {
+			// 	console.log("removing", e);
+			// 	map.geoJSON.removeLayer(e);
+			// })
+
+			// -----------------------------------------------------------------
+
 			map.markerGroupVis = L.layerGroup();
 			map.lineGroupVis = L.layerGroup();
 			map.markerGroupInvis = L.layerGroup();
 			map.lineGroupInvis = L.layerGroup();
-			map.mapLayer.addData(tc.rawData["directions"][dir]["geo"]);
+			console.log('TEST: about to add data to map.');
+			map.geoJSON.addData(tc.rawData["directions"][dir]["geo"]);
 
 			// set a default journey to display
 			var oneFifth = Math.floor((stops.length) / 5);
@@ -261,9 +286,9 @@
 
 			// emulate 'click' events for a sample journey through middle fifth of route
 			tc.selection.stop = 0;
-			var startMarker = map.mapLayer.getLayer(startId)
+			var startMarker = map.geoJSON.getLayer(startId)
 			startMarker.fireEvent('click');
-			var endMarker = map.mapLayer.getLayer(endId)
+			var endMarker = map.geoJSON.getLayer(endId)
 			endMarker.fireEvent('click');
 		},
 	};

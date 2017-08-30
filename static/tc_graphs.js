@@ -255,8 +255,6 @@
 				return a - b;
 			});
 
-			console.log(master);
-
 			var time_x = master.map(function(el) { return el[0] });
 			var time_y_wait = master.map(function(el) { return el[1] });
 			var time_y_trip = master.map(function(el) { return el[2] });
